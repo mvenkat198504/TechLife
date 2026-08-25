@@ -1,0 +1,94 @@
+:root {
+  --bs-primary: #0d6efd;
+  --bs-secondary: #6c757d;
+  --bs-success: #198754;
+  --bs-danger: #dc3545;
+  --bs-warning: #ffc107;
+  --bs-info: #0dcaf0;
+  --bs-light: #f8f9fa;
+  --bs-dark: #212529;
+
+  /* Light theme colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Light theme - Transparent/Glassmorphism */
+:root {
+  --bg-primary: rgba(255, 255, 255, 0.95);
+  --bg-secondary: rgba(248, 249, 250, 0.8);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: rgba(226, 232, 240, 0.5);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 8px 16px rgba(15, 23, 42, 0.15);
+  --shadow-lg: 0 12px 24px rgba(15, 23, 42, 0.2);
+  
+  /* Gradient backgrounds */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+  
+  /* Backdrop filter for glass effect */
+  --backdrop-blur: blur(10px);
+}
+
+/* Dark theme - Transparent/Glassmorphism */
+[data-theme='dark'] {
+  --bg-primary: rgba(15, 23, 42, 0.95);
+  --bg-secondary: rgba(30, 41, 59, 0.8);
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --border-color: rgba(71, 85, 105, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.5);
+  
+  /* Gradient backgrounds for dark theme */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+  
+  /* Backdrop filter for glass effect */
+  --backdrop-blur: blur(10px);
+}
+
+/* Responsive font sizing */
+:root {
+  font-size: 14px;
+}
+
+@media (min-width: 576px) {
+  :root {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 992px) {
+  :root {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    font-size: 16px;
+  }
+}
+
+[data-theme='dark'] {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --border-color: #333333;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
