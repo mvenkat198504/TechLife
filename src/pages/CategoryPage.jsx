@@ -20,7 +20,7 @@ const getSections = (content) => {
 };
 
 const renderInlineText = (text) => {
-  const inlinePattern = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`)/g;
+  const inlinePattern = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|!\[[^\]]*\]\([^)]+\))/g;
 
   return text.split(inlinePattern).filter(Boolean).map((chunk, index) => {
     if (/^\*\*[^*]+\*\*$/.test(chunk) || /^__[^_]+__$/.test(chunk)) {
@@ -29,6 +29,11 @@ const renderInlineText = (text) => {
 
     if (/^`[^`]+`$/.test(chunk)) {
       return <code key={index}>{chunk.slice(1, -1)}</code>;
+    }
+
+    const imageMatch = chunk.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imageMatch) {
+      return <img key={index} src={imageMatch[2]} alt={imageMatch[1]} className="question-image-inline" style={{ maxWidth: '100%', height: 'auto' }} />;
     }
 
     return chunk;
