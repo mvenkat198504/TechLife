@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom';
 import { categories } from '../content/categories';
+import { questions } from '../content/questionLoader';
+import { useProgress } from '../hooks/useProgress';
 import './HomePage.css';
 
 export const HomePage = () => {
+  const progress = useProgress();
+  const totalQuestions = questions.length;
+  const completedCount = progress.completed.length;
+  const bookmarkedCount = progress.bookmarks.length;
+
   return (
     <div className="home-page">
       {/* Welcome Banner */}
@@ -31,22 +38,22 @@ export const HomePage = () => {
           <div className="col-md-3">
             <div className="stat-card">
               <i className="bi bi-question-circle"></i>
-              <h3>200+</h3>
+              <h3>{totalQuestions}</h3>
               <p>Questions</p>
             </div>
           </div>
           <div className="col-md-3">
             <div className="stat-card">
               <i className="bi bi-bookmark"></i>
-              <h3>Save</h3>
+              <h3>{bookmarkedCount}</h3>
               <p>Bookmarks</p>
             </div>
           </div>
           <div className="col-md-3">
             <div className="stat-card">
               <i className="bi bi-graph-up"></i>
-              <h3>Track</h3>
-              <p>Progress</p>
+              <h3>{completedCount}</h3>
+              <p>Completed</p>
             </div>
           </div>
           <div className="col-md-3">
@@ -95,7 +102,7 @@ export const HomePage = () => {
               <i className="bi bi-bookmark-fill"></i>
               <div>
                 <h4>My Bookmarks</h4>
-                <p>Review your saved questions</p>
+                <p>{bookmarkedCount} saved question{bookmarkedCount === 1 ? '' : 's'}</p>
               </div>
               <i className="bi bi-chevron-right"></i>
             </Link>
@@ -105,7 +112,7 @@ export const HomePage = () => {
               <i className="bi bi-graph-up-arrow"></i>
               <div>
                 <h4>My Progress</h4>
-                <p>Track your learning journey</p>
+                <p>{completedCount} completed, {totalQuestions - completedCount} remaining</p>
               </div>
               <i className="bi bi-chevron-right"></i>
             </Link>
