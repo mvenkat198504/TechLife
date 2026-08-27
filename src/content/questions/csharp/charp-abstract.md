@@ -1,7 +1,7 @@
 ---
 id: csharp-abstract-001
 slug: abstractclassvsinterface1
-title: 1. Abstract Class vs Interface in C#
+title: Abstract Class vs Interface in C#
 categoryId: csharp
 subcategory: OOPS
 difficulty: Basic
@@ -328,7 +328,7 @@ composition over inheritance unless inheritance clearly models the domain.
 ---
 id: csharp-abstract-002
 slug: abstractclass
-title:2. Abstract Class vs Interface in C#
+title:Abstract Class vs Interface in C#
 categoryId: csharp
 subcategory: OOPS
 difficulty: Basic
@@ -364,15 +364,15 @@ But technically and practically they are NOT the same. The difference becomes ve
 
 | | |
 |---|---|
-| ![alt text](/public/images/csharp/asbstract/image1.png) | ![alt text](/public/images/csharp/asbstract/image2.png) | ![alt text](/public/images/csharp/asbstract/image3.png) |
+| ![alt text](/images/csharp/asbstract/image1.png) | ![alt text](/images/csharp/asbstract/image2.png) | ![alt text](/images/csharp/asbstract/image3.png) |
 
-![alt text](/public/images/csharp/asbstract/image4.png) 
+![alt text](/images/csharp/asbstract/image4.png) 
 
 %%%
 ---
 id: csharp-abstract-003
 slug: abstractclassvsinterface2
-title:3. In c# why were are abstract class speficically instead of normal public class ?
+title:In c# why were are abstract class speficically instead of normal public class ?
 categoryId: csharp
 subcategory: OOPS
 difficulty: Basic
