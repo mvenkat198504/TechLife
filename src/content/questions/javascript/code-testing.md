@@ -82,7 +82,7 @@ const atmInventory = {
 };
 
 // Test Case 1: Successful withdrawal favoring high bills
-console.log(withdrawCash(280, atmInventory));
+console.log(withdrawCash(5000, atmInventory));
 
 // Test Case 2: Unfulfillable amount (exact change error)
 console.log(withdrawCash(15, atmInventory));
@@ -96,7 +96,7 @@ slug: reversestring
 title: Write a JavaScript function to reverse a string without using reverse() .
 categoryId: javascript
 subcategory: coding-questions
-difficulty: Experienced
+difficulty: Basic
 tags:
   - coding-testing
   - reverseString
@@ -124,3 +124,179 @@ console.log(reverseString("hello"));
 // olleh
 ```
 Tests: Loops and string manipulation.
+
+%%%
+---
+id: javascript-codetesting-003
+slug: polindrom_checking
+title:Check Whether a String Is a Palindrome
+categoryId: javascript
+subcategory: coding-questions
+difficulty: Basic
+tags:
+  - coding-testing
+  - PolindromCoding
+  - javascript
+summary: Check whether a given string reads the same forward and backward
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
+# Check Whether a String Is a Palindrome
+## Check whether a given string reads the same forward and backward
+Polindrom Coding
+
+```javascript
+function isPalindrome(str) {
+    let reversed = str.split("").reverse().join("");
+    return str === reversed;
+}
+console.log(isPalindrome("madam")); // true
+console.log(isPalindrome("hello")); // false
+```
+```javascript
+function isPolindrom(str){
+    let revStr="";
+    for (let i=str.length-1;i>=0;i--)
+    {
+        revStr += str[i];
+    }
+    if (str==revStr){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+console.log(isPolindrom("malayalam"))
+```
+
+%%%
+---
+id: javascript-codetesting-004
+slug: largesnumber_array
+title: Find the Largest Number in an Array
+categoryId: javascript
+subcategory: coding-questions
+difficulty: Basic
+tags:
+  - coding-testing
+  - largesnumber_array
+  - javascript
+summary:  Find the Largest Number in an Array
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+# Find the Largest Number in an Array
+## Find the Largest Number in an Array
+```javascript
+function findLargest(numbers) {
+    let largest = numbers[0];
+        for (let num of numbers) {
+            if (num > largest) {
+                largest = num;
+            }
+    }
+    return largest;
+}
+console.log(findLargest([10, 45, 23, 99, 5]));
+// 99
+```
+
+%%%
+---
+id: javascript-codetesting-004
+slug: secondlargesnumber_array
+title: Find the second largest number in an unsorted array
+categoryId: javascript
+subcategory: coding-questions
+difficulty: Basic
+tags:
+  - coding-testing
+  - secondlargesnumber_array
+  - javascript
+summary:  Find the second largest number in an unsorted array
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+# Find the second largest number in an unsorted array without any built-in method in JavaScript
+## But solution is very simple, first finding maximum number then to find second maximum when the array element is maximum we will just skip that element,
+
+```javascript
+let array = [10, 30, 35, 20, 30, 25, 90, 89];
+
+    function secondLargestNumber(array) {
+        let max = 0;
+        let secondMax = 0;
+
+        for (let i = 0; i < array.length; i++) {
+            if (array[i] > max) {
+                max = array[i];
+            }
+        }
+
+        for (let i = 0; i < array.length; i++) {
+            if (array[i] > secondMax && array[i] !== max) {
+                secondMax = array[i];
+            }
+        }
+        return secondMax;
+    }
+    console.log(secondLargestNumber(array));
+```
+Appraoch 1:
+```javascript
+let numArray=[10,20,50,75,35,76,100]
+function secondLargest(numArray)
+{
+    let max=0;
+    let secondLargest=0;
+    for (let num of numArray){
+        if (num>max){
+            secondLargest=max
+            max=num
+        }
+        else if (num>secondLargest && num!==max){
+            secondLargest=num
+        }
+    }
+    
+    console.log(max)
+    console.log(secondLargest)
+}
+secondLargest(numArray)
+```
+
+Appraoch 1:
+```javascript
+let numArray=[10,20,50,75,35,76,100]
+function secondLargest(numArray)
+{
+    let max=0;
+    let secondLargest=0;
+    for (let num of numArray){
+        if (num>max){
+            max=num
+        }
+    }
+     for (let num of numArray){
+        if (num>secondLargest && num!==max){
+            secondLargest=num
+        }
+    }
+    
+    console.log(max)
+    console.log(secondLargest)
+}
+secondLargest(numArray)
+```
