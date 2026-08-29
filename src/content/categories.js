@@ -23,6 +23,30 @@ export const categories = [
     icon: 'database',
     displayOrder: 3,
   },
+   {
+    id: 'javascript',
+    slug: 'javascript',
+    name: 'JavaScript',
+    description: 'ES6+, closures, prototypes, async patterns, and browser APIs',
+    icon: 'file-earmark-code',
+    displayOrder: 12,
+  },
+  {
+    id: 'react',
+    slug: 'react',
+    name: 'React',
+    description: 'Components, hooks, state management, performance optimization',
+    icon: 'braces',
+    displayOrder: 10,
+  },
+  {
+    id: 'angular',
+    slug: 'angular',
+    name: 'Angular',
+    description: 'TypeScript framework, directives, services, and RxJS',
+    icon: 'brackets',
+    displayOrder: 11,
+  },
   {
     id: 'sql-server',
     slug: 'sql-server',
@@ -71,30 +95,8 @@ export const categories = [
     icon: 'bezier2',
     displayOrder: 9,
   },
-  {
-    id: 'react',
-    slug: 'react',
-    name: 'React',
-    description: 'Components, hooks, state management, performance optimization',
-    icon: 'braces',
-    displayOrder: 10,
-  },
-  {
-    id: 'angular',
-    slug: 'angular',
-    name: 'Angular',
-    description: 'TypeScript framework, directives, services, and RxJS',
-    icon: 'brackets',
-    displayOrder: 11,
-  },
-  {
-    id: 'javascript',
-    slug: 'javascript',
-    name: 'JavaScript',
-    description: 'ES6+, closures, prototypes, async patterns, and browser APIs',
-    icon: 'file-earmark-code',
-    displayOrder: 12,
-  },
+  
+ 
 ];
 
 export const getCategoryById = (id) => {
