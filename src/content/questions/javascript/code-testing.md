@@ -577,6 +577,32 @@ console.log(z==x) // false
 
 ```
 
+```javascript
+const obj={
+    pqr:100,
+    abc:200,
+    xyz:{
+        pqr:300,
+        abc:400
+    }
+}
+
+const {pqr,abc,xyz:{pqr:p}}=obj;
+console.log(pqr,abc,p)
+
+//Output: 100,200,300
+```
+
+```javascript
+let arr=[1,5,64,3,4,5]
+let arry1=arr.map((ele)=>{
+    return ele>3
+})
+
+console.log(arry1)
+// Output : [ false, true, true, false, true, true ]
+```
+
 ## Split the array and store it datatype based
 
 ```javascript
