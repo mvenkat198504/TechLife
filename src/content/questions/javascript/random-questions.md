@@ -348,3 +348,62 @@ This is an arrow function expression assigned to add.
 
 **Interview answer:** A function declaration uses `function name(){}` and is fully hoisted, meaning it can be called before its declaration. 
 A function expression creates a function and assigns it to a variable; it generally cannot be called before that variable has been initialized.
+
+# undefined vs null
+## null vs undefined
+
+`null` and `undefined` both represent the absence of a value in JavaScript, but they have different meanings and use cases.
+
+| `undefined`                             | `null`                                                   |
+| --------------------------------------- | -------------------------------------------------------- |
+| Means a value has **not been assigned** | Means the value was **intentionally set to empty**       |
+| Automatically assigned by JavaScript    | Explicitly assigned by the programmer                    |
+| Type is `"undefined"`                   | Type is `"object"` (this is a historical JavaScript bug) |
+
+`undefined`
+
+A variable is undefined when it hasn't been assigned a value.
+
+```javascript
+let x;
+console.log(x); // undefined
+```
+
+`null`
+
+null is used when you intentionally want to represent "no value."
+
+```javascript
+let selectedUser = null;
+
+console.log(selectedUser); // null
+```
+## type of null and type of undefined
+
+In JavaScript, using the typeof operator:
+
+```javascript
+console.log(typeof null);       // "object"
+console.log(typeof undefined);  // "undefined"
+```
+| Value       | `typeof` result |
+| ----------- | --------------- |
+| `null`      | `"object"`      |
+| `undefined` | `"undefined"`   |
+
+Why is typeof null "object"?
+
+This is a **historical bug in JavaScript.** null is **not actually an object,** but JavaScript returns "object" for backward compatibility.
+
+```javascript
+let a = null;
+let b;
+
+console.log(typeof a); // "object"
+console.log(typeof b); // "undefined"
+```
+
+For an interview, you can answer:
+
+`typeof null` returns `"object"` **due to a historical JavaScript bug, whereas** `typeof undefined` returns `"undefined"`. `null`
+**represents an intentionally empty value, while** `undefined` usually means a value has not been assigned.`
