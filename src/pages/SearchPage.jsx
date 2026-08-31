@@ -14,6 +14,7 @@ export const SearchPage = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [filterCompleted, setFilterCompleted] = useState(null);
   const [filterBookmarked, setFilterBookmarked] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const progress = useProgress();
 
@@ -59,7 +60,7 @@ export const SearchPage = () => {
       </section>
 
       {/* Search Input */}
-      <section className="search-input-section mb-5">
+      <section className="search-input-section mb-3">
         <div className="search-box-container">
           <div className="input-group">
             <span className="input-group-text bg-white">
@@ -85,10 +86,21 @@ export const SearchPage = () => {
         </div>
       </section>
 
+      {/* Mobile Filters Toggle - Visible only on small screens */}
+      <div className="mobile-filters-toggle-container">
+        <button 
+          className="btn btn-filters-toggle w-100 mb-4"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <i className={`bi bi-funnel${showFilters ? '-fill' : ''}`}></i>
+          <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
+        </button>
+      </div>
+
       <div className="row g-4">
-        {/* Filters Sidebar */}
+        {/* Filters Sidebar - Collapsible on Mobile */}
         <div className="col-lg-3">
-          <div className="filters-section">
+          <div className={`filters-section${showFilters ? ' show' : ''}`}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5>Filters</h5>
               {(searchTerm || selectedCategory || selectedDifficulty || filterCompleted !== null || filterBookmarked !== null) && (
