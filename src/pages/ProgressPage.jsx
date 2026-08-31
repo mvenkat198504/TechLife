@@ -1,11 +1,21 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { questions } from '../content/questionLoader';
 import { categories } from '../content/categories';
 import { useProgress } from '../hooks/useProgress';
+import { slugify } from '../utils/slugify';
 import './ProgressPage.css';
 
 export const ProgressPage = () => {
   const progress = useProgress();
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
 
   // Calculate statistics
   const totalQuestions = questions.length;
@@ -111,7 +121,7 @@ export const ProgressPage = () => {
                 {recentlyViewed.map((question) => (
                   <Link
                     key={question.id}
-                    to={`/category/${question.categoryId}?q=${question.slug}`}
+                    to={`/category/${question.categoryId}/${slugify(question.subcategory)}?q=${question.slug}`}
                     className="recent-item"
                   >
                     <div className="recent-item-content">
@@ -172,7 +182,7 @@ export const ProgressPage = () => {
                   {categoryQuestions.map((question) => (
                     <Link
                       key={question.id}
-                      to={`/category/${question.categoryId}?q=${question.slug}`}
+                      to={`/category/${question.categoryId}/${slugify(question.subcategory)}?q=${question.slug}`}
                       className="completed-item"
                       title={question.title}
                     >

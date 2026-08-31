@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -13,7 +13,9 @@ import './CategoryPage.css';
 // Helper function to fix image paths with base URL
 const fixImagePath = (src) => {
   if (src.startsWith('/')) {
-    return `${import.meta.env.BASE_URL}images${src.startsWith('/images') ? src.substring(7) : src}`;
+    const base = import.meta.env.BASE_URL;
+    const basePath = base.endsWith('/') ? base.slice(0, -1) : base;
+    return `${basePath}/images${src.startsWith('/images') ? src.substring(7) : src}`;
   }
   return src;
 };
@@ -342,6 +344,9 @@ export const CategoryPage = () => {
       : categoryQuestions[0]?.id ?? null;
   });
 
+  // Ref to track the opened question element
+  const openedQuestionRef = useRef(null);
+
   // Track recently viewed when question is opened
   const { addToRecent } = progress;
   useEffect(() => {
@@ -349,6 +354,26 @@ export const CategoryPage = () => {
       addToRecent(openQuestionId);
     }
   }, [openQuestionId, addToRecent]);
+
+  // Scroll to the opened question element
+  useEffect(() => {
+    if (openedQuestionRef.current && openQuestionId) {
+      setTimeout(() => {
+        openedQuestionRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 100); // Small delay to ensure DOM has updated
+    }
+  }, [openQuestionId]);
+
+  // Scroll to top when category or subcategory changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [categorySlug, subcategorySlug]);
 
   if (!category) {
     return <p>Category not found.</p>;
@@ -409,7 +434,11 @@ export const CategoryPage = () => {
             const isCompleted = progress.isCompleted(question.id);
 
             return (
-              <article key={question.id} className={`question-accordion-item${isOpen ? ' is-open' : ''}`}>
+              <article 
+                key={question.id} 
+                className={`question-accordion-item${isOpen ? ' is-open' : ''}`}
+                ref={isOpen ? openedQuestionRef : null}
+              >
                 <button
                   type="button"
                   className="question-accordion-header"

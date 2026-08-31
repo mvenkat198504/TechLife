@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { categories } from '../content/categories';
 import { questions } from '../content/questionLoader';
@@ -9,6 +10,14 @@ export const HomePage = () => {
   const totalQuestions = questions.length;
   const completedCount = progress.completed.length;
   const bookmarkedCount = progress.bookmarks.length;
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
 
   return (
     <div className="home-page">

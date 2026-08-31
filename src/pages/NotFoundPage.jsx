@@ -1,7 +1,16 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './NotFoundPage.css';
 
 export const NotFoundPage = () => {
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
+
   return (
     <div className="not-found-page">
       <div className="not-found-content">

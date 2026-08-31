@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { questions } from '../content/questionLoader';
 import { categories } from '../content/categories';
@@ -16,6 +16,14 @@ export const SearchPage = () => {
   const [filterBookmarked, setFilterBookmarked] = useState(null);
 
   const progress = useProgress();
+
+  // Scroll to top when search/filter results change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [searchTerm, selectedCategory, selectedDifficulty, filterCompleted, filterBookmarked]);
 
   // Apply filters to questions
   const filteredQuestions = useMemo(() => {
@@ -303,7 +311,7 @@ export const SearchPage = () => {
                   <div key={question.id} className="result-card">
                     <div className="result-card-header">
                       <Link
-                        to={`/category/${question.categoryId}?q=${question.slug}`}
+                        to={`/category/${question.categoryId}/${slugify(question.subcategory)}?q=${question.slug}`}
                         className="result-title"
                       >
                         {question.title}

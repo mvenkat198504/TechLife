@@ -1,11 +1,21 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { questions } from '../content/questionLoader';
 import { categories } from '../content/categories';
 import { useProgress } from '../hooks/useProgress';
+import { slugify } from '../utils/slugify';
 import './BookmarksPage.css';
 
 export const BookmarksPage = () => {
   const progress = useProgress();
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, []);
 
   // Get bookmarked questions
   const bookmarkedQuestions = questions.filter((q) => progress.bookmarks.includes(q.id));
@@ -82,7 +92,7 @@ export const BookmarksPage = () => {
                   <div key={question.id} className="question-card">
                     <div className="card-header">
                       <Link
-                        to={`/category/${question.categoryId}?q=${question.slug}`}
+                        to={`/category/${question.categoryId}/${slugify(question.subcategory)}?q=${question.slug}`}
                         className="question-title"
                       >
                         {question.title}
