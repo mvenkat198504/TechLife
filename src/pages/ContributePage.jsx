@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { categories } from '../content/categories';
 import { DIFFICULTIES } from '../models/question';
 import { slugify } from '../utils/slugify';
@@ -55,16 +55,48 @@ const buildMarkdown = (form) => {
 export const ContributePage = () => {
   const [form, setForm] = useState(emptyForm);
   const [copied, setCopied] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imageFolder, setImageFolder] = useState('');
+  const contentRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // Revoke the object URL to avoid leaking memory across re-selections/unmount
+  useEffect(() => () => {
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+  }, [imagePreviewUrl]);
 
   const markdown = useMemo(() => buildMarkdown(form), [form]);
 
   const handleChange = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
     setCopied(false);
+  };
+
+  const handleImageSelect = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const folder = `${form.categoryId || 'category'}/${slugify(form.subcategory) || 'topic'}`;
+    const targetPath = `/images/${folder}/${file.name}`;
+    const snippet = `![${file.name}](${targetPath})`;
+
+    const textarea = contentRef.current;
+    if (textarea) {
+      const { selectionStart, selectionEnd, value } = textarea;
+      const nextValue = `${value.slice(0, selectionStart)}${snippet}${value.slice(selectionEnd)}`;
+      setForm((prev) => ({ ...prev, content: nextValue }));
+    } else {
+      setForm((prev) => ({ ...prev, content: `${prev.content}\n${snippet}\n` }));
+    }
+
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    setImagePreviewUrl(URL.createObjectURL(file));
+    setImageFolder(folder);
+    setCopied(false);
+    event.target.value = '';
   };
 
   const handleCopy = async () => {
@@ -184,12 +216,37 @@ export const ContributePage = () => {
               <label className="form-label" htmlFor="cf-content">Answer (markdown)</label>
               <textarea
                 id="cf-content"
+                ref={contentRef}
                 className="form-control"
                 rows={12}
                 value={form.content}
                 onChange={handleChange('content')}
                 placeholder={'Write the answer body here, including ```code blocks``` as needed.'}
               />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label" htmlFor="cf-image">Insert image</label>
+              <input
+                id="cf-image"
+                className="form-control"
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+              />
+              <div className="form-text">
+                This only inserts an <code>![alt](path)</code> reference into the answer above.
+                You must still manually save the actual file to{' '}
+                <code>public/images/{imageFolder || '<category>/<subcategory>'}/</code>{' '}
+                before publishing — this is a static site with no upload server.
+              </div>
+              {imagePreviewUrl && (
+                <img
+                  src={imagePreviewUrl}
+                  alt="Selected preview"
+                  className="contribute-image-preview mt-2"
+                />
+              )}
             </div>
 
             <div className="contribute-actions">
