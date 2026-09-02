@@ -1,0 +1,53 @@
+/* Contribute Page Styles */
+
+.contribute-page {
+  max-width: 100%;
+}
+
+.contribute-header {
+  margin-bottom: 2rem;
+}
+
+.contribute-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bs-body-color);
+}
+
+.contribute-header p {
+  color: var(--text-secondary);
+}
+
+.contribute-header code {
+  color: var(--bs-primary);
+}
+
+.contribute-form .form-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.contribute-form textarea {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.contribute-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.contribute-preview {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 8px;
+  padding: 1rem;
+  max-height: 640px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.85rem;
+}

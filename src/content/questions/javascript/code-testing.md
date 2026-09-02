@@ -603,6 +603,20 @@ console.log(arry1)
 // Output : [ false, true, true, false, true, true ]
 ```
 
+```javascript
+// find the indexes of two numbers whose sum is 25:
+let arr = [15, 11, 8, 12,10];
+
+for (let i = 0; i < arr.length; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+        if (arr[i] + arr[j] === 25) {
+            console.log(i, j);
+        }
+    }
+}
+// Output : 0 4
+```
+
 ## Split the array and store it datatype based
 
 ```javascript

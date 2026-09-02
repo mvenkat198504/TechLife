@@ -9,6 +9,7 @@ import { ProgressPage } from './pages/ProgressPage';
 import { QuizPage } from './pages/QuizPage';
 import { AboutPage } from './pages/AboutPage';
 import { CategoryPage } from './pages/CategoryPage';
+import { ContributePage } from './pages/ContributePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import './styles/theme.css';
 import './App.css';
@@ -28,6 +29,8 @@ function App() {
               <Route path="/progress" element={<ProgressPage />} />
               <Route path="/quiz" element={<QuizPage />} />
               <Route path="/about" element={<AboutPage />} />
+              {/* Intentionally not linked from Header/Sidebar; reachable only via direct URL */}
+              <Route path="/admin/contribute" element={<ContributePage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </AppLayout>
