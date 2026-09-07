@@ -12,11 +12,15 @@ export const Header = () => {
     setMobileNavOpen(!mobileNavOpen);
   };
 
+  const closeMobileNav = () => {
+    setMobileNavOpen(false);
+  };
+
   return (
     <header className="header sticky-top">
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
         <div className="container-fluid">
-          <Link className="navbar-brand fw-bold" to="/">
+          <Link className="navbar-brand fw-bold" to="/" onClick={closeMobileNav}>
             <i className="bi bi-lightbulb-fill me-2"></i>
             TechLife Pro
           </Link>
@@ -40,6 +44,7 @@ export const Header = () => {
                   <a
                     className="nav-link dropdown-toggle"
                     href={`#/category/${cat.slug}`}
+                    onClick={closeMobileNav}
                     id={`nav-${cat.id}`}
                     role="button"
                     data-bs-toggle="dropdown"
@@ -50,7 +55,11 @@ export const Header = () => {
                   </a>
                   <ul className="dropdown-menu" aria-labelledby={`nav-${cat.id}`}>
                     <li>
-                      <Link className="dropdown-item" to={`/category/${cat.slug}`}>
+                      <Link
+                        className="dropdown-item"
+                        to={`/category/${cat.slug}`}
+                        onClick={closeMobileNav}
+                      >
                         All {cat.name} Questions
                       </Link>
                     </li>
@@ -58,13 +67,13 @@ export const Header = () => {
                 </li>
               ))}
               <li className="nav-item">
-                <Link className="nav-link" to="/search">
+                <Link className="nav-link" to="/search" onClick={closeMobileNav}>
                   <i className="bi bi-search me-1"></i>
                   Search
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/bookmarks">
+                <Link className="nav-link" to="/bookmarks" onClick={closeMobileNav}>
                   <i className="bi bi-bookmark me-1"></i>
                   Bookmarks
                 </Link>
