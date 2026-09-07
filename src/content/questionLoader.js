@@ -13,6 +13,15 @@ const parseValue = (value) => {
     return [];
   }
 
+  if (trimmedValue.startsWith('[') && trimmedValue.endsWith(']')) {
+    return trimmedValue
+      .slice(1, -1)
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => parseValue(item));
+  }
+
   if ((trimmedValue.startsWith('"') && trimmedValue.endsWith('"')) ||
       (trimmedValue.startsWith("'") && trimmedValue.endsWith("'"))) {
     return trimmedValue.slice(1, -1);

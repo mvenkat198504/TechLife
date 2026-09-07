@@ -32,8 +32,11 @@ export const Header = () => {
 
           <div className={`collapse navbar-collapse ${mobileNavOpen ? 'show' : ''}`}>
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              {categories.slice(0, 5).map((cat) => (
-                <li key={cat.id} className="nav-item dropdown">
+              {categories.map((cat, index) => (
+                <li
+                  key={cat.id}
+                  className={`nav-item dropdown ${index >= 5 ? 'mobile-category-item' : ''}`}
+                >
                   <a
                     className="nav-link dropdown-toggle"
                     href={`#/category/${cat.slug}`}

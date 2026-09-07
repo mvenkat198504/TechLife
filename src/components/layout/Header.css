@@ -9,9 +9,17 @@
   align-items: center;
 }
 
+.mobile-category-item {
+  display: none;
+}
+
 @media (max-width: 991px) {
   .navbar-collapse {
     margin-top: 1rem;
+  }
+
+  .mobile-category-item {
+    display: block;
   }
 
   .nav-item {
