@@ -269,19 +269,8 @@ const renderSection = (section) => {
 
             if (showLabel) {
               return (
-                <div key={index} style={{ marginBottom: '16px' }}>
-                  <div
-                    style={{
-                      backgroundColor: '#282a36',
-                      color: '#50fa7b',
-                      padding: '8px 16px',
-                      borderRadius: '8px 8px 0 0',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}
-                  >
+                <div key={index} className="question-code-wrapper">
+                  <div className="question-code-label">
                     {languageLabel}
                   </div>
                   <SyntaxHighlighter

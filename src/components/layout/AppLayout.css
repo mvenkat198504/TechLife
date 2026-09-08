@@ -48,6 +48,12 @@
   }
 }
 
+@media (max-width: 575.98px) {
+  .app-main {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
 /* Dark theme support */
 [data-theme='dark'] .app-content {
   background-color: #121212;

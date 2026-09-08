@@ -318,10 +318,31 @@ html[data-theme='dark'] .question-actions {
   -webkit-overflow-scrolling: touch;
 }
 
+.question-code-wrapper {
+  margin-bottom: 1rem;
+  max-width: 100%;
+}
+
+.question-code-label {
+  padding: 0.5rem 1rem;
+  border-radius: 8px 8px 0 0;
+  background-color: #282a36;
+  color: #50fa7b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* The wrapper already shows a language label, so drop the duplicate "example" caption */
+.question-code-wrapper .question-code-block::before {
+  display: none;
+}
+
 @media (max-width: 767.98px) {
   .question-accordion-body,
   .question-section .card-body {
-    padding: 1rem;
+    padding: 0.75rem;
   }
 
   .question-section p,
@@ -336,5 +357,28 @@ html[data-theme='dark'] .question-actions {
 
   .question-table th {
     white-space: normal;
+  }
+
+  /* Reclaim horizontal space taken by code block chrome */
+  .question-code-block {
+    padding: 0.65rem 0.6rem !important;
+    border-left-width: 2px;
+    font-size: 0.78rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .question-code-label {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.5px;
+  }
+
+  .question-code-block::before {
+    margin-bottom: 0.4rem;
+    font-size: 0.65rem;
+  }
+
+  .question-code-wrapper {
+    margin-bottom: 0.75rem;
   }
 }
