@@ -57,8 +57,22 @@ const renderSection = (section) => {
   const lines = section.body.split('\n');
   const elements = [];
   let currentList = [];
+  let currentListOrdered = false;
+  let currentListStart = 1;
   let currentParagraph = [];
   let i = 0;
+
+  const flushList = () => {
+    if (currentList.length > 0) {
+      elements.push({
+        type: 'list',
+        items: currentList,
+        ordered: currentListOrdered,
+        start: currentListStart,
+      });
+      currentList = [];
+    }
+  };
 
   const imagePattern = /!\[([^\]]*)\]\(([^)]+)\)/;
 
@@ -73,10 +87,7 @@ const renderSection = (section) => {
         elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
         currentParagraph = [];
       }
-      if (currentList.length > 0) {
-        elements.push({ type: 'list', items: currentList });
-        currentList = [];
-      }
+      flushList();
 
       // Extract language identifier
       const languageRaw = trimmedLine.substring(3).trim() || 'plaintext';
@@ -123,10 +134,7 @@ const renderSection = (section) => {
         elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
         currentParagraph = [];
       }
-      if (currentList.length > 0) {
-        elements.push({ type: 'list', items: currentList });
-        currentList = [];
-      }
+      flushList();
 
       // Collect table lines
       const tableLines = [trimmedLine];
@@ -149,27 +157,45 @@ const renderSection = (section) => {
       continue;
     }
 
-    // Empty line
+    // Empty line - a blank line between list items must not split the list
     if (!trimmedLine) {
       if (currentParagraph.length > 0) {
         elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
         currentParagraph = [];
       }
-      if (currentList.length > 0) {
-        elements.push({ type: 'list', items: currentList });
-        currentList = [];
+      i++;
+      continue;
+    }
+
+    // Sub-heading (###, ####, ...) - also tolerates a missing space after the hashes
+    const headingMatch = trimmedLine.match(/^(#{3,6})\s*(.+)$/);
+    if (headingMatch) {
+      if (currentParagraph.length > 0) {
+        elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
+        currentParagraph = [];
       }
+      flushList();
+      elements.push({ type: 'heading', level: headingMatch[1].length, content: headingMatch[2].trim() });
       i++;
       continue;
     }
 
     // List item
-    if (trimmedLine.startsWith('- ') || /^\d+\.\s/.test(trimmedLine)) {
+    const orderedMatch = trimmedLine.match(/^(\d+)\.\s+/);
+    if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ') || orderedMatch) {
       if (currentParagraph.length > 0) {
         elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
         currentParagraph = [];
       }
-      currentList.push(trimmedLine.replace(/^(?:- |\d+\.\s)/, ''));
+      const isOrdered = Boolean(orderedMatch);
+      if (currentList.length > 0 && currentListOrdered !== isOrdered) {
+        flushList();
+      }
+      if (currentList.length === 0) {
+        currentListOrdered = isOrdered;
+        currentListStart = isOrdered ? Number(orderedMatch[1]) : 1;
+      }
+      currentList.push(trimmedLine.replace(/^(?:[-*]\s+|\d+\.\s+)/, ''));
       i++;
       continue;
     }
@@ -180,10 +206,7 @@ const renderSection = (section) => {
         elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
         currentParagraph = [];
       }
-      if (currentList.length > 0) {
-        elements.push({ type: 'list', items: currentList });
-        currentList = [];
-      }
+      flushList();
       const match = trimmedLine.match(imagePattern);
       if (match) {
         elements.push({ type: 'image', alt: match[1], src: match[2] });
@@ -193,10 +216,7 @@ const renderSection = (section) => {
     }
 
     // Regular paragraph text
-    if (currentList.length > 0) {
-      elements.push({ type: 'list', items: currentList });
-      currentList = [];
-    }
+    flushList();
     currentParagraph.push(trimmedLine);
     i++;
   }
@@ -205,9 +225,7 @@ const renderSection = (section) => {
   if (currentParagraph.length > 0) {
     elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
   }
-  if (currentList.length > 0) {
-    elements.push({ type: 'list', items: currentList });
-  }
+  flushList();
 
   return (
     <section key={section.title} className="card question-section mb-3">
@@ -216,11 +234,17 @@ const renderSection = (section) => {
         {elements.map((element, index) => {
           if (element.type === 'paragraph') {
             return <p key={index}>{renderInlineText(element.content)}</p>;
+          } else if (element.type === 'heading') {
+            const HeadingTag = `h${Math.min(element.level + 1, 6)}`;
+            return <HeadingTag key={index} className="question-subheading">{renderInlineText(element.content)}</HeadingTag>;
           } else if (element.type === 'list') {
+            const ListTag = element.ordered ? 'ol' : 'ul';
             return (
-              <ul key={index} className="mb-3">
-                {element.items.map((item) => <li key={item}>{renderInlineText(item)}</li>)}
-              </ul>
+              <ListTag key={index} className="mb-3 question-list" start={element.ordered ? element.start : undefined}>
+                {element.items.map((item, itemIndex) => (
+                  <li key={itemIndex}>{renderInlineText(item)}</li>
+                ))}
+              </ListTag>
             );
           } else if (element.type === 'image') {
             return (
