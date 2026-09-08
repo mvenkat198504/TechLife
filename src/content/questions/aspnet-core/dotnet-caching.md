@@ -21,10 +21,10 @@ resources: []
 
 ## Type of Caching 
 
-1.In-Memory Cache
-2.Distributed Cache
-3.Response Caching
-4.Output Caching (modern)
+1. In-Memory Cache
+2. Distributed Cache
+3. Response Caching
+4. Output Caching (modern)
 
 ## 1.In-Memory Cache
 Stores data in server memory.
