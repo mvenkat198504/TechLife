@@ -673,7 +673,7 @@ In simple words:
 Instead of your class controlling object creation, the control is given to the .NET framework.
 
 
- ## 43:- Explain Dependency Injection ( DI ) with an example?
+## 43:- Explain Dependency Injection ( DI ) with an example?
 
 
 Dependency injection is a process where we inject dependent object from outside.
