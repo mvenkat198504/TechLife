@@ -23,13 +23,21 @@ export const categories = [
     icon: 'database',
     displayOrder: 3,
   },
+    {
+    id: 'unit-test',
+    slug: 'unit-test',
+    name: 'Unit Testing',
+    description: 'Writing and running unit tests, test frameworks, and best practices',
+    icon: 'check2-square',
+    displayOrder: 4,
+  },
    {
     id: 'javascript',
     slug: 'javascript',
     name: 'JavaScript',
     description: 'ES6+, closures, prototypes, async patterns, and browser APIs',
     icon: 'file-earmark-code',
-    displayOrder: 12,
+    displayOrder: 5,
   },
   {
     id: 'react',
@@ -37,7 +45,7 @@ export const categories = [
     name: 'React',
     description: 'Components, hooks, state management, performance optimization',
     icon: 'braces',
-    displayOrder: 10,
+    displayOrder: 6,
   },
   {
     id: 'angular',
@@ -45,7 +53,7 @@ export const categories = [
     name: 'Angular',
     description: 'TypeScript framework, directives, services, and RxJS',
     icon: 'brackets',
-    displayOrder: 11,
+    displayOrder: 7,
   },
   {
     id: 'sql-server',
@@ -53,7 +61,7 @@ export const categories = [
     name: 'SQL Server',
     description: 'Queries, indexing, performance tuning, and database design',
     icon: 'table',
-    displayOrder: 4,
+    displayOrder: 8,
   },
   {
     id: 'azure',
@@ -61,7 +69,7 @@ export const categories = [
     name: 'Azure',
     description: 'Cloud services, App Service, databases, and deployment',
     icon: 'cloud',
-    displayOrder: 5,
+    displayOrder: 9,
   },
   {
     id: 'devops',
@@ -69,7 +77,7 @@ export const categories = [
     name: 'Azure DevOps',
     description: 'CI/CD pipelines, git, deployment strategies, and monitoring',
     icon: 'tools',
-    displayOrder: 6,
+    displayOrder: 10,
   },
   {
     id: 'microservices',
@@ -77,7 +85,7 @@ export const categories = [
     name: 'Microservices',
     description: 'Service design, communication patterns, and distributed systems',
     icon: 'diagram-3',
-    displayOrder: 7,
+    displayOrder: 11,
   },
   {
     id: 'design-patterns',
@@ -85,7 +93,7 @@ export const categories = [
     name: 'Design Patterns',
     description: 'SOLID principles, creational, structural, and behavioral patterns',
     icon: 'pencil-square',
-    displayOrder: 8,
+    displayOrder: 12,
   },
   {
     id: 'system-design',
@@ -93,7 +101,7 @@ export const categories = [
     name: 'System Design',
     description: 'Scalability, load balancing, caching, and architectural decisions',
     icon: 'bezier2',
-    displayOrder: 9,
+    displayOrder: 13,
   },
   
  
