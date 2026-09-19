@@ -534,3 +534,373 @@ No. Angular supports zoneless change detection. In zoneless applications, UI upd
 **Final interview answer**
 
 "**NgZone** is an Angular service that helps control change detection by executing code inside or outside Angular's zone. We use runOutsideAngular() for frequent background operations to avoid unnecessary change detection, and run() to re-enter Angular's zone when needed. This is particularly useful for timers, animations, and third-party libraries. Modern Angular also supports zoneless change detection."
+
+%%%
+---
+id: angular-advanced-questions-002
+slug: angular-advanced-questions-DI
+title: Angular Dependency Injection
+categoryId: angular
+subcategory: Angular-Dependency-Injection
+difficulty: Intermediate
+tags:
+  - angular
+  - Angular Dependency Injection
+  - angular DI
+  - advanced
+summary: Angular-Dependency-Injection
+updatedAt: 2026-09-17
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+# Angular Dependency Injection
+
+## Dependency Injection (DI)
+
+**1. What is Dependency Injection in Angular?**
+**DI** is a design pattern and mechanism for creating and delivering some parts of an app to other parts of an app that require them.
+
+Dependency injection , or DI is one the fundamental concepts in Angular. DI is wired into the Angular framework and allows classes with angular decorotos, such as Componenents, Directives,Pipes, and Injectables, to configure dependencies that they need.
+
+Two main roles exist in the DI system: dependency consumer and dependency provider.
+
+**Interview answer:**
+
+"Dependency Injection is a design pattern that allows Angular to inject services into components or other services. It promotes loose coupling, code reusability, maintainability, and testability."
+
+How Dependency Injection works
+![Angular Buildings](/images/angular/DI_1.png)
+
+**2. Example 1: Dependency Injection using LoggerService**
+
+Consider a LoggerService that logs messages to the browser console.
+
+Step 1: Create LoggerService
+
+Run the Angular CLI command:
+```
+ng generate service services/logger
+```
+File: logger.service.ts
+```typescript
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LoggerService {
+
+  log(message: string): void {
+    console.log(`[LOG]: ${message}`);
+  }
+
+  error(message: string): void {
+    console.error(`[ERROR]: ${message}`);
+  }
+
+  warn(message: string): void {
+    console.warn(`[WARNING]: ${message}`);
+  }
+}
+```
+Explanation:
+
+- @Injectable() marks the class as available for Angular's dependency injection system.
+- providedIn: 'root' registers the service with the root environment injector.
+- Angular generally creates one shared instance for the application when the service is first requested.
+- The service contains reusable logging methods.
+
+**Step 2: Inject LoggerService into a component**
+
+File: app.component.ts
+
+```typescript
+import { Component } from '@angular/core';
+import { LoggerService } from './services/logger.service';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  template: `
+    <h2>Dependency Injection Example</h2>
+
+    <button (click)="save()">
+      Save
+    </button>
+  `
+})
+export class AppComponent {
+
+  constructor(
+    private logger: LoggerService
+  ) {}
+
+  save(): void {
+
+    this.logger.log('Save button clicked');
+
+    this.logger.warn('Checking data');
+
+    this.logger.error('Sample error');
+
+  }
+}
+```
+**Why is this Dependency Injection?**
+
+We are not creating the service manually:
+```typescript
+const logger = new LoggerService();
+```
+nstead, Angular provides the service through the constructor:
+```typescript
+constructor(private logger: LoggerService) {}
+```
+This is called Constructor Injection.
+
+**3. Example 2: Dependency Injection using an API Service**
+
+This is a practical example commonly used in Angular applications.
+
+We will create a service to fetch employee details from an API.
+
+**Step 1: Configure HttpClient**
+
+For modern standalone Angular applications, configure HttpClient in app.config.ts.
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideHttpClient()
+  ]
+};
+```
+provideHttpClient() registers the dependencies required by Angular's HTTP client.
+
+**Step 2: Create EmployeeService**
+
+```
+ng generate service services/employee
+```
+File: employee.service.ts
+```typescript
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface Employee {
+  id: number;
+  name: string;
+  department: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EmployeeService {
+
+  private apiUrl = 'https://localhost:7001/api/employees';
+
+  constructor(private http: HttpClient) {}
+
+  getEmployees(): Observable<Employee[]> {
+
+    return this.http.get<Employee[]>(this.apiUrl);
+
+  }
+
+  getEmployee(id: number): Observable<Employee> {
+
+    return this.http.get<Employee>(
+      `${this.apiUrl}/${id}`
+    );
+
+  }
+}
+```
+Explanation:
+
+Angular injects HttpClient into EmployeeService.
+```typescript
+constructor(private http: HttpClient) {}
+```
+The service then uses HttpClient to call the API.
+
+**Step 3: Inject EmployeeService into EmployeeComponent**
+
+File: employee.component.ts
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { EmployeeService, Employee } from './employee.service';
+
+@Component({
+  selector: 'app-employee',
+  standalone: true,
+  template: `
+    <h2>Employee List</h2>
+
+    @for (emp of employees; track emp.id) {
+      <p>{{ emp.name }} - {{ emp.department }}</p>
+    }
+  `
+})
+export class EmployeeComponent implements OnInit {
+
+  employees: Employee[] = [];
+
+  constructor(
+    private employeeService: EmployeeService
+  ) {}
+
+  ngOnInit(): void {
+
+    this.employeeService.getEmployees()
+      .subscribe({
+        next: (data) => {
+          this.employees = data;
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+
+  }
+}
+```
+![Angular Buildings](/images/angular/DI_2.png)
+The API URL is an example. Replace it with your actual API endpoint and configure CORS on the backend if the Angular app and API use different origins.
+
+**4. Constructor Injection vs inject() Function**
+
+Modern Angular supports two common ways to inject services.
+
+**Constructor injection**
+```typescript
+export class EmployeeComponent {
+
+  constructor(
+    private employeeService: EmployeeService
+  ) {}
+
+}
+```
+**inject() function**
+```typescript
+import { inject } from '@angular/core';
+
+export class EmployeeComponent {
+
+  private employeeService =
+    inject(EmployeeService);
+
+}
+```
+Both approaches request a dependency from Angular's injection system.
+
+The inject() function must be called in a valid injection context, such as a field initializer, constructor, or provider factory. It cannot ordinarily be called inside an arbitrary component method.
+
+**5. What is providedIn: 'root'?**
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+```
+This registers the service with the root environment injector.
+
+The same service instance is normally shared across components that resolve it from that injector.
+
+![Angular Buildings](/images/angular/DI_3.png)
+
+**6. Service provided at component level**
+```typescript
+@Component({
+  selector: 'app-employee',
+  standalone: true,
+  providers: [LoggerService],
+  template: `<h2>Employee</h2>`
+})
+export class EmployeeComponent {
+
+  constructor(private logger: LoggerService) {}
+
+}
+```
+When LoggerService is registered in the component's providers array, each component instance gets its own service instance. Its descendants can share that instance unless they override the provider.
+
+| Root Provider | Component Provider |
+|---|---|
+| `providedIn: 'root'` | `providers: [LoggerService]` |
+| Shared root-level instance | Instance scoped to component |
+| Suitable for API services and shared state | Suitable for component-specific state |
+| Generally available application-wide | Available to component and descendants |
+
+**7. Advantages of Dependency Injection**
+
+| Advantage | Explanation |
+|---|---|
+| Loose coupling | Components depend on injected services rather than creating them |
+| Reusability | Same service can be used across components |
+| Testability | Dependencies can be replaced with mocks or stubs |
+| Maintainability | Business logic remains separate from UI logic |
+| Instance management | Angular manages service creation and lifetime |
+| Hierarchical DI | Different injectors can provide different instances |
+
+**8. Angular DI vs ASP.NET Core DI**
+
+Since the concepts are similar, here is a comparison.
+| Angular | ASP.NET Core |
+|---|---|
+| `@Injectable()` | Service class registration |
+| `providedIn: 'root'` | Similar to Singleton in typical application scope |
+| Component `providers` | Child dependency-injection scope (conceptually) |
+| Constructor injection | Constructor injection |
+| `inject()` | Resolving dependencies through the DI system |
+| Injector | `IServiceProvider` |
+
+**9. Dependency Injection interview questions**
+
+1. What is Dependency Injection in Angular?
+
+It is a design pattern where Angular creates and supplies dependencies to components or services through its injector.
+
+2. What is @Injectable()?
+
+It is a decorator that marks a class as injectable and allows Angular to generate the necessary dependency-injection metadata.
+
+3. What is providedIn: 'root'?
+
+It registers the service with the root environment injector, generally providing one shared instance unless another injector overrides it.
+
+4. What is the difference between constructor injection and inject()?
+
+Constructor injection declares dependencies as constructor parameters. inject() retrieves dependencies directly within a valid Angular injection context.
+
+5. Can one service inject another service?
+
+Yes. For example, EmployeeService can inject HttpClient and LoggerService through its constructor or the inject() function.
+
+6. How do you create separate service instances?
+
+Provide the service in a component's providers array. Each component instance receives its own provider instance.
+
+7. How does DI improve unit testing?
+
+It allows us to replace real dependencies with mocks or stubs. For example, an EmployeeComponent test can inject a mock EmployeeService without calling the real API.
+
+8. What happens if Angular cannot find a provider?
+
+Angular throws a NullInjectorError unless the dependency is optional or otherwise handled.
+
+**Final interview answer**
+
+"Dependency Injection in Angular is a design pattern where Angular creates and provides services to components or other services through its injector.
+
+For example, I create a LoggerService with @Injectable({ providedIn: 'root' }) and inject it into a component using constructor injection or the inject() function.
+
+Similarly, EmployeeService can inject HttpClient to communicate with a backend API.
+
+Dependency Injection improves loose coupling, reusability, maintainability, and unit testing."
