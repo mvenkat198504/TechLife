@@ -702,3 +702,304 @@ It helps organize your tests into logical blocks, so when you run them in Karma,
 - xdescribe() : Skip the whole suite
 - xit() – Skip just one test
 - fdescribe() – Focus only this suite
+
+%%%
+---
+id: angular-advanced-questions-009
+slug: angular-advanced-questions_all
+title:Optimization
+categoryId: angular
+subcategory: Angular-Advanced_All
+difficulty: Basic
+tags:
+  - angular
+  - advance-questions
+  - Optimization 
+  - Lazy Loading  
+  - Code Splitting 
+  - Source Mapping
+summary: Angular-Advanced-Questions
+updatedAt: 2026-09-17
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+# Optimization
+## 1. How to Optimize Angular Applications?
+**Use Lazy Loading (Route-Level Code Splitting)**
+
+- Split app into modules (AdminModule, UserModule, etc.)
+- Use Angular Router’s loadChildren to lazy load those modules
+
+**Enable Change Detection Optimization**
+- Only re-renders component if @Input() changes
+- Improves performance, especially in large UIs
+
+**Use TrackBy in *ngFor** 
+- With trackBy, only changed items are updated
+
+**Avoid Memory Leaks (Especially in RxJS)**
+- Always unsubscribe from subscriptions using:
+- takeUntil(), AsyncPipe
+- Subscription management in ngOnDestroy
+
+**Use Pure Pipes for Expensive Transformations**
+- Pure pipes are only re-evaluated when input changes.
+
+**Use Web Workers for Heavy Computation**
+- move Offload CPU-heavy tasks (e.g., data parsing, image processing) to Web Workers.
+
+**Lazy Load Images and Components**
+- Use loading="lazy" on 
+
+## How do you secure an Angular app?
+**Route Guards**
+- We should use canActivate, canLoad, and canActivateChild to restrict unauthorized access, based on roles or auth status.
+**Interceptors**
+- use HttpInterceptors to inject tokens into headers securely, and also handle unauthorized responses globally.
+**CSRF Protection**
+- For cookie-based auth, I work with backend teams to enable CSRF protection using X-XSRF-TOKEN, which Angular supports out of the box.
+```typescript
+imports: [
+  HttpClientXsrfModule.withOptions({
+    cookieName: 'MY-XSRF-COOKIE',
+    headerName: 'MY-XSRF-HEADER'
+  })
+]
+```
+**Avoid Exposing Secrets**
+- make sure not to hardcode API keys or secrets in Angular, since all front-end code is publicly visible.
+**Token Security**
+- we should prefer storing JWTs in HttpOnly cookies to avoid XSS risks.
+- If localStorage or sessionStorage is used, we should ensure input sanitization and logout on suspicious activity.
+- HttpOnly cookies: They are stored by the browser itself, and not accessible via document.cookie or JavaScript. You only see them in the "Application → Cookies" tab in dev tools.
+- this.http.get('/api/user-profile', { withCredentials: true }).subscribe(...)
+
+## Code-Level Optimizations
+**Lazy Loading Modules or Components**
+Split large modules into lazy-loaded chunks using routes:
+```
+{
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
+}
+     
+```
+**Tree Shaking & Dead Code Elimination**
+
+Angular and Webpack remove unused code ( but only if it's structured well)
+
+- Avoid large barrel exports
+- Don’t bundle everything in a single shared module
+- Mark classes with providedIn: 'root' for optimal tree-shaking
+
+**Use Standalone Components**
+Helps reduce boilerplate, improves tree-shakability and bundling.
+
+## Build-Time Optimizations
+**Ahead-of-Time (AOT) Compilation**
+- Faster rendering
+- Smaller bundles
+- Detects template errors at build time
+**ESBuild Integration (Angular 16+)**
+- The Angular CLI now supports ESBuild — much faster than Webpack for transpiling.
+
+**Differential Loading**
+- create separate bundles for modern and legacy browsers.
+- Angular CLI handles this automatically
+- es2015 for modern browsers
+- es5 fallback for older ones
+
+**Disable Source Maps in Prod**
+When you write Angular code using TypeScript, SCSS, etc., it's not what the browser actually runs. The browser gets compiled JavaScript, CSS, and HTML.
+
+But when you're debugging, you want to see your original TypeScript code, not the ugly minified JS.
+
+That’s where source maps come in—they’re like a translator between your original source code and the compiled output.
+```
+"configurations": {
+    "production": {
+      ...
+      "sourceMap": false
+    }
+}     
+```
+
+## Runtime Optimization Techniques
+**OnPush Change Detection**
+Use ChangeDetectionStrategy.OnPush to avoid unnecessary checks:
+
+**Use trackBy in ngFor**
+
+**Problem:** Without it Angular destroys and recreates every DOM mode in a list when the array reference changes --even if only one item changed
+
+**Solution:** Angular reconciles by key and patches only what's different
+### Before
+```html
+//Before
+<div *ngFor="let user of users{{user.name}}></div>
+```
+### After
+```html
+// legacy strctural directive
+
+<div *ngFor="let user of users; trackBy: trackById">{{user.name}}</div>
+
+trackById(index: number, user: User) {
+    return user.id;
+}
+
+//modern control flow-track is required syntex
+
+@for(user of users;tack user.id){
+  <div>{{user.name}}</div>
+}
+```
+
+#### Explicit public/private/protected
+**Problem:** Defaults to public if omiited,silently exposing internals to templates and other classes
+### Before
+```typescript
+export class UserCardComponent{
+  user:User;
+  formatName(u:User){/*....*/}
+}
+```
+### After
+```typescript
+export class UserCardComponent{
+  public user!:User;
+  protected formatName(u:User):string{/* usable in template only*/}
+  private buildCachekey(u:User):string{/*internal only*/}
+}
+```
+#### Explicit return types on every method
+
+Problem:Without it, typescript infers the type- a refactor can silently widen or narrow it with no compiler warning downstream.
+### Before
+```typescript
+calculateTotal(items:CartItem[]){
+  return items.reduce((sum,i)=> sum+i.price,0)
+}
+```
+### After
+```typescript
+calculateTotal(items:CartItem[]: number){
+  return items.reduce((sum,i)=> sum+i.price,0)
+}
+```
+
+#### Unsubscribe discipline
+Problem: Manual .subscribe() without cleanup is the #1 cause of memory leaks in Angular apps.
+
+### Before
+```typescript
+ngOnInit*(){
+  this.service.data$.subscribe(d=>this.data=d);
+  //leaks - outlives the componennt
+}
+```
+### After
+```typescript
+//Option A- let the template own it 
+// template:<div>{{data$ | async}}</div>
+data$=this.service.data$;
+
+//Option B- auto unsubscribe on destroy
+private destroyREf=inejct(DestroyRef);
+ngOnInit*(){
+    this.service.data$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(d=>this.data=d);
+}
+```
+#### readonly for properties that never reassign
+Why: signals a contract to future (and the compiler) that this shouldn't change after construction.
+```typescript
+export class UserCardComponent{
+  private readonly userService=inject(UserService);
+  readonly maxNameLength=40;
+}
+```
+
+**Memoization & Pure Pipes**
+Memoization is an optimization technique where you cache the result of expensive function calls and return the cached result when the same inputs occur again.
+
+**Image & Asset Optimization**
+- Use WebP or AVIF
+- Lazy load heavy images
+
+## What is Webpack?
+Webpack is a module bundler. Think of it as a super-efficient packer: it takes all your project files (JavaScript, CSS, images, HTML, etc.), analyzes their dependencies, and bundles them into optimized files that can be shipped to the browser.
+
+**Module Bundling**
+- Webpack takes your Angular components, services, pipes, directives, and other modules and builds a dependency graph.
+- Then it bundles these modules into efficient JavaScript files (like main.js, polyfills.js, etc.).
+**Asset Processing**
+- Webpack loads and processes your styles (CSS/SCSS), HTML templates, and images using loaders
+**Tree Shaking**
+- Removes unused code (dead code elimination).
+- This significantly reduces bundle size in production builds
+**Code Splitting**
+- Webpack enables lazy loading and dynamic imports to split your app into smaller chunks.
+- This means only the necessary code is loaded initially, improving performance.
+**Environment-Specific Builds**
+- Angular uses Webpack to replace environment files (environment.ts vs environment.prod.ts) during build time.
+**Minification and Optimization**
+- Removes white spaces, comments, shortens variable names, etc.
+- Also optimizes images, CSS, and other static files
+**Source Mapping**
+- Generates .map files so that even after code minification, you can debug using original source code in the browser.
+
+Webpack is the engine behind Angular CLI's build system. It bundles your code, optimizes it, splits it for lazy loading, processes your assets, and prepares everything for efficient browser delivery.
+
+## What is Babel?
+Babel is a JavaScript compiler. Think of it like a translator that:
+
+- Converts modern JavaScript (ES6+ or TypeScript) into older versions (like ES5) that all browsers can understand.
+- Allows use of cutting-edge JS features without worrying about browser support.
+- Transpile ES6+ code to ES5
+- Transpile JSX (React syntax) to plain JS
+- Polyfill new APIs like Promise, Array.from, etc.
+
+## XSS (Cross-Site Scripting)
+XSS is when an attacker injects malicious JavaScript into your application — often via input fields, query params, or URLs.
+```
+[innerHTML]="userInput"
+ p  {{ userInput }} p 
+ userInput ="<script>alert('x')script>"
+```
+If you're binding unsafe HTML, Angular won’t sanitize it unless you let it.
+```
+this.sanitizer.bypassSecurityTrustHtml(userInput);                                    
+```
+Angular renders it as plain text – not executable.
+
+## AOT vs JIT
+**JIT (Just-In-Time) Compilation**
+Angular compiles your HTML templates + TypeScript code in the browser, as the app loads.
+
+- You write TS and templates.
+- Angular sends them raw-ish to the browser.
+- Angular compiler runs in the browser and compiles templates into JS on the fly.
+**AOT (Ahead-of-Time) Compilation**
+Angular pre-compiles your templates and code before shipping to the browser.
+
+- Angular CLI compiles HTML & TS into pure JavaScript during ng build.
+- Removes Angular compiler from final bundle.
+- Faster rendering in the browser ,Smaller bundle size,Early error detection
+
+## Accessibility in angular
+**Core Concepts of Accessibility**
+- Keyboard Navigation: Users should be able to use the app using just a keyboard (Tab, Enter, Space, etc.).
+- Screen Readers: The UI should be understandable by screen readers (like NVDA, JAWS).
+- Semantic HTML: Use elements for what they mean (, ,, etc.).
+- Color Contrast: Make sure there's enough contrast between text and background.
+- Focus Management: Properly manage focus (especially after navigation/dialogs).
+- ARIA attributes: aria-label, aria-hidden, role, etc., to enhance semantics for assistive tech.
+- Live announcements with cdk/LiveAnnouncer
+
+We ensure all interactive elements are keyboard-accessible using tabindex, role, and HostListener for key events."
+
+use LiveAnnouncer and FocusTrap from Angular CDK to make dynamic interactions accessible.
+
+avoid using divs or spans for interactivity unless I add the necessary ARIA roles and keyboard logic.

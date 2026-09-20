@@ -53,6 +53,75 @@ const renderInlineText = (text) => {
   });
 };
 
+const renderCodeBlock = (element, index, extraClassName = '') => {
+  const showLabel = element.language && element.language !== 'plaintext';
+  const languageLabel = showLabel
+    ? element.language === 'csharp'
+      ? 'C# EXAMPLE'
+      : element.language === 'javascript'
+        ? 'JAVASCRIPT EXAMPLE'
+        : `${element.language.toUpperCase()} EXAMPLE`
+    : null;
+
+  const codeMarkup = (
+    <SyntaxHighlighter
+      language={element.language || 'plaintext'}
+      style={dracula}
+      className={`question-code-block ${extraClassName}`.trim()}
+      customStyle={{
+        borderRadius: '0 0 8px 8px',
+        padding: '16px',
+        fontSize: '14px',
+        lineHeight: '1.5',
+        margin: 0,
+      }}
+    >
+      {element.content}
+    </SyntaxHighlighter>
+  );
+
+  if (showLabel) {
+    return (
+      <div key={index} className="question-code-wrapper">
+        <div className="question-code-label">{languageLabel}</div>
+        {codeMarkup}
+      </div>
+    );
+  }
+
+  return codeMarkup;
+};
+
+const copyCode = async (text) => {
+  if (!text) return;
+
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    console.warn('Clipboard copy failed:', error);
+  }
+};
+
+const renderCodeComparePanel = ({ title, code, variant, index }) => {
+  const panelClass = variant === 'before' ? 'before-panel' : 'after-panel';
+
+  return (
+    <div key={`${index}-${variant}`} className={`before-after-panel ${panelClass}`}>
+      <div className="before-after-header">
+        <span className="before-after-title">{title}</span>
+        <button
+          type="button"
+          className="before-after-copy"
+          onClick={() => copyCode(code.content)}
+        >
+          Copy
+        </button>
+      </div>
+      {renderCodeBlock(code, `${index}-${variant}`, 'compare-code-block')}
+    </div>
+  );
+};
+
 const renderSection = (section) => {
   const lines = section.body.split('\n');
   const elements = [];
@@ -227,13 +296,62 @@ const renderSection = (section) => {
   }
   flushList();
 
+  const comparisonBlocks = [];
+  for (let index = 0; index < elements.length; index += 1) {
+    const current = elements[index];
+    const next = elements[index + 1];
+    const afterHeading = elements[index + 2];
+    const afterCode = elements[index + 3];
+
+    if (
+      current?.type === 'heading' &&
+      current.content.trim().toLowerCase() === 'problem' &&
+      next?.type === 'paragraph'
+    ) {
+      const problemText = next.content.trim();
+      comparisonBlocks.push({
+        type: 'problem',
+        title: 'Problem',
+        content: problemText,
+      });
+      index += 1;
+      continue;
+    }
+
+    if (
+      current?.type === 'heading' &&
+      current.content.trim().toLowerCase() === 'before' &&
+      next?.type === 'code' &&
+      afterHeading?.type === 'heading' &&
+      afterHeading.content.trim().toLowerCase() === 'after' &&
+      afterCode?.type === 'code'
+    ) {
+      comparisonBlocks.push({
+        type: 'comparison',
+        before: next,
+        after: afterCode,
+      });
+      index += 3;
+      continue;
+    }
+
+    comparisonBlocks.push(current);
+  }
+
   return (
     <section key={section.title} className="card question-section mb-3">
       <div className="card-body">
         <h3 className="h5">{section.title}</h3>
-        {elements.map((element, index) => {
+        {comparisonBlocks.map((element, index) => {
           if (element.type === 'paragraph') {
             return <p key={index}>{renderInlineText(element.content)}</p>;
+          } else if (element.type === 'problem') {
+            return (
+              <div key={index} className="problem-callout">
+                <div className="problem-label">PROBLEM</div>
+                <div className="problem-text">{renderInlineText(element.content)}</div>
+              </div>
+            );
           } else if (element.type === 'heading') {
             const HeadingTag = `h${Math.min(element.level + 1, 6)}`;
             return <HeadingTag key={index} className="question-subheading">{renderInlineText(element.content)}</HeadingTag>;
@@ -257,57 +375,13 @@ const renderSection = (section) => {
               />
             );
           } else if (element.type === 'code') {
-            // Regular code blocks
-            const showLabel = element.language && element.language !== 'plaintext';
-            const languageLabel = showLabel 
-              ? element.language === 'csharp' 
-                ? 'C# EXAMPLE' 
-                : element.language === 'javascript'
-                ? 'JAVASCRIPT EXAMPLE'
-                : `${element.language.toUpperCase()} EXAMPLE`
-              : null;
-
-            if (showLabel) {
-              return (
-                <div key={index} className="question-code-wrapper">
-                  <div className="question-code-label">
-                    {languageLabel}
-                  </div>
-                  <SyntaxHighlighter
-                    language={element.language || 'plaintext'}
-                    style={dracula}
-                    className="question-code-block"
-                    customStyle={{
-                      borderRadius: '0 0 8px 8px',
-                      padding: '16px',
-                      fontSize: '14px',
-                      lineHeight: '1.5',
-                      margin: 0
-                    }}
-                  >
-                    {element.content}
-                  </SyntaxHighlighter>
-                </div>
-              );
-            }
-
-            // No label - just code
+            return renderCodeBlock(element, index);
+          } else if (element.type === 'comparison') {
             return (
-              <SyntaxHighlighter
-                key={index}
-                language={element.language || 'plaintext'}
-                style={dracula}
-                className="question-code-block"
-                customStyle={{
-                  borderRadius: '8px',
-                  padding: '16px',
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  marginBottom: '16px'
-                }}
-              >
-                {element.content}
-              </SyntaxHighlighter>
+              <div key={index} className="before-after-grid">
+                {renderCodeComparePanel({ title: 'Before', code: element.before, variant: 'before', index })}
+                {renderCodeComparePanel({ title: 'After', code: element.after, variant: 'after', index })}
+              </div>
             );
           } else if (element.type === 'table') {
             return (

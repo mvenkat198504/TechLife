@@ -904,3 +904,189 @@ For example, I create a LoggerService with @Injectable({ providedIn: 'root' }) a
 Similarly, EmployeeService can inject HttpClient to communicate with a backend API.
 
 Dependency Injection improves loose coupling, reusability, maintainability, and unit testing."
+
+%%%
+---
+id: angular-advanced-questions_optimization-002
+slug: angular-advanced-questions
+title: Avoid Calling Methods in Templates?
+categoryId: angular
+subcategory: Angular-Change Detection
+difficulty: Basic
+tags:
+  - angular
+  - advance-questions
+  - angular-advance
+  - change detection
+summary: Angular-Advanced-Questions
+updatedAt: 2026-09-17
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+# Angular Performance Optimization: Avoid Calling Methods in Templates
+
+## Problem
+
+```typescript
+{{ calculateTotal(items) }}
+```
+
+The method `calculateTotal(items)` re-executes on every change detection (CD) cycle, regardless of whether `items` has changed.
+**Performance impact:**
+- O(n) recomputation per change detection cycle.
+- Repeated method calls can compound across the component tree.
+
+## Solution
+
+Replace the template method call with:
+
+1. **Pure Pipe:** Caches the previous result based on input values and reference equality.
+2. **Computed Signal:** Uses fine-grained reactivity and memoization to avoid unnecessary recalculation.
+
+---
+#### 1. Before — Calling a Method in the Template
+#### 2. After — Using Signals (Preferred)
+### Before
+```typescript
+@Component({
+  template: `<div>Total: {{ calculateTotal(items) }}</div>`
+})
+export class CartComponent {
+
+  items: CartItem[] = [];
+
+  calculateTotal(items: CartItem[]): number {
+    return items.reduce(
+      (sum, i) => sum + i.price * i.qty,
+      0
+    );
+  }
+}
+```
+
+### After
+```typescript
+import { Component, signal, computed } from '@angular/core';
+
+@Component({
+  template: `<div>Total: {{ total() }}</div>`
+})
+export class CartComponent {
+
+  items = signal<CartItem[]>([]);
+
+  total = computed(() =>
+    this.items().reduce(
+      (sum, i) => sum + i.price * i.qty,
+      0
+    )
+  );
+}
+```
+
+### Explanation
+
+- `signal()` stores the cart items as reactive state.
+- `computed()` calculates the total based on the `items` signal.
+- Angular caches the computed value.
+- The total is recalculated only when its signal dependencies change.
+- `total()` reads the cached computed value in the template.
+
+**Interview Tip:** Avoid expensive method calls directly in Angular templates. Use pure pipes or computed signals to prevent unnecessary recomputation.
+
+%%%
+---
+id: angular-advanced-questions_optimization-003
+slug: angular-advanced-questions
+title: Avoid Inline Object and Array Literals?
+categoryId: angular
+subcategory: Angular-Change Detection
+difficulty: Basic
+tags:
+  - angular
+  - advance-questions
+  - angular-advance
+  - change detection
+summary: Angular-Advanced-Questions
+updatedAt: 2026-09-17
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
+# Angular Performance Optimization: Avoid Inline Object and Array Literals
+
+## Problem
+
+A new object or array literal written inline creates a **new reference on every change detection (CD) cycle**.
+
+When passed as an `@Input()` to an `OnPush` child component, it can defeat the benefits of `OnPush` because the child receives a new input reference every time.
+
+## Solution
+
+Move the object or array literal into a **class field** or use a `computed()` signal so the reference remains stable across change detection cycles.
+
+---
+
+## 1. Before — Inline Object and Array Literals
+
+```typescript
+@Component({
+  template: `
+    <app-card [config]="{ theme: 'dark' }" />
+    <div [class]="['a', 'b']"></div>
+  `
+})
+export class PanelComponent {}
+```
+
+### Problem
+
+- `{ theme: 'dark' }` creates a new object reference.
+- `['a', 'b']` creates a new array reference.
+- The `OnPush` child component receives a new `config` reference during change detection.
+- This can cause unnecessary child component checks.
+
+---
+
+## 2. After — Stable References (Recommended)
+
+```typescript
+@Component({
+  template: `
+    <app-card [config]="cardConfig" />
+    <div [class]="rowClasses"></div>
+  `
+})
+export class PanelComponent {
+
+  readonly cardConfig = { theme: 'dark' };
+
+  readonly rowClasses = ['a', 'b'];
+
+}
+```
+
+### Explanation
+
+- `cardConfig` is initialized once when the component instance is created.
+- `rowClasses` is initialized once.
+- Both references remain stable across change detection cycles.
+- The `OnPush` child avoids unnecessary checks caused by changing input references.
+
+**Note:** `readonly` prevents reassignment of the field but does not make the object or array immutable.
+
+---
+
+## Interview Tip
+
+**Question:** Why should we avoid creating objects or arrays directly inside Angular template bindings?
+
+**Answer:**
+
+Inline object and array literals can create new references during change detection. When these references are passed to `OnPush` child components, Angular may treat them as changed inputs and check the child unnecessarily.
+
+To optimize performance, define objects and arrays as component class fields or use computed signals when their values depend on reactive state.
