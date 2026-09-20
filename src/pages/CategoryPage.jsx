@@ -20,6 +20,28 @@ const fixImagePath = (src) => {
   return src;
 };
 
+const resolveAssetPath = (src) => {
+  if (!src) return src;
+
+  if (src.startsWith('/')) {
+    const base = import.meta.env.BASE_URL;
+    const basePath = base.endsWith('/') ? base.slice(0, -1) : base;
+    return `${basePath}${src}`;
+  }
+
+  return src;
+};
+
+const getPdfTitle = (src) => {
+  if (!src) return 'PDF Document';
+
+  const normalized = src.split('?')[0].split('#')[0];
+  const fileName = normalized.substring(normalized.lastIndexOf('/') + 1);
+  if (!fileName) return 'PDF Document';
+
+  return fileName.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+};
+
 const getSections = (content) => {
   const sections = [];
   const sectionPattern = /^##\s+(.+)\n([\s\S]*?)(?=^##\s+|(?![\s\S]))/gm;
@@ -30,6 +52,37 @@ const getSections = (content) => {
   }
 
   return sections;
+};
+
+const parseMarkdownImageOrPdf = (raw) => {
+  const match = raw.match(/^!\[([^\]]*)\]\((.*)\)$/);
+  if (!match) return null;
+
+  const [, alt, rawValue] = match;
+  let content = rawValue.trim();
+  let title = '';
+
+  if ((content.includes('"') || content.includes("'")) && (content.lastIndexOf('"') > content.lastIndexOf("'"))) {
+    const lastQuote = content.lastIndexOf('"');
+    const firstQuote = content.lastIndexOf('"', lastQuote - 1);
+    if (firstQuote > -1 && lastQuote > firstQuote) {
+      title = content.substring(firstQuote + 1, lastQuote).trim();
+      content = content.substring(0, firstQuote).trim();
+    }
+  } else if (content.includes("'")) {
+    const lastQuote = content.lastIndexOf("'");
+    const firstQuote = content.lastIndexOf("'", lastQuote - 1);
+    if (firstQuote > -1 && lastQuote > firstQuote) {
+      title = content.substring(firstQuote + 1, lastQuote).trim();
+      content = content.substring(0, firstQuote).trim();
+    }
+  }
+
+  return {
+    alt,
+    src: content,
+    title,
+  };
 };
 
 const renderInlineText = (text) => {
@@ -44,9 +97,17 @@ const renderInlineText = (text) => {
       return <code key={index}>{chunk.slice(1, -1)}</code>;
     }
 
-    const imageMatch = chunk.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    const imageMatch = parseMarkdownImageOrPdf(chunk);
     if (imageMatch) {
-      return <img key={index} src={fixImagePath(imageMatch[2])} alt={imageMatch[1]} className="question-image-inline" style={{ maxWidth: '100%', height: 'auto' }} />;
+      if (imageMatch.src.toLowerCase().endsWith('.pdf')) {
+        return (
+          <a key={index} href={resolveAssetPath(imageMatch.src)} target="_blank" rel="noreferrer" className="pdf-inline-link">
+            {imageMatch.alt || imageMatch.title || 'PDF'}
+          </a>
+        );
+      }
+
+      return <img key={index} src={fixImagePath(imageMatch.src)} alt={imageMatch.alt} className="question-image-inline" style={{ maxWidth: '100%', height: 'auto' }} />;
     }
 
     return chunk;
@@ -144,10 +205,45 @@ const renderSection = (section) => {
   };
 
   const imagePattern = /!\[([^\]]*)\]\(([^)]+)\)/;
+  const pdfLinkPattern = /^\[pdf\]\(([^)]+?)(?:\s+["']([^"']+)["'])?\)$/i;
+  const iframePattern = /^<iframe\s+[^>]*src=["']([^"']+)["'][^>]*>.*<\/iframe>$/i;
 
   while (i < lines.length) {
     const line = lines[i];
     const trimmedLine = line.trim();
+
+    if (pdfLinkPattern.test(trimmedLine)) {
+      if (currentParagraph.length > 0) {
+        elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
+        currentParagraph = [];
+      }
+      flushList();
+      const pdfMatch = trimmedLine.match(pdfLinkPattern);
+      if (pdfMatch) {
+        const [, src, customTitle] = pdfMatch;
+        elements.push({
+          type: 'pdf',
+          src,
+          title: customTitle || getPdfTitle(src),
+        });
+      }
+      i += 1;
+      continue;
+    }
+
+    if (iframePattern.test(trimmedLine)) {
+      if (currentParagraph.length > 0) {
+        elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
+        currentParagraph = [];
+      }
+      flushList();
+      const iframeMatch = trimmedLine.match(iframePattern);
+      if (iframeMatch) {
+        elements.push({ type: 'pdf', src: iframeMatch[1], title: 'PDF Document' });
+      }
+      i += 1;
+      continue;
+    }
 
     // Check for code block start
     if (trimmedLine.startsWith('```')) {
@@ -269,7 +365,30 @@ const renderSection = (section) => {
       continue;
     }
 
-    // Image line
+    // Image or PDF line
+    if (trimmedLine.startsWith('![')) {
+      const parsedImage = parseMarkdownImageOrPdf(trimmedLine);
+      if (parsedImage) {
+        if (currentParagraph.length > 0) {
+          elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
+          currentParagraph = [];
+        }
+        flushList();
+
+        if (parsedImage.src.toLowerCase().endsWith('.pdf')) {
+          elements.push({
+            type: 'pdf',
+            src: parsedImage.src,
+            title: parsedImage.title || getPdfTitle(parsedImage.src),
+          });
+        } else {
+          elements.push({ type: 'image', alt: parsedImage.alt, src: parsedImage.src });
+        }
+        i++;
+        continue;
+      }
+    }
+
     if (imagePattern.test(trimmedLine)) {
       if (currentParagraph.length > 0) {
         elements.push({ type: 'paragraph', content: currentParagraph.join('\n').trim() });
@@ -373,6 +492,33 @@ const renderSection = (section) => {
                 loading="lazy"
                 className="question-image"
               />
+            );
+          } else if (element.type === 'pdf') {
+            const resolvedPdfSrc = resolveAssetPath(element.src);
+
+            return (
+              <div key={index} className="pdf-viewer-wrapper">
+                <div className="pdf-viewer-toolbar">
+                  <div className="pdf-viewer-title-block">
+                    <span className="pdf-viewer-label">PDF</span>
+                    <span className="pdf-viewer-file-name">{element.title}</span>
+                  </div>
+                  <div className="pdf-viewer-actions">
+                    <a href={resolvedPdfSrc} target="_blank" rel="noreferrer" className="pdf-viewer-link">
+                      Open in new tab
+                    </a>
+                    <a href={resolvedPdfSrc} download className="pdf-viewer-link pdf-viewer-link-primary">
+                      Download
+                    </a>
+                  </div>
+                </div>
+                <iframe
+                  src={resolvedPdfSrc}
+                  title={element.title}
+                  className="pdf-viewer"
+                  loading="lazy"
+                />
+              </div>
             );
           } else if (element.type === 'code') {
             return renderCodeBlock(element, index);

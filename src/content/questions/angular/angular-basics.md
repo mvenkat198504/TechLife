@@ -1201,3 +1201,259 @@ ngOnChanges() runs when relevant inputs change.
 **ngOnDestroy**
 - Cleanup just before Angular destroys the component
 - Unsubscribing from observables, detaching event handlers, or other cleanup tasks.​​
+
+%%%
+---
+id: angular-basic-questions-002
+slug: angular-signals-questions
+title: Angular signals - Questions and Answers?
+categoryId: angular
+subcategory: Angular-Basics
+difficulty: Basic
+tags:
+  - angular
+  - signal-questions
+  - signal
+summary: Angular signals Questions
+updatedAt: 2026-09-17
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+# Angular Signals – Complete Interview Preparation Guide
+## 1. What is a Signal in Angular?
+
+
+![Angular pdf](/pdf/angular/Angular Signals Guide.pdf "Interview Guide")
+<!-- 
+Interview answer:
+
+A Signal is a reactive wrapper around a value that notifies Angular when the value changes. Angular uses signals to track where state is read and update the relevant parts of the application efficiently.
+
+Signals were introduced in Angular 16 and are commonly used for managing component state.
+
+Key features:
+
+Reactive state management.
+
+Fine-grained dependency tracking.
+
+Automatic dependency tracking for computed signals.
+
+Supports primitive values, objects and arrays.
+
+Works with Angular's change detection, including zoneless applications.
+
+Simple example
+```typescript
+import { Component, signal } from '@angular/core';
+
+@Component({
+  selector: 'app-counter',
+  standalone: true,
+  template: `
+    <h2>Count: {{ count() }}</h2>
+
+    <button (click)="increment()">Increment</button>
+  `
+})
+export class CounterComponent {
+
+  count = signal(0);
+
+  increment() {
+    this.count.update(value => value + 1);
+  }
+}
+```
+Explanation:
+
+signal(0) creates a signal with an initial value of 0.
+
+count() reads the current value.
+
+update() calculates and sets a new value.
+
+Angular marks the component for updating when a signal read in its template changes.
+
+## 2. Types of Signals in Angular
+
+There are three fundamental signal concepts commonly discussed in interviews.
+![Angular Buildings](/images/angular/signals.png)
+
+| Type | Purpose | Writable? |
+|---|---|---|
+| `signal()` | Stores reactive state | Yes |
+| `computed()` | Calculates derived values | No |
+| `effect()` | Executes side effects | Not a signal |
+| `linkedSignal()` | Writable state linked to another reactive source | Yes |
+| `input()` | Receives input from a parent | No |
+| `model()` | Supports two-way component binding | Yes |
+
+## 3. Writable Signal – signal()
+
+A writable signal stores a value that can be modified using set() or update().
+
+Syntax
+```typescript
+const count = signal(0);
+```
+Angular infers the signal's type from its initial value.
+```typescript
+const count = signal<number>(0);
+const name = signal<string>('Venkat');
+const isActive = signal<boolean>(true);
+```
+Important methods
+
+| Method | Purpose |
+|---|---|
+| `signal()` | Creates a writable signal |
+| `set()` | Replaces the current value |
+| `update()` | Updates based on the previous value |
+| `asReadonly()` | Exposes a read-only signal |
+| `()` | Reads the current value |
+
+
+Example: set() and update()
+```typescript
+import { signal } from '@angular/core';
+
+const count = signal(10);
+
+// Read
+console.log(count()); // 10
+
+// Set new value
+count.set(20);
+
+console.log(count()); // 20
+
+// Update existing value
+count.update(value => value + 5);
+
+console.log(count()); // 25
+```
+
+Difference between set() and update()
+
+| set() | update() |
+|---|---|
+| Replaces the value | Calculates from the current value |
+| Accepts a new value | Accepts an updater function |
+| `count.set(10)` | `count.update(x => x + 1)` |
+
+**Interview tip:** Use set() when the new value is already known. Use update() when the new value depends on the existing value.
+
+## 4. Computed Signal – computed()
+
+Interview answer:
+
+A computed signal is a read-only signal that derives its value from other signals. It automatically tracks dependencies, recalculates when necessary and caches its result.
+
+Example: Calculate total price
+
+```typescript
+import { signal, computed } from '@angular/core';
+
+export class ProductComponent {
+
+  price = signal(100);
+  quantity = signal(2);
+
+  total = computed(() =>
+    this.price() * this.quantity()
+  );
+
+  changeQuantity() {
+    this.quantity.set(5);
+  }
+}
+```
+```html
+<p>Price: {{ price() }}</p>
+<p>Quantity: {{ quantity() }}</p>
+<p>Total: {{ total() }}</p>
+
+<button (click)="changeQuantity()">
+  Change Quantity
+</button>
+```
+Output:
+```
+Initially:
+
+Price: 100
+Quantity: 2
+Total: 200
+
+After clicking:
+
+Price: 100
+Quantity: 5
+Total: 500
+```
+Important characteristics
+
+- Computed signals are read-only.
+- Values are calculated lazily, on demand.
+- Results are memoized (cached).
+- Dependencies are tracked dynamically.
+- A computed signal recalculates when read after a dependency change invalidates its cached value.
+
+You cannot write:
+```typescript
+this.total.set(500); // Error
+```
+## 5. Effect – effect()
+
+Interview answer:
+
+An effect is a reactive function that runs when its tracked signal dependencies change. It is mainly used to synchronize signal state with external systems.
+
+Examples include logging, browser storage, third-party charts and external APIs.
+
+Example
+```typescript
+import {
+  Component,
+  signal,
+  effect
+} from '@angular/core';
+
+@Component({
+  selector: 'app-counter',
+  standalone: true,
+  template: `
+    <p>{{ count() }}</p>
+
+    <button (click)="increment()">
+      Increment
+    </button>
+  `
+})
+export class CounterComponent {
+
+  count = signal(0);
+
+  constructor() {
+
+    effect(() => {
+      console.log('Count changed:', this.count());
+    });
+
+  }
+
+  increment() {
+    this.count.update(value => value + 1);
+  }
+}
+```
+Console output after initial execution and successive clicks:
+```
+Count changed: 0
+Count changed: 1
+Count changed: 2
+```
+Effects execute asynchronously during Angular's synchronization process. Multiple synchronous updates may be coalesced, so an effect is not guaranteed to run once for every intermediate value. -->
