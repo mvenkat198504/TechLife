@@ -3,7 +3,7 @@ id: system-designs-006
 slug:  system-designs
 title: Event-Driven Architecture
 categoryId: system-design
-subcategory: Event-Driven Architecture
+subcategory: 5. Event-Driven Architecture
 difficulty: Experienced
 tags:
   - system-designs

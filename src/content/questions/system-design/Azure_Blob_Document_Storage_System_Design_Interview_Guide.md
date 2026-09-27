@@ -3,7 +3,7 @@ id: system-designs-015
 slug:  system-designs
 title: Design a File and Document Storage System for Millions of Large Files
 categoryId: system-design
-subcategory: Design a File and Document Storage System
+subcategory: 14. Design a File and Document Storage System
 difficulty: Experienced
 tags:
   - system-designs

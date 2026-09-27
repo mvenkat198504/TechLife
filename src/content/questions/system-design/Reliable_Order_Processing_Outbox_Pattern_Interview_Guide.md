@@ -3,7 +3,7 @@ id: system-designs-008
 slug:  system-designs
 title: Design a Reliable Order Processing System Using the Outbox Pattern
 categoryId: system-design
-subcategory: Outbox Pattern
+subcategory: 7. Outbox Pattern
 difficulty: Experienced
 tags:
   - system-designs

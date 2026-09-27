@@ -3,7 +3,7 @@ id: system-designs-014
 slug:  system-designs
 title: Design Authentication and Authorization for Microservices
 categoryId: system-design
-subcategory: Design Authentication and Authorization
+subcategory: 13. Design Authentication and Authorization
 difficulty: Experienced
 tags:
   - system-designs

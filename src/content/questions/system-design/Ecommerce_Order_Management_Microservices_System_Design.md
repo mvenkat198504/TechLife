@@ -3,7 +3,7 @@ id: system-designs-001
 slug:  system-designs
 title: E-Commerce / Order Management System
 categoryId: system-design
-subcategory: E-Commerce - Order Management System
+subcategory: 1. E-Commerce - Order Management System
 difficulty: Experienced
 tags:
   - system-designs

@@ -3,7 +3,7 @@ id: system-designs-010
 slug:  system-designs
 title: Design a Notification System for Millions of Users
 categoryId: system-design
-subcategory: Design Notification System
+subcategory: 9. Design Notification System
 difficulty: Experienced
 tags:
   - system-designs

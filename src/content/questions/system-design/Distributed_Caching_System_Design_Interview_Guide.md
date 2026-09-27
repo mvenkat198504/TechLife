@@ -3,7 +3,7 @@ id: system-designs-012
 slug:  system-designs
 title: Design a Distributed Caching Solution
 categoryId: system-design
-subcategory: Design Distributed Caching
+subcategory: 11. Design Distributed Caching
 difficulty: Experienced
 tags:
   - system-designs

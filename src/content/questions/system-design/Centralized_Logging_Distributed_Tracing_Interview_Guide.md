@@ -3,7 +3,7 @@ id: system-designs-013
 slug:  system-designs
 title: Design Centralized Logging and Distributed Tracing
 categoryId: system-design
-subcategory: Design Logging and Distributed Tracing
+subcategory: 12. Design Logging and Distributed Tracing
 difficulty: Experienced
 tags:
   - system-designs

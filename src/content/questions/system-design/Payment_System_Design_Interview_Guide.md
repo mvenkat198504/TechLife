@@ -3,7 +3,7 @@ id: system-designs-003
 slug:  system-designs
 title: Payment System Design --- Senior Microservices Interview Guide
 categoryId: system-design
-subcategory: Payment System Design
+subcategory: 3. Design a Payment System
 difficulty: Experienced
 tags:
   - system-designs

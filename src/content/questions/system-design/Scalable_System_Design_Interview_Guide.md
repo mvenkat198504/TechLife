@@ -3,7 +3,7 @@ id: system-designs-004
 slug:  system-designs
 title:  Design a System for Millions of Users and Requests
 categoryId: system-design
-subcategory: Scalability System Design
+subcategory: 4. Scalability System Design
 difficulty: Experienced
 tags:
   - system-designs
@@ -179,7 +179,7 @@ id: system-designs-005
 slug:  system-designs
 title: Scale From Zero To Million of Users
 categoryId: system-design
-subcategory: Scalability System Design
+subcategory: 4. Scalability System Design
 difficulty: Experienced
 tags:
   - system-designs

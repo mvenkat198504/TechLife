@@ -3,7 +3,7 @@ id: system-designs-002
 slug:  system-designs
 title: Highly Scalable Microservices Architecture --- System Design Interview Guide
 categoryId: system-design
-subcategory: Highly Scalable Microservices Architecture
+subcategory: 2. Design Highly Scalable Microservices Architecture
 difficulty: Experienced
 tags:
   - system-designs

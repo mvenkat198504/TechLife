@@ -3,7 +3,7 @@ id: system-designs-007
 slug:  system-designs
 title: Design a Distributed Transaction
 categoryId: system-design
-subcategory: Distributed Transaction
+subcategory: 6. Distributed Transaction
 difficulty: Experienced
 tags:
   - system-designs

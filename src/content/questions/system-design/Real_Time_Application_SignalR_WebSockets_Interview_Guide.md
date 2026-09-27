@@ -3,7 +3,7 @@ id: system-designs-016
 slug:  system-designs
 title: Design a Real-Time Application- Chat, Trading, or Tracking
 categoryId: system-design
-subcategory: Design a Real-Time Application- Chat, Trading, or Tracking
+subcategory: 15. Design a Real-Time Application- Chat, Trading, or Tracking
 difficulty: Experienced
 tags:
   - system-designs

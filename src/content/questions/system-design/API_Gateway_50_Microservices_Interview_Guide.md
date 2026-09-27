@@ -3,7 +3,7 @@ id: system-designs-009
 slug:  system-designs
 title: Design an API Gateway for 50+ Microservices
 categoryId: system-design
-subcategory: Design an API Gateway
+subcategory: 8. Design an API Gateway
 difficulty: Experienced
 tags:
   - system-designs

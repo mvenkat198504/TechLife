@@ -3,7 +3,7 @@ id: system-designs-011
 slug:  system-designs
 title: Design a URL Shortener Like TinyURL
 categoryId: system-design
-subcategory: Design URL Shortener
+subcategory: 10. Design URL Shortener
 difficulty: Experienced
 tags:
   - system-designs
