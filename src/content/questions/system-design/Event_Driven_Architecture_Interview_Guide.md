@@ -167,3 +167,6 @@ Monitor publish failure rate, outbox age, consumer lag or oldest-message age, pr
 ![Load_balancer_4.png](/images/system-designs/event_driven/event_driver_QA.png)
 
 ![Load_balancer_4.png](/images/system-designs/event_driven/event_driver_arch_1.gif)
+
+![Load_balancer_4.png](/images/system-designs/event_driven/message_queue.gif)
+
