@@ -3,7 +3,7 @@ id: aspnet-react-006
 slug:  Validation in an ASP.NET Core API Serving React
 title:  Validation in an ASP.NET Core API Serving React
 categoryId: aspnet-core
-subcategory:  Validation in an ASP.NET Core API Serving React
+subcategory:  AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

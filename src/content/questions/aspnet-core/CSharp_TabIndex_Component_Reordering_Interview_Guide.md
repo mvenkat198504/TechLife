@@ -3,7 +3,7 @@ id: aspnet-react-009
 slug:  Reorder UI Components by `TabIndex` in C#
 title: Reorder UI Components by `TabIndex` in C#
 categoryId: aspnet-core
-subcategory: Reorder UI Components by `TabIndex` in C#
+subcategory: AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

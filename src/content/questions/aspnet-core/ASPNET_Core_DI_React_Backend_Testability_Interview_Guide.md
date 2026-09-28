@@ -1,9 +1,9 @@
 ---
-id: aspnet-react-007
+id: aspnet-react-008
 slug:  Dependency Injection in ASP.NET Core for a React-Facing API
 title: Dependency Injection in ASP.NET Core for a React-Facing API
 categoryId: aspnet-core
-subcategory: Dependency Injection in ASP.NET Core for a React-Facing API
+subcategory: AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

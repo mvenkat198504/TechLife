@@ -3,7 +3,7 @@ id: aspnet-react-002
 slug: Validating React UI/UX Performance with a .NET Backend and Third-Party Components
 title: Validating React UI/UX Performance with a .NET Backend and Third-Party Components
 categoryId: aspnet-core
-subcategory: Validating React UI/UX Performance with a .NET Backend and Third-Party Components
+subcategory: AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

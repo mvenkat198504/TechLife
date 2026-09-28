@@ -3,7 +3,7 @@ id: aspnet-react-003
 slug: React CSS Methodologies for a Large Designer Handoff
 title: React CSS Methodologies for a Large Designer Handoff
 categoryId: aspnet-core
-subcategory: React CSS Methodologies for a Large Designer Handoff
+subcategory: AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

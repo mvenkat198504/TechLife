@@ -1,9 +1,9 @@
 ---
-id: aspnet-react-004
+id: aspnet-react-011
 slug:  Performant, Scalable React Components from Complex UI/UX Designs
 title:  Performant, Scalable React Components from Complex UI/UX Designs
 categoryId: aspnet-core
-subcategory:  Performant, Scalable React Components from Complex UI/UX Designs
+subcategory:  AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

@@ -3,7 +3,7 @@ id: aspnet-react-001
 slug: Fast Large Lists and Tables
 title: React + ASP.NET Core: Fast Large Lists and Tables
 categoryId: aspnet-core
-subcategory: Fast Large Lists and Tables
+subcategory: AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

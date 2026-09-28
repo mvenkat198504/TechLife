@@ -3,7 +3,7 @@ id: aspnet-react-004
 slug:  Integrating a Complex Responsive Grid in React
 title:  Integrating a Complex Responsive Grid in React
 categoryId: aspnet-core
-subcategory:  Integrating a Complex Responsive Grid in React
+subcategory:  AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

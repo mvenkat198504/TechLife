@@ -1,9 +1,9 @@
 ---
-id: aspnet-react-008
+id: aspnet-react-010
 slug:  Return Components Whose `Render()` Completes Within 100 ms
 title: Return Components Whose `Render()` Completes Within 100 ms
 categoryId: aspnet-core
-subcategory: Return Components Whose `Render()` Completes Within 100 ms
+subcategory: AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

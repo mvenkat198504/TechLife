@@ -1,9 +1,9 @@
 ---
-id: aspnet-react-006
+id: aspnet-react-007
 slug:  Scalable Large File Uploads from React to ASP.NET Core
 title:  Scalable Large File Uploads from React to ASP.NET Core
 categoryId: aspnet-core
-subcategory:  Scalable Large File Uploads from React to ASP.NET Core
+subcategory:  AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core

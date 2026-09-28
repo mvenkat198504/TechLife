@@ -3,7 +3,7 @@ id: aspnet-react-005
 slug:  Optimizing Dynamic Lists and Real-Time React Updates
 title:  Optimizing Dynamic Lists and Real-Time React Updates
 categoryId: aspnet-core
-subcategory:  Optimizing Dynamic Lists and Real-Time React Updates
+subcategory:  AspNet_React
 difficulty: Experienced
 tags:
   - React + ASP.NET Core
