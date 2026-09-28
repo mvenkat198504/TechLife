@@ -548,6 +548,29 @@ ORDER BY user_id, streak_start;
 
 This is one of the most frequently asked SQL scenario-based interview questions. Below are multiple approaches, from most portable to most efficient.
 
+## Simple Approach : Using `TOP` 
+
+```sql
+SELECT TOP 1 * FROM (SELECT TOP 3 EMP_SALARY,EMP_NAME FROM EMPLOYEE ORDER BY  EMP_SALARY DESC) AS X ORDER BY EMP_SALARY ASC
+```
+```sql
+DECLARE @NTHHIGHEST INT=2;
+SELECT EMP_SALARY FROM EMPLOYEE EMP1
+WHERE @NTHHIGHEST=(SELECT COUNT(*) FROM EMPLOYEE EMP2
+WHERE EMP1.EMP_SALARY<=EMP2.EMP_SALARY
+)
+```
+```sql
+DECLARE @NTHHIGHEST INT=2;
+WITH RankedSalaries AS(
+    SELECT 
+        EMP_SALARY,
+        DENSE_RANK() OVER ( ORDER BY EMP_SALARY DESC) AS SALARY_RANK
+        FROM EMPLOYEE
+)
+SELECT EMP_SALARY FROM RankedSalaries WHERE SALARY_RANK=@NTHHIGHEST
+```
+
 ## Approach 1: Using `LIMIT` / `OFFSET` (simplest, works on distinct values)
 
 ```sql
