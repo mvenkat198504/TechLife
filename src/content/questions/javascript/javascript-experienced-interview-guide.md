@@ -238,32 +238,94 @@ console.log(original.address.city); // Pune
 
 ## 13. Spread `...` versus rest parameters
 
-**Interview answer:** Spread expands an iterable into function arguments or array elements, and copies enumerable own properties into an object. Rest collects remaining function arguments into an array or remaining destructured properties into an object.
+**Interview answer:**
+
+The same ... syntax has two jobs in JavaScript:
+
+- Spread expands values from an iterable, such as an array, or copies properties from an object.
+- Rest collects multiple values into one array, or remaining properties into one object.
+
+| Use | Example | What happens |
+|---|---|---|
+| Spread in a function call | `sum(...numbers)` | Passes array items as separate arguments |
+| Spread in an array | `[...first, ...second]` | Adds items to a new array |
+| Spread in an object | `{ ...user, active: true }` | Copies properties into a new object |
+| Rest in parameters | `function sum(...numbers)` | Collects arguments into an array |
+| Rest in destructuring | `const [first, ...others] = items` | Collects the remaining items |
 
 ```js
-const numbers = [2, 3];
-console.log(Math.max(1, ...numbers)); // spread: 3
-const merged = [0, ...numbers];
-const settings = { theme: 'light', ...{ theme: 'dark' } }; // dark wins
-function total(...values) { return values.reduce((a, b) => a + b, 0); }
-const { password, ...publicUser } = { id: 1, password: 'secret' };
+function sum(...numbers) {          // Rest: collect arguments
+  return numbers.reduce((a, b) => a + b, 0);
+}
+
+const values = [10, 20, 30];
+console.log(sum(...values));        // Spread: pass 10, 20, 30
+// 60
+```
+For a React example:
+
+```js
+const original = { name: "Venkat", role: "Developer" };
+const updated = { ...original, role: "Lead" }; // Spread
+
+const { name, ...otherDetails } = updated;     // Rest
+console.log(otherDetails); // { role: "Lead" }
 ```
 
-Object and array spread make shallow copies. Rest parameters must be last in a parameter list. Avoid spreading a huge array as function arguments because engines have argument-count limits.
+**Interview shortcut:** Spread means expand; rest means collect. Both array and object spread create shallow copies, so nested objects still share references.
 
 ## 14. Destructuring and production use
 
-**Interview answer:** Destructuring binds values from an object's properties or an iterable's positions into variables. It helps extract API fields, component props, and configuration while making dependencies visible.
+**Interview answer:** Destructuring extracts values from an object or array into variables.
 
 ```js
-function renderOrder({ id, customer: { name }, status = 'Pending' }) {
-  return `#${id}: ${name} (${status})`;
-}
-const [first, second] = ['Writer', 'Reviewer'];
-const { data: orders, nextPageToken } = await loadOrders();
-```
+const user = { id: 101, name: "Venkat", role: "Lead" };
+const { name, role } = user;
 
+console.log(name); // "Venkat"
+console.log(role); // "Lead"
+
+const scores = [85, 92, 78];
+const [first, second] = scores;
+
+console.log(first);  // 85
+console.log(second); // 92
+```
+Where you use it in production
+
+1. Read API responses clearly
+```js
+const response = await fetch("/api/studies/101");
+const { id, title, status } = await response.json();
+```
+2. Extract React props
+```js
+function StudyCard({ title, status, owner }) {
+  return <div>{title} — {status} — {owner}</div>;
+}
+```
+3. Set defaults for optional configuration
+```js
+function loadStudies({ page = 1, pageSize = 20 } = {}) {
+  return fetch(`/api/studies?page=${page}&pageSize=${pageSize}`);
+}
+
+loadStudies();                 // Uses defaults
+loadStudies({ page: 3 });      // pageSize remains 20
+```
+4. Rename a property and collect the rest
+```js
+const { id: studyId, ...studyDetails } = user;
+```
+Here, studyId receives user.id, and studyDetails is a new object with the remaining own enumerable properties.
+Common production pitfall: A default applies to undefined, but not to null.
+```js
+const { status = "Draft" } = { status: null };
+console.log(status); // null
+```
 In an authoring workspace, I might extract `studyId`, `sectionId`, and `version` from a response before updating a section. Defaults apply only when a value is `undefined`, not when it is `null`. Guard optional nested data or use optional chaining if the parent can be missing.
+
+**Interview answer:** “Destructuring lets me pull the fields I need from arrays, objects, API responses, and function parameters. I use it to make React props and service code easier to read, set safe defaults, rename fields, and separate selected fields from the remaining data.”
 
 ## 15. `map`, `filter`, `reduce`, `find` and `some`
 
@@ -294,14 +356,43 @@ All run callbacks synchronously; `async` callbacks inside `map` produce an array
 
 **Interview answer:** `forEach` runs a callback for each element and returns `undefined`; use it for synchronous side effects. `map` returns a new array of transformed results. Neither waits for asynchronous callbacks.
 
+| | `forEach()` | `map()` |
+|---|---|---|
+| Purpose | Perform an action for each item | Transform each item |
+| Return value | `undefined` | A new array |
+| Typical use | Logging, updating an external value | Preparing data for display or further processing |
+| Changes original array? | Neither does so automatically; your callback can still mutate objects | Neither does so automatically; your callback can still mutate objects |
+
 ```js
-const ids = users.map(u => u.id);
-users.forEach(u => console.log(u.name));
-await Promise.all(users.map(u => saveUser(u)));
-// Avoid: await users.forEach(async u => saveUser(u));
+const numbers = [1, 2, 3];
+
+const result1 = numbers.forEach(n => n * 2);
+console.log(result1); // undefined
+
+const result2 = numbers.map(n => n * 2);
+console.log(result2); // [2, 4, 6]
+```
+Production example: Transform an API response into options for a dropdown:
+```js
+const users = [
+  { id: 1, fullName: "Anita" },
+  { id: 2, fullName: "Ravi" }
+];
+
+const options = users.map(user => ({
+  value: user.id,
+  label: user.fullName
+}));
+
+// [{ value: 1, label: "Anita" }, { value: 2, label: "Ravi" }]
+```
+Use forEach() when the action itself is the goal:
+
+```js
+users.forEach(user => console.log(user.fullName));
 ```
 
-For sequential async work, use `for...of` and `await`; for bounded parallelism, use a worker pool.
+**Interview answer:** “I use map() when I need a new array of transformed values. I use forEach() when I just need to perform an action for each item and do not need an array returned.”
 
 ## 17. `Promise.all`, `allSettled`, `race` and `any`
 
@@ -496,6 +587,31 @@ For credentialed cross-origin requests, the server must explicitly allow the req
 ## 29. Event bubbling, capturing and delegation
 
 **Interview answer:** A DOM event travels down ancestors in the capture phase, reaches the target, then travels upward in the bubble phase (for events that bubble). `addEventListener(..., { capture: true })` listens on the way down. Event delegation attaches one listener to a parent and uses `event.target`/`closest()` to handle matching descendants.
+
+Event Propagation Lifecycle
+When you interact with an element on a webpage (like clicking a button), the browser runs an event lifecycle with three distinct phases:
+1. Capturing Phase: The event starts at the root (window/document) and travels down the DOM tree through ancestor elements to the target element.
+2. Target Phase: The event reaches the actual element that was clicked or activated.
+3. Bubbling Phase: The event turns around and bubbles up from the target element back through its parents to the root
+
+**1. Event Bubbling**
+- Definition: An event triggered on a child element travels upward to its parent and ancestor elements.
+- Direction: Inside to outside (bottom to top).
+- Default Behavior: By default, most JavaScript event listeners execute during this bubbling phase.
+- Stopping It: You can use e.stopPropagation() inside an event handler to stop the event from bubbling up to parents.
+
+**2. Event Capturing**
+- Definition: The exact opposite of bubbling; the outer ancestor handlers fire before the inner target handler.
+- Direction: Outside to inside (top to bottom).
+- Usage: To listen for events during this phase, pass true (or { capture: true }) as the third argument to addEventListener.
+
+**3. Event Delegation**
+- Definition: A pattern where you attach a single event listener to a parent element instead of adding separate listeners to multiple child elements.
+- How It Works: It relies on event bubbling. When a child is clicked, the event bubbles up to the parent where your single listener catches it
+
+**Benefits:**
+- Saves memory and improves performance by reducing total event listeners.
+- Automatically works for new child elements added dynamically to the DOM later.
 
 ```js
 const list = document.querySelector('#orders');

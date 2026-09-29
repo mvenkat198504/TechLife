@@ -176,15 +176,34 @@ because `Select()` projects each item into a Boolean value.
 
 ---
 
-# 4. What is deferred execution in LINQ?
+## 4. If the interviewer meant the lowest odd number and the lowest even number, you can get both with one LINQ query:
+```csharp
+int[] numbers = { 8, 3, 12, 7, 2, 5 };
 
-## Answer
+var result = numbers
+    .GroupBy(n => n % 2 == 0 ? "Even" : "Odd")
+    .Select(g => new { Type = g.Key, Lowest = g.Min() });
+
+foreach (var item in result)
+    Console.WriteLine($"{item.Type}: {item.Lowest}");
+```
+Output:
+```text
+Even: 2
+Odd: 3
+```
+GroupBy separates odd and even numbers, and Min() finds the lowest value in each group. If the interviewer meant the single lowest value in the whole array, numbers.Min() is enough.
+
+
+## 4. What is deferred execution in LINQ?
+
+#### Answer
 
 Deferred execution means that the LINQ query is not executed when it is created.
 
 It executes when the result is enumerated.
 
-## Example
+#### Example
 
 ```csharp
 var numbers = new List<int> { 1, 2, 3 };
@@ -209,7 +228,7 @@ foreach (var item in query)
 
 The query executed only when `foreach` started.
 
-## Immediate Execution
+#### Immediate Execution
 
 Methods such as the following execute immediately:
 
@@ -225,7 +244,7 @@ Sum()
 Average()
 ```
 
-## Interview Tip
+#### Interview Tip
 
 Say:
 
@@ -239,15 +258,15 @@ Aggregate and materialization methods usually execute immediately.
 
 ---
 
-# 5. What is `IEnumerable<T>`?
+## 5. What is `IEnumerable<T>`?
 
-## Answer
+#### Answer
 
 `IEnumerable<T>` represents a sequence of objects that can be enumerated.
 
 It is commonly used for in-memory collections.
 
-## Example
+#### Example
 
 ```csharp
 IEnumerable<int> numbers = new List<int>
@@ -262,15 +281,15 @@ Filtering normally happens in application memory.
 
 ---
 
-# 6. What is `IQueryable<T>`?
+## 6. What is `IQueryable<T>`?
 
-## Answer
+#### Answer
 
 `IQueryable<T>` represents a query that can be translated by a query provider.
 
 It is commonly used by Entity Framework Core.
 
-## Example
+#### Example
 
 ```csharp
 IQueryable<Employee> employees = dbContext.Employees;
@@ -291,7 +310,7 @@ WHERE Salary > 50000;
 
 ---
 
-# 7. `IEnumerable` vs `IQueryable`
+## 7. `IEnumerable` vs `IQueryable`
 
 | Feature | IEnumerable | IQueryable |
 |---|---|---|
@@ -302,7 +321,7 @@ WHERE Salary > 50000;
 | EF Core SQL Generation | No | Yes |
 | Expression Type | Delegates | Expression Trees |
 
-## Interview Example
+#### Interview Example
 
 ```csharp
 var query = dbContext.Employees
@@ -325,7 +344,7 @@ var result = employees.Where(x => x.Salary > 50000);
 
 The filtering afterward occurs in application memory.
 
-## Interview Trap
+#### Interview Trap
 
 Avoid calling `ToList()` too early in a database query.
 
@@ -347,9 +366,9 @@ var employees = dbContext.Employees
 
 ---
 
-# 8. What is the difference between `First()` and `FirstOrDefault()`?
+## 8. What is the difference between `First()` and `FirstOrDefault()`?
 
-## `First()`
+#### `First()`
 
 Returns the first element.
 
@@ -359,7 +378,7 @@ Throws an exception when no matching element exists.
 var employee = employees.First(x => x.Id == 10);
 ```
 
-## `FirstOrDefault()`
+#### `FirstOrDefault()`
 
 Returns the first matching element.
 
@@ -371,15 +390,15 @@ var employee = employees.FirstOrDefault(x => x.Id == 10);
 
 For a reference type, the default is normally `null`.
 
-## Interview Tip
+#### Interview Tip
 
 Use `FirstOrDefault()` when zero records is an expected situation.
 
 ---
 
-# 9. What is the difference between `Single()` and `SingleOrDefault()`?
+## 9. What is the difference between `Single()` and `SingleOrDefault()`?
 
-## `Single()`
+#### `Single()`
 
 Expected result count:
 
@@ -392,7 +411,7 @@ Exceptions occur if:
 - Zero records exist
 - More than one record exists
 
-## `SingleOrDefault()`
+#### `SingleOrDefault()`
 
 Expected result count:
 
@@ -414,14 +433,14 @@ This is useful when `Email` is expected to be unique.
 
 ---
 
-# 10. `FirstOrDefault()` vs `SingleOrDefault()`
+## 10. `FirstOrDefault()` vs `SingleOrDefault()`
 
 | Method | Zero Items | One Item | Multiple Items |
 |---|---|---|---|
 | FirstOrDefault | Default | Returns item | Returns first |
 | SingleOrDefault | Default | Returns item | Exception |
 
-## Interview Trap
+#### Interview Trap
 
 **Question:** Which should you use for a unique email lookup?
 
@@ -431,9 +450,9 @@ Strong answer:
 
 ---
 
-# 11. What is `Any()` in LINQ?
+## 11. What is `Any()` in LINQ?
 
-## Answer
+#### Answer
 
 `Any()` checks whether at least one element exists or matches a condition.
 
@@ -448,7 +467,7 @@ bool hasHighSalaryEmployee =
     employees.Any(x => x.Salary > 100000);
 ```
 
-## Interview Tip
+#### Interview Tip
 
 For existence checks, prefer:
 
@@ -466,9 +485,9 @@ especially for database queries.
 
 ---
 
-# 12. `Any()` vs `Count() > 0`
+## 12. `Any()` vs `Count() > 0`
 
-## Better
+#### Better
 
 ```csharp
 bool exists = employees.Any();
@@ -486,9 +505,9 @@ bool exists = employees.Count() > 0;
 
 ---
 
-# 13. What is `All()`?
+## 13. What is `All()`?
 
-## Answer
+#### Answer
 
 `All()` checks whether every element satisfies a condition.
 
@@ -498,9 +517,9 @@ bool allAdults = people.All(x => x.Age >= 18);
 
 ---
 
-# 14. What is `OrderBy()`?
+## 14. What is `OrderBy()`?
 
-## Answer
+#### Answer
 
 `OrderBy()` sorts data in ascending order.
 
@@ -516,9 +535,9 @@ var result = employees.OrderByDescending(x => x.Salary);
 
 ---
 
-# 15. What is `ThenBy()`?
+## 15. What is `ThenBy()`?
 
-## Answer
+#### Answer
 
 `ThenBy()` applies secondary sorting.
 
@@ -536,7 +555,7 @@ var result = employees
     .ThenByDescending(x => x.Salary);
 ```
 
-## Interview Trap
+#### Interview Trap
 
 This is incorrect if you want secondary sorting:
 
@@ -552,13 +571,13 @@ Use `ThenBy`.
 
 ---
 
-# 16. What is `GroupBy()`?
+## 16. What is `GroupBy()`?
 
-## Answer
+#### Answer
 
 `GroupBy()` groups elements based on a key.
 
-## Example
+#### Example
 
 ```csharp
 var groupedEmployees = employees
@@ -577,7 +596,7 @@ foreach (var group in groupedEmployees)
 
 ---
 
-# 17. Find employee count by department
+## 17. Find employee count by department
 
 ```csharp
 var result = employees
@@ -591,7 +610,7 @@ var result = employees
 
 ---
 
-# 18. Find the highest salary in each department
+## 18. Find the highest salary in each department
 
 ```csharp
 var result = employees
@@ -603,15 +622,15 @@ var result = employees
     });
 ```
 
-## Interview Tip
+#### Interview Tip
 
 Grouping plus aggregation is one of the most common LINQ coding-round patterns.
 
 ---
 
-# 19. What is an anonymous type?
+## 19. What is an anonymous type?
 
-## Answer
+#### Answer
 
 Anonymous types allow us to create objects without explicitly defining a class.
 
@@ -627,9 +646,9 @@ Useful for temporary projections.
 
 ---
 
-# 20. What is projection in LINQ?
+## 20. What is projection in LINQ?
 
-## Answer
+#### Answer
 
 Projection means transforming source objects into another shape.
 
@@ -645,13 +664,13 @@ For EF Core APIs, projection is important because it can retrieve only required 
 
 ---
 
-# 21. What is `SelectMany()`?
+## 21. What is `SelectMany()`?
 
-## Answer
+#### Answer
 
 `SelectMany()` flattens nested collections.
 
-## Example
+#### Example
 
 ```csharp
 var departments = new[]
@@ -683,7 +702,7 @@ Payroll
 
 ---
 
-# 22. `Select()` vs `SelectMany()`
+## 22. `Select()` vs `SelectMany()`
 
 Suppose:
 
@@ -719,7 +738,7 @@ Result:
 [1,2,3,4]
 ```
 
-## Interview Trap
+#### Interview Trap
 
 If the interviewer asks:
 
@@ -733,9 +752,9 @@ SelectMany()
 
 ---
 
-# 23. What is `Distinct()`?
+## 23. What is `Distinct()`?
 
-## Answer
+#### Answer
 
 `Distinct()` removes duplicate values.
 
@@ -763,7 +782,7 @@ var employees = source.DistinctBy(x => x.Email);
 
 ---
 
-# 24. What are `Skip()` and `Take()`?
+## 24. What are `Skip()` and `Take()`?
 
 They are commonly used for paging.
 
@@ -777,7 +796,7 @@ This skips the first 20 records and returns the next 10.
 
 ---
 
-# 25. LINQ pagination example
+## 25. LINQ pagination example
 
 ```csharp
 int pageNumber = 3;
@@ -796,9 +815,9 @@ Always use deterministic ordering when paging database records.
 
 ---
 
-# 26. What is `Contains()`?
+## 26. What is `Contains()`?
 
-## Answer
+#### Answer
 
 Checks whether the sequence contains a value.
 
@@ -819,9 +838,9 @@ var employees = dbContext.Employees
 
 ---
 
-# 27. What is `Aggregate()`?
+## 27. What is `Aggregate()`?
 
-## Answer
+#### Answer
 
 `Aggregate()` performs a custom accumulation operation.
 
@@ -847,7 +866,7 @@ numbers.Sum();
 
 ---
 
-# 28. What are aggregate LINQ operators?
+## 28. What are aggregate LINQ operators?
 
 Common operators:
 
@@ -872,9 +891,9 @@ var maxSalary = employees.Max(x => x.Salary);
 
 ---
 
-# 29. What is `ToList()`?
+## 29. What is `ToList()`?
 
-## Answer
+#### Answer
 
 `ToList()` materializes a sequence into a `List<T>`.
 
@@ -888,7 +907,7 @@ In database-backed queries, this generally executes the query.
 
 ---
 
-# 30. Why should `ToList()` not be called too early?
+## 30. Why should `ToList()` not be called too early?
 
 Bad:
 
@@ -914,7 +933,7 @@ var result = dbContext.Employees
 
 This allows the database provider to apply filtering and limiting.
 
-## Interview Tip
+#### Interview Tip
 
 A strong performance statement:
 
@@ -922,9 +941,9 @@ A strong performance statement:
 
 ---
 
-# 31. What is a LINQ Join?
+## 31. What is a LINQ Join?
 
-## Example Data
+#### Example Data
 
 ```csharp
 public class Employee
@@ -941,7 +960,7 @@ public class Department
 }
 ```
 
-## Join Example
+#### Join Example
 
 ```csharp
 var result = employees.Join(
@@ -957,7 +976,7 @@ var result = employees.Join(
 
 ---
 
-# 32. LINQ Inner Join using Query Syntax
+## 32. LINQ Inner Join using Query Syntax
 
 ```csharp
 var result =
@@ -973,7 +992,7 @@ var result =
 
 ---
 
-# 33. How do you perform a left join using LINQ?
+## 33. How do you perform a left join using LINQ?
 
 A common pattern uses `GroupJoin`, `DefaultIfEmpty`, and `SelectMany`.
 
@@ -991,7 +1010,7 @@ var result =
     };
 ```
 
-## Interview Tip
+#### Interview Tip
 
 `DefaultIfEmpty()` is an important keyword when explaining LINQ left joins.
 
@@ -1007,9 +1026,9 @@ It is similar conceptually to a grouped join and is commonly used when construct
 
 ---
 
-# 35. What is `DefaultIfEmpty()`?
+## 35. What is `DefaultIfEmpty()`?
 
-## Answer
+### Answer
 
 Returns the original sequence if items exist.
 
@@ -1029,9 +1048,9 @@ For `int`, the default value is:
 
 ---
 
-# 36. `OfType<T>()` vs `Cast<T>()`
+## 36. `OfType<T>()` vs `Cast<T>()`
 
-## `OfType<T>()`
+### `OfType<T>()`
 
 Returns only elements that can be converted to the specified type.
 
@@ -1054,7 +1073,7 @@ Result:
 2
 ```
 
-## `Cast<T>()`
+### `Cast<T>()`
 
 Attempts to cast every element.
 
@@ -1064,7 +1083,7 @@ var numbers = items.Cast<int>();
 
 This can throw an exception when an item cannot be cast.
 
-## Interview Trap
+### Interview Trap
 
 `OfType<T>()` filters incompatible types.
 
@@ -1072,9 +1091,9 @@ This can throw an exception when an item cannot be cast.
 
 ---
 
-# 37. What is `ToDictionary()`?
+## 37. What is `ToDictionary()`?
 
-## Answer
+### Answer
 
 Converts data to a dictionary.
 
@@ -1091,9 +1110,9 @@ Duplicate keys can cause an exception.
 
 ---
 
-# 38. What is `ToLookup()`?
+## 38. What is `ToLookup()`?
 
-## Answer
+### Answer
 
 `ToLookup()` creates a one-to-many lookup.
 
@@ -1105,7 +1124,7 @@ Unlike `Dictionary`, multiple values can share the same key.
 
 ---
 
-# 39. What is the difference between `GroupBy()` and `ToLookup()`?
+## 39. What is the difference between `GroupBy()` and `ToLookup()`?
 
 A simple practical difference:
 
@@ -1114,9 +1133,9 @@ A simple practical difference:
 
 ---
 
-# 40. What is `SequenceEqual()`?
+## 40. What is `SequenceEqual()`?
 
-## Answer
+### Answer
 
 Checks whether two sequences contain equal elements in the same order.
 
@@ -1135,9 +1154,9 @@ true
 
 ---
 
-# 41. What are `Union`, `Intersect`, and `Except`?
+## 41. What are `Union`, `Intersect`, and `Except`?
 
-## Union
+### Union
 
 Combines distinct values.
 
@@ -1145,7 +1164,7 @@ Combines distinct values.
 var result = first.Union(second);
 ```
 
-## Intersect
+### Intersect
 
 Returns common values.
 
@@ -1153,7 +1172,7 @@ Returns common values.
 var result = first.Intersect(second);
 ```
 
-## Except
+### Except
 
 Returns values from the first sequence that are not present in the second.
 
@@ -1163,7 +1182,7 @@ var result = first.Except(second);
 
 ---
 
-# 42. LINQ question: Find common elements from two arrays
+## 42. LINQ question: Find common elements from two arrays
 
 ```csharp
 var first = new[] { 1, 2, 3, 4 };
@@ -1182,7 +1201,7 @@ var common = first.Intersect(second);
 
 ---
 
-# 43. LINQ question: Find duplicate numbers
+## 43. LINQ question: Find duplicate numbers
 
 ```csharp
 var numbers = new[]
@@ -1205,7 +1224,7 @@ var duplicates = numbers
 
 ---
 
-# 44. LINQ question: Remove duplicates
+## 44. LINQ question: Remove duplicates
 
 ```csharp
 var numbers = new[]
@@ -1218,7 +1237,7 @@ var uniqueNumbers = numbers.Distinct();
 
 ---
 
-# 45. Find the second highest salary using LINQ
+## 45. Find the second highest salary using LINQ
 
 ```csharp
 var secondHighestSalary = employees
@@ -1229,13 +1248,13 @@ var secondHighestSalary = employees
     .FirstOrDefault();
 ```
 
-## Interview Trap
+### Interview Trap
 
 Without `Distinct()`, duplicate highest salaries may produce the wrong interpretation of "second highest distinct salary."
 
 ---
 
-# 46. Find the third highest salary using LINQ
+## 46. Find the third highest salary using LINQ
 
 ```csharp
 var thirdHighestSalary = employees
@@ -1248,7 +1267,7 @@ var thirdHighestSalary = employees
 
 ---
 
-# 47. Find top 3 highest-paid employees
+## 47. Find top 3 highest-paid employees
 
 ```csharp
 var topEmployees = employees
@@ -1259,7 +1278,7 @@ var topEmployees = employees
 
 ---
 
-# 48. Find employees whose name starts with A
+## 48. Find employees whose name starts with A
 
 ```csharp
 var result = employees
@@ -1268,7 +1287,7 @@ var result = employees
 
 ---
 
-# 49. Find employees whose name contains "an"
+## 49. Find employees whose name contains "an"
 
 ```csharp
 var result = employees
@@ -1279,7 +1298,7 @@ For database queries, exact translation and case sensitivity depend on the datab
 
 ---
 
-# 50. Find employees with salary between 50,000 and 100,000
+## 50. Find employees with salary between 50,000 and 100,000
 
 ```csharp
 var result = employees
@@ -1292,7 +1311,7 @@ var result = employees
 
 # Experienced-Level LINQ Questions
 
-# 51. How does LINQ work internally?
+## 51. How does LINQ work internally?
 
 ## Answer
 
@@ -1314,9 +1333,9 @@ For `IQueryable<T>`, lambda expressions can be represented as expression trees t
 
 ---
 
-# 52. What is an expression tree?
+## 52. What is an expression tree?
 
-## Answer
+### Answer
 
 An expression tree represents code as a data structure.
 
@@ -1329,7 +1348,7 @@ Expression<Func<Employee, bool>> expression =
 
 A provider such as Entity Framework Core can inspect this expression and translate supported parts into SQL.
 
-## Interview Tip
+### Interview Tip
 
 Important distinction:
 
@@ -1347,7 +1366,7 @@ represents the expression structure.
 
 ---
 
-# 53. Why can't every C# method be used inside an EF Core LINQ query?
+## 53. Why can't every C# method be used inside an EF Core LINQ query?
 
 Because database providers can translate only supported expressions into their target query language.
 
@@ -1361,7 +1380,7 @@ var result = dbContext.Employees
 
 A custom method may not be translatable to SQL.
 
-## Better Approach
+### Better Approach
 
 Move supported filtering to the database first.
 
@@ -1379,9 +1398,9 @@ Using `AsEnumerable()` too early can move filtering into application memory and 
 
 ---
 
-# 54. `AsEnumerable()` vs `ToList()`
+## 54. `AsEnumerable()` vs `ToList()`
 
-## `AsEnumerable()`
+### `AsEnumerable()`
 
 Changes how subsequent LINQ operators are evaluated without necessarily materializing the sequence immediately.
 
@@ -1393,7 +1412,7 @@ var query = dbContext.Employees
 
 Subsequent LINQ-to-Objects operations occur in application code.
 
-## `ToList()`
+### `ToList()`
 
 Materializes the query into a list.
 
@@ -1405,9 +1424,9 @@ var employees = dbContext.Employees
 
 ---
 
-# 55. What is multiple enumeration?
+## 55. What is multiple enumeration?
 
-## Answer
+### Answer
 
 Multiple enumeration occurs when the same `IEnumerable` query is enumerated more than once.
 
@@ -1427,7 +1446,7 @@ foreach (var employee in query)
 
 Depending on the source, the underlying work may execute twice.
 
-## Better
+### Better
 
 ```csharp
 var employees = GetEmployees()
@@ -1442,13 +1461,13 @@ foreach (var employee in employees)
 }
 ```
 
-## Interview Tip
+### Interview Tip
 
 Materialize only when reuse is intentional and the memory trade-off is acceptable.
 
 ---
 
-# 56. What is deferred execution useful for?
+## 56. What is deferred execution useful for?
 
 Benefits include:
 
@@ -1465,7 +1484,7 @@ Possible disadvantages:
 
 ---
 
-# 57. What is immediate execution?
+## 57. What is immediate execution?
 
 Examples:
 
@@ -1486,7 +1505,7 @@ These methods need the query result immediately.
 
 ---
 
-# 58. How do you dynamically construct a LINQ query?
+## 58. How do you dynamically construct a LINQ query?
 
 ```csharp
 IQueryable<Employee> query =
@@ -1513,13 +1532,13 @@ if (minimumSalary.HasValue)
 var result = await query.ToListAsync();
 ```
 
-## Interview Tip
+### Interview Tip
 
 This is a common real-world example of deferred execution and query composition.
 
 ---
 
-# 59. Why should projection be applied before materialization?
+## 59. Why should projection be applied before materialization?
 
 Bad:
 
@@ -1549,7 +1568,7 @@ The second approach allows the provider to request only required columns.
 
 ---
 
-# 60. What is the N+1 problem and how is LINQ related?
+## 60. What is the N+1 problem and how is LINQ related?
 
 Consider:
 
@@ -1582,15 +1601,15 @@ var employees = dbContext.Employees
     .ToList();
 ```
 
-## Interview Tip
+### Interview Tip
 
 For API read operations, projection is often a strong solution because it fetches only the shape required by the API.
 
 ---
 
-# 61. `Include()` vs `Select()` projection
+## 61. `Include()` vs `Select()` projection
 
-## Include
+### Include
 
 Use when you need complete related entities.
 
@@ -1600,7 +1619,7 @@ var orders = dbContext.Orders
     .ToList();
 ```
 
-## Projection
+### Projection
 
 Use when the response needs only selected fields.
 
@@ -1618,7 +1637,7 @@ Projection can reduce transferred columns and object materialization.
 
 ---
 
-# 62. What is client-side evaluation?
+## 62. What is client-side evaluation?
 
 Client-side evaluation means part of the work happens inside application memory instead of in the database.
 
@@ -1634,13 +1653,13 @@ var result = dbContext.Employees
 
 This can be valid when intentionally used on a reasonably small result set.
 
-## Interview Trap
+### Interview Trap
 
 Do not move large database datasets into memory merely because a method cannot be translated.
 
 ---
 
-# 63. What is `AsNoTracking()` and why is it important with LINQ?
+## 63. What is `AsNoTracking()` and why is it important with LINQ?
 
 For read-only Entity Framework queries:
 
@@ -1657,7 +1676,7 @@ This can reduce tracking overhead for read-only scenarios.
 
 ---
 
-# 64. How can LINQ query performance be improved?
+## 64. How can LINQ query performance be improved?
 
 Common strategies:
 
@@ -1675,7 +1694,7 @@ Common strategies:
 
 ---
 
-# 65. What happens when you call `Where()` multiple times?
+## 65. What happens when you call `Where()` multiple times?
 
 Example:
 
@@ -1696,7 +1715,7 @@ AND Salary > 50000
 
 ---
 
-# 66. Does the order of LINQ operators matter?
+## 66. Does the order of LINQ operators matter?
 
 Yes.
 
@@ -1718,13 +1737,13 @@ employees
 
 The second version considers only the first 10 elements before filtering when executed as LINQ-to-Objects.
 
-## Interview Tip
+### Interview Tip
 
 Always think about the logical query pipeline.
 
 ---
 
-# 67. Difference between `OrderBy()` and `ThenBy()`
+## 67. Difference between `OrderBy()` and `ThenBy()`
 
 Correct:
 
@@ -1746,7 +1765,7 @@ The second `OrderBy()` creates a new primary ordering.
 
 ---
 
-# 68. What is `DistinctBy()`?
+## 68. What is `DistinctBy()`?
 
 ```csharp
 var uniqueEmployees =
@@ -1769,7 +1788,7 @@ Availability depends on the target .NET version.
 
 ---
 
-# 69. What are `MinBy()` and `MaxBy()`?
+## 69. What are `MinBy()` and `MaxBy()`?
 
 Instead of getting only the salary:
 
@@ -1786,7 +1805,7 @@ var employee =
 
 ---
 
-# 70. Find highest-paid employee in each department
+## 70. Find highest-paid employee in each department
 
 ```csharp
 var result = employees
@@ -1808,7 +1827,7 @@ For EF Core queries, always verify whether the exact expression is translated ef
 
 ---
 
-# 71. Find duplicate employees by email
+## 71. Find duplicate employees by email
 
 ```csharp
 var duplicates = employees
@@ -1823,7 +1842,7 @@ var duplicates = employees
 
 ---
 
-# 72. Find the most frequent number
+## 72. Find the most frequent number
 
 ```csharp
 var numbers = new[]
@@ -1846,7 +1865,7 @@ var result = numbers
 
 ---
 
-# 73. Find the first non-repeated character
+## 73. Find the first non-repeated character
 
 ```csharp
 string input = "swiss";
@@ -1868,7 +1887,7 @@ w
 
 ---
 
-# 74. Count occurrence of every character
+## 74. Count occurrence of every character
 
 ```csharp
 string input = "banana";
@@ -1884,7 +1903,7 @@ var result = input
 
 ---
 
-# 75. Reverse words using LINQ
+## 75. Reverse words using LINQ
 
 ```csharp
 string input = "LINQ Interview Questions";
@@ -1905,7 +1924,7 @@ Questions Interview LINQ
 
 ---
 
-# 76. Find even and odd numbers
+## 76. Find even and odd numbers
 
 ```csharp
 var numbers = Enumerable.Range(1, 10);
@@ -1919,7 +1938,7 @@ var oddNumbers =
 
 ---
 
-# 77. Find sum of even numbers
+## 77. Find sum of even numbers
 
 ```csharp
 var result = numbers
@@ -1929,7 +1948,7 @@ var result = numbers
 
 ---
 
-# 78. Convert a list of objects into a dictionary
+## 78. Convert a list of objects into a dictionary
 
 ```csharp
 var employeeDictionary =
@@ -1940,7 +1959,7 @@ var employeeDictionary =
 
 ---
 
-# 79. Flatten nested employee skills
+## 79. Flatten nested employee skills
 
 ```csharp
 public class Employee
@@ -1957,7 +1976,7 @@ var skills = employees
 
 ---
 
-# 80. Find employees having more than three skills
+## 80. Find employees having more than three skills
 
 ```csharp
 var result = employees
@@ -1968,7 +1987,7 @@ var result = employees
 
 # Scenario-Based Interview Questions
 
-# 81. Scenario: API returns 1 million employee records and then filters them
+## 81. Scenario: API returns 1 million employee records and then filters them
 
 Bad code:
 
@@ -2003,7 +2022,7 @@ var result = await dbContext.Employees
 
 ---
 
-# 82. Scenario: You only need to check whether a user exists
+## 82. Scenario: You only need to check whether a user exists
 
 Avoid:
 
@@ -2021,7 +2040,7 @@ var exists = dbContext.Users
 
 ---
 
-# 83. Scenario: Same query is called twice unexpectedly
+## 83. Scenario: Same query is called twice unexpectedly
 
 ```csharp
 var query = dbContext.Employees
@@ -2034,17 +2053,17 @@ var employees = query.ToList();
 
 For a database query, this usually means two database executions.
 
-## Possible Approach
+### Possible Approach
 
 If both the rows and count are needed, choose the best approach based on paging and dataset size. Do not automatically materialize a huge table merely to avoid a second query.
 
-## Interview Tip
+### Interview Tip
 
 This is a trade-off question, not a one-rule answer.
 
 ---
 
-# 84. Scenario: Need unique employees by email
+## 84. Scenario: Need unique employees by email
 
 ```csharp
 var result = employees
@@ -2061,7 +2080,7 @@ var result = employees
 
 ---
 
-# 85. Scenario: Need employee and department even when department is missing
+## 85. Scenario: Need employee and department even when department is missing
 
 Use a left join.
 
@@ -2082,7 +2101,7 @@ var result =
 
 ---
 
-# 86. Scenario: Need API paging
+## 86. Scenario: Need API paging
 
 ```csharp
 var result = await dbContext.Employees
@@ -2098,7 +2117,7 @@ var result = await dbContext.Employees
     .ToListAsync();
 ```
 
-## Interview Tip
+### Interview Tip
 
 Mention:
 
@@ -2109,7 +2128,7 @@ Mention:
 
 ---
 
-# 87. Scenario: Need optional filters
+## 87. Scenario: Need optional filters
 
 ```csharp
 IQueryable<Employee> query =
@@ -2142,7 +2161,7 @@ This demonstrates LINQ query composition.
 
 ---
 
-# 88. Scenario: Need parent records with child count
+## 88. Scenario: Need parent records with child count
 
 ```csharp
 var result = dbContext.Departments
@@ -2158,7 +2177,7 @@ A good provider can translate this into an appropriate database query.
 
 ---
 
-# 89. Scenario: Need only the latest order per customer
+## 89. Scenario: Need only the latest order per customer
 
 For in-memory LINQ:
 
@@ -2174,7 +2193,7 @@ For EF Core, verify the generated SQL for the target provider/version because gr
 
 ---
 
-# 90. Scenario: Find customers with no orders
+## 90. Scenario: Find customers with no orders
 
 For in-memory collections:
 
@@ -2196,7 +2215,7 @@ var result = dbContext.Customers
 
 # LINQ Interview Traps
 
-# 91. Trap: `First()` on an empty sequence
+## 91. Trap: `First()` on an empty sequence
 
 ```csharp
 var employee = employees
@@ -2219,7 +2238,7 @@ when zero results are expected.
 
 ---
 
-# 92. Trap: `SingleOrDefault()` with duplicate records
+## 92. Trap: `SingleOrDefault()` with duplicate records
 
 ```csharp
 var employee =
@@ -2233,7 +2252,7 @@ This is intentional because `SingleOrDefault()` asserts uniqueness.
 
 ---
 
-# 93. Trap: `ToDictionary()` with duplicate keys
+## 93. Trap: `ToDictionary()` with duplicate keys
 
 ```csharp
 var result =
@@ -2252,7 +2271,7 @@ or group the records.
 
 ---
 
-# 94. Trap: Calling `ToList()` before `Where()`
+## 94. Trap: Calling `ToList()` before `Where()`
 
 Bad:
 
@@ -2272,7 +2291,7 @@ dbContext.Employees
 
 ---
 
-# 95. Trap: Using `Count()` just to check existence
+## 95. Trap: Using `Count()` just to check existence
 
 Avoid:
 
@@ -2288,7 +2307,7 @@ employees.Any()
 
 ---
 
-# 96. Trap: Multiple `OrderBy()`
+## 96. Trap: Multiple `OrderBy()`
 
 Wrong intent:
 
@@ -2308,7 +2327,7 @@ employees
 
 ---
 
-# 97. Trap: Assuming deferred query results are fixed
+## 97. Trap: Assuming deferred query results are fixed
 
 ```csharp
 var numbers = new List<int>
@@ -2335,7 +2354,7 @@ The query used the collection state at enumeration time.
 
 ---
 
-# 98. Trap: Assuming `Select()` performs filtering
+## 98. Trap: Assuming `Select()` performs filtering
 
 Wrong:
 
@@ -2351,7 +2370,7 @@ employees.Where(x => x.Salary > 50000);
 
 ---
 
-# 99. Trap: Using custom C# methods inside database LINQ
+## 99. Trap: Using custom C# methods inside database LINQ
 
 ```csharp
 dbContext.Employees
@@ -2369,7 +2388,7 @@ Ask:
 
 ---
 
-# 100. Trap: Ignoring generated SQL
+## 100. Trap: Ignoring generated SQL
 
 A LINQ expression may look simple but produce inefficient SQL.
 
@@ -2377,9 +2396,9 @@ For production EF Core applications, inspect generated SQL and execution plans f
 
 ---
 
-# Rapid-Fire LINQ Interview Questions
+## Rapid-Fire LINQ Interview Questions
 
-## What does `Where()` return?
+### What does `Where()` return?
 
 Normally an:
 
@@ -2395,53 +2414,53 @@ IQueryable<T>
 
 depending on the source and overload.
 
-## What does `Select()` do?
+### What does `Select()` do?
 
 Projects each item into another shape.
 
-## What does `SelectMany()` do?
+### What does `SelectMany()` do?
 
 Flattens nested sequences.
 
-## What does `Any()` do?
+### What does `Any()` do?
 
 Checks whether at least one matching item exists.
 
-## What does `All()` do?
+### What does `All()` do?
 
 Checks whether all items match a condition.
 
-## What does `Distinct()` do?
+### What does `Distinct()` do?
 
 Removes duplicate values based on equality.
 
-## What does `GroupBy()` do?
+### What does `GroupBy()` do?
 
 Groups elements by key.
 
-## What does `OrderByDescending()` do?
+### What does `OrderByDescending()` do?
 
 Sorts in descending order.
 
-## What does `Take()` do?
+### What does `Take()` do?
 
 Returns the first N elements of the current sequence.
 
-## What does `Skip()` do?
+### What does `Skip()` do?
 
 Skips the first N elements.
 
-## Which LINQ method is commonly used for left joins?
+### Which LINQ method is commonly used for left joins?
 
 `DefaultIfEmpty()` is part of the common left-join pattern.
 
-## Which method materializes query results into a list?
+### Which method materializes query results into a list?
 
 ```csharp
 ToList()
 ```
 
-## Which method is good for existence checking?
+### Which method is good for existence checking?
 
 ```csharp
 Any()
@@ -2449,9 +2468,9 @@ Any()
 
 ---
 
-# LINQ Coding Round Exercises
+## LINQ Coding Round Exercises
 
-## Exercise 1: Find numbers greater than 10
+### Exercise 1: Find numbers greater than 10
 
 ```csharp
 var numbers = new[]
@@ -2465,7 +2484,7 @@ var result =
 
 ---
 
-## Exercise 2: Square every number
+### Exercise 2: Square every number
 
 ```csharp
 var result =
@@ -2474,7 +2493,7 @@ var result =
 
 ---
 
-## Exercise 3: Find distinct values
+### Exercise 3: Find distinct values
 
 ```csharp
 var result =
@@ -2483,7 +2502,7 @@ var result =
 
 ---
 
-## Exercise 4: Find second highest distinct number
+### Exercise 4: Find second highest distinct number
 
 ```csharp
 var result = numbers
@@ -2495,7 +2514,7 @@ var result = numbers
 
 ---
 
-## Exercise 5: Find duplicate values
+### Exercise 5: Find duplicate values
 
 ```csharp
 var result = numbers
@@ -2506,7 +2525,7 @@ var result = numbers
 
 ---
 
-## Exercise 6: Sort employees by salary descending
+### Exercise 6: Sort employees by salary descending
 
 ```csharp
 var result = employees
@@ -2515,7 +2534,7 @@ var result = employees
 
 ---
 
-## Exercise 7: Count employees per department
+### Exercise 7: Count employees per department
 
 ```csharp
 var result = employees
@@ -2529,7 +2548,7 @@ var result = employees
 
 ---
 
-## Exercise 8: Find departments with more than 5 employees
+### Exercise 8: Find departments with more than 5 employees
 
 ```csharp
 var result = employees
@@ -2540,7 +2559,7 @@ var result = employees
 
 ---
 
-## Exercise 9: Find highest salary per department
+### Exercise 9: Find highest salary per department
 
 ```csharp
 var result = employees
@@ -2555,7 +2574,7 @@ var result = employees
 
 ---
 
-## Exercise 10: Flatten all employee skills
+### Exercise 10: Flatten all employee skills
 
 ```csharp
 var result = employees
@@ -2565,7 +2584,7 @@ var result = employees
 
 ---
 
-# Experienced Candidate: Strong Interview Answer Template
+## Experienced Candidate: Strong Interview Answer Template
 
 When an interviewer asks:
 
@@ -2577,7 +2596,7 @@ A strong answer can be:
 
 ---
 
-# Interview Tips
+### Interview Tips
 
 1. Do not only memorize LINQ method definitions. Practice writing code using `Where`, `Select`, `GroupBy`, `Join`, `SelectMany`, `Any`, `OrderBy`, `Skip`, and `Take`.
 
@@ -2605,7 +2624,7 @@ The exact order may vary by requirement, but materialization should generally ha
 
 ---
 
-# Most Important LINQ Questions to Prepare
+## Most Important LINQ Questions to Prepare
 
 Before attending a .NET interview, make sure you can confidently explain:
 
@@ -2639,7 +2658,7 @@ Before attending a .NET interview, make sure you can confidently explain:
 
 ---
 
-# Final Interview Tip
+## Final Interview Tip
 
 For a fresher, interviewers usually expect correct syntax and a clear understanding of LINQ operators.
 

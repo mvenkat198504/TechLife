@@ -32,6 +32,61 @@ resources: []
 
 ## Hosting and deployment
 
+### 1.@hat difference between local.settings.json and host json file in azure
+
+In Azure Functions (and Azure Logic Apps Standard), the core difference is that **host.json** configures global runtime behaviors for both local and production environments, whereas **local.settings.json** is strictly a local sandbox for environment variables and secrets that is ignored during deployment.
+
+
+**Key Details**
+
+**host.json (Runtime Architecture)**
+
+This file defines parameters that the Azure Functions host infrastructure understands. The configurations applied here affect all functions within that function app instance
+
+| File | What it controls | Used in Azure? |
+|---|---|---|
+| `local.settings.json` | Local app settings, connection strings, and secrets | **No.** Put the required values in the Function App’s application settings when deploying. |
+| `host.json` | Functions host behavior, such as logging and trigger settings | **Yes.** It applies locally and is deployed with the app. |
+
+
+- What it controls: Function timeouts, logging levels (Microsoft.Azure.WebJobs), concurrency limits, extension bundle versions, and custom handler configurations.
+- Example
+```json
+{
+  "version": "2.0",
+  "logging": {
+    "logLevel": {
+      "default": "Information"
+    }
+  }
+}
+
+```
+**local.settings.json (Local Secrets & Variables)**
+
+This file is designed to mimic the environment variables that your app will use when running in the cloud. When the function runs locally, values inside the "Values" object are injected as local environment variables
+
+- What it controls: Database connection strings, API keys, storage account keys (AzureWebJobsStorage), and language worker runtimes
+- Production Hand-off: Because this file isn't uploaded to Azure, you must manually or via CI/CD add these key-value pairs into your App Settings / Configuration section within the Azure Portal
+- Example
+
+**Interview answer:** 
+
+local.settings.json supplies environment values for local development; host.json configures how the Functions runtime behaves across the app. Keep local.settings.json out of source control because it may contain secrets.
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "MY_THIRD_PARTY_API_KEY": "secret-dev-key-123"
+  }
+}
+
+```
+
+
 ### 1. What is Azure App Service and how do you deploy a .NET application to it?
 Azure App Service is a managed web hosting platform for HTTP applications and APIs. Azure manages the host OS, runtime integration, load balancing and platform patching; we own application code, configuration, scaling decisions and monitoring. A plan determines compute capacity and pricing, while a web app holds deployment and runtime configuration.
 
