@@ -181,3 +181,5 @@ Deploy workers independently from the API, drain on shutdown, and cap job durati
 - [Microsoft: Azure Service Bus dead-letter queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues)
 - [Microsoft: Competing Consumers pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers)
 - [Microsoft: .NET Worker Services](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers)
+
+![Background_Job_Processing_System.svg](/images/system-designs/background_jobs/Background_Job_Processing_System.svg)

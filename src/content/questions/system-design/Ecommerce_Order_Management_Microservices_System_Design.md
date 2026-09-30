@@ -299,6 +299,10 @@ It sends commands, processes results, stores workflow state and controls
 compensation. It coordinates the workflow but does **not** own each
 service's domain rules.
 
+|![choreography-pattern.png](/images/system-designs/e-commerce/choreography-pattern.png)| ![orchestrator.png](/images/system-designs/e-commerce/orchestrator.png) |
+
+
+
 ------------------------------------------------------------------------
 
 ## 8. Complete happy path
@@ -1506,44 +1510,20 @@ External dependency saturation
 
 ## 41. Architecture trade-offs
 
-  -------------------------------------------------------------------------
-  Decision                Benefit                 Trade-off
-  ----------------------- ----------------------- -------------------------
-  Microservices           Independent             Distributed complexity
-                          deployment/scaling      
-
-  Database per service    Autonomy                Cross-service consistency
-                                                  is harder
-
-  Async Saga              Durable resilient       Eventual consistency
-                          workflow                
-
-  Orchestration           Explicit                Coordinator complexity
-                          workflow/recovery       
-
-  Inventory reservation   Reduces                 Expiration and cleanup
-                          overselling/refunds     
-
-  Payment idempotency     Prevents duplicate      Extra state/logic
-                          charges                 
-
-  Outbox                  Reliable DB-to-message  Publisher/cleanup
-                          transition              complexity
-
-  Inbox                   Duplicate protection    Extra storage
-
-  Service Bus             Durable async           Broker dependency
-                          communication           
-
-  DLQ                     Isolates poison         Operational process
-                          messages                required
-
-  AKS                     Independent             Platform complexity
-                          scaling/deployment      
-
-  OpenTelemetry           End-to-end visibility   Instrumentation/storage
-                                                  cost
-  -------------------------------------------------------------------------
+  | Decision | Benefit | Trade-off |
+| --- | --- | --- |
+| Microservices | Independent deployment and scaling | Distributed complexity |
+| Database per service | Autonomy | Cross-service consistency is harder |
+| Async Saga | Durable, resilient workflow | Eventual consistency |
+| Orchestration | Explicit workflow and recovery | Coordinator complexity |
+| Inventory reservation | Reduces overselling and refunds | Expiration and cleanup |
+| Payment idempotency | Prevents duplicate charges | Extra state and logic |
+| Outbox | Reliable DB-to-message transition | Publisher and cleanup complexity |
+| Inbox | Duplicate protection | Extra storage |
+| Service Bus | Durable asynchronous communication | Broker dependency |
+| DLQ | Isolates poison messages | Operational process required |
+| AKS | Independent scaling and deployment | Platform complexity |
+| OpenTelemetry | End-to-end visibility | Instrumentation and storage cost |
 
 ------------------------------------------------------------------------
 
@@ -1728,3 +1708,10 @@ Rolling/Canary Deployment
 > If compensation fails, the workflow remains durably recoverable
 > through retries, reconciliation, alerts and operational intervention
 > rather than becoming silently inconsistent.
+
+
+
+![order_microservices_architecture.svg](/images/system-designs/e-commerce/order_microservices_architecture.svg)
+
+![order_saga_success_failure.svg](/images/system-designs/e-commerce/order_saga_success_failure.svg)
+

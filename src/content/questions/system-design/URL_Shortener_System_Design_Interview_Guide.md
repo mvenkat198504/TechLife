@@ -176,10 +176,10 @@ Track p50/p95/p99 redirect latency, redirect throughput, cache hit rate, databas
 - [AWS: DynamoDB partition key design](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html)
 
 
-![outbox_pattern.png](/images/system-designs/tiny_URL/tiny_url_request_1.png)
+![tiny_url_request_1.png](/images/system-designs/tiny_URL/tiny_url_request_1.png)
 
-![outbox_pattern.png](/images/system-designs/tiny_URL/tiny_url_request_2.png)
+![tiny_url_request_1.png](/images/system-designs/tiny_URL/tiny_url_request_2.png)
 
-![outbox_pattern.png](/images/system-designs/tiny_URL/tiny_url_request_3.png)
+![tiny_url_request_1.png](/images/system-designs/tiny_URL/tiny_url_request_3.png)
 
-![outbox_pattern.png](/images/system-designs/tiny_URL/tiny_url_request_4.png)
+![tiny_url_request_1.png](/images/system-designs/tiny_URL/tiny_url_request_4.png)
