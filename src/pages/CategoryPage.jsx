@@ -8,6 +8,7 @@ import {
   getSubcategoriesByCategory,
 } from '../content/questionLoader';
 import { useProgress } from '../hooks/useProgress';
+import { MermaidDiagram } from '../components/common/MermaidDiagram';
 import './CategoryPage.css';
 
 // Helper function to fix image paths with base URL
@@ -115,6 +116,10 @@ const renderInlineText = (text) => {
 };
 
 const renderCodeBlock = (element, index, extraClassName = '') => {
+  if (element.language === 'mermaid') {
+    return <MermaidDiagram key={index} chart={element.content} />;
+  }
+
   const showLabel = element.language && element.language !== 'plaintext';
   const languageLabel = showLabel
     ? element.language === 'csharp'
