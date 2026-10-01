@@ -1,3 +1,23 @@
+---
+id: azure-AKS-001
+slug: What Is AKS
+title: What Is AKS 
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Kubernetes Service
+  - AKS
+ 
+
+summary: What Is AKS
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is AKS?
 ## Azure Kubernetes Service Interview Preparation Guide
 

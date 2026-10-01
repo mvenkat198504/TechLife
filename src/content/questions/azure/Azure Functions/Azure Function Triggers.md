@@ -1,3 +1,23 @@
+---
+id: azure-Functions-003
+slug:   Azure Function Triggers 
+title:  AAzure Function Triggers 
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Function Triggers 
+  - Triggers
+ 
+
+summary: Azure Function Triggers  
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Function Triggers  
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -1,3 +1,24 @@
+---
+id: azure-Functions-012
+slug: Azure Functions Hosting Plans 
+title: Azure Functions Hosting Plans 
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Hosting Plans 
+  - Azure Functions  
+ 
+
+summary: Azure Functions Hosting Plans 
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # Azure Functions Hosting Plans  
 ## Consumption Plan vs Premium Plan vs Dedicated Plan
 

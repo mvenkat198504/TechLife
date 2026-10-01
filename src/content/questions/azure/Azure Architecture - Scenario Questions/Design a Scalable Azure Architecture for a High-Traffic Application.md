@@ -1,3 +1,25 @@
+---
+id: azure-Scenario Questions-001
+slug: Design a scalable Azure architecture for a high-traffic application
+title: Design a scalable Azure architecture for a high-traffic application
+categoryId: azure
+subcategory: Azure Scenario Questions
+difficulty: Experienced
+tags:
+  - azure
+  - high-traffic application
+  - scalable Azure architecture
+  - Azure Architecture 
+  - Scenario Questions
+ 
+
+summary: Design a scalable Azure architecture for a high-traffic application
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Design a Scalable Azure Architecture for a High-Traffic Application
 
 ## Detailed Interview Preparation Guide with Flow Charts

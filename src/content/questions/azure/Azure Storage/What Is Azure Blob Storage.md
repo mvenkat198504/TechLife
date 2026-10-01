@@ -1,3 +1,24 @@
+---
+id: azure-Blob-Storage-001
+slug: What Is Azure Blob Storage
+title: What Is Azure Blob Storage
+categoryId: azure
+subcategory: Azure Blob Storage
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Blob Storage
+  - Azure Storage
+  - Azure Container
+
+summary: What Is Azure Blob Storage
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # What Is Azure Blob Storage?
 ## Detailed Interview Preparation Guide with Flow Charts
 

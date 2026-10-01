@@ -10,10 +10,7 @@ const loadMermaid = () => {
         startOnLoad: false,
         theme: 'default',
         securityLevel: 'strict',
-        // Plain SVG text (not HTML foreignObject) avoids the page's own CSS
-        // (font-family/line-height overrides) reflowing labels after mermaid
-        // has already sized the node boxes, which was clipping wrapped text.
-        flowchart: { useMaxWidth: true, htmlLabels: false, wrap: true },
+        flowchart: { useMaxWidth: true, htmlLabels: true, wrap: true },
         themeVariables: { fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif' },
       });
       return mermaid;

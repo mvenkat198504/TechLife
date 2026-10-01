@@ -1,3 +1,23 @@
+---
+id: azure-Serviec-Bus-002
+slug: Azure Service Bus: Queue vs Topic
+title: Azure Service Bus: Queue vs Topic
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Service Bus
+  - Queue vs Topic
+ 
+
+summary: Queue vs Topic
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Service Bus: Queue vs Topic  
 ## Detailed Interview Preparation Guide with Flow Charts
 

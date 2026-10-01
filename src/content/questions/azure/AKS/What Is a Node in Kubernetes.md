@@ -1,3 +1,24 @@
+---
+id: azure-AKS-004
+slug: What Is a Node in Kubernetes
+title: What Is a Node in Kubernetes
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Node in Kubernetes
+  - Azure App Service
+  - Azure Kubernetes Service
+  - AKS
+
+summary: What Is a Node in Kubernetes
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Node in Kubernetes?
 ## Detailed Interview Preparation Guide with Flow Charts
 

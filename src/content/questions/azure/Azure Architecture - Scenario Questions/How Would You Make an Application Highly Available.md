@@ -1,3 +1,24 @@
+---
+id: azure-Scenario Questions-002
+slug: How Would You Make an Application Highly Available
+title: How Would You Make an Application Highly Available
+categoryId: azure
+subcategory: Azure Scenario Questions
+difficulty: Experienced
+tags:
+  - azure
+  - Highly Available
+  - Azure Architecture 
+  - Scenario Questions
+ 
+
+summary: How Would You Make an Application Highly Available
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Would You Make an Application Highly Available?
 ## Detailed Interview Preparation Guide with Flow Charts
 

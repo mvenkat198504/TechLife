@@ -1,3 +1,24 @@
+---
+id: azure-Functions-001
+slug:   Azure Functions
+title:  What is Azure Function
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Functions
+  - Why Azure Functions
+ 
+
+summary: What is Azure Function
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # Azure Functions  
 ## Detailed Interview Preparation Guide with Flow Charts
 

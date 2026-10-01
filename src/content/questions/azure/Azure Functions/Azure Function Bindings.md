@@ -1,3 +1,24 @@
+---
+id: azure-Functions-004
+slug:  Azure Function Bindings 
+title: Azure Function Bindings 
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Function Bindings 
+  - Bindings
+ 
+
+summary: Azure Function Bindings
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # Azure Function Bindings  
 ## Detailed Interview Preparation Guide with Flow Charts
 

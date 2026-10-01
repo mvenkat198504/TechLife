@@ -1,3 +1,23 @@
+---
+id: azure-AKS-009
+slug: How Do You Scale AKS
+title: How Do You Scale AKS
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Scale in Kubernetes
+  - Azure Kubernetes Service
+  - AKS
+
+summary: How Do You Scale AKS
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Scale AKS?
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -1,3 +1,23 @@
+---
+id: azure-AKS-008
+slug: How Do You Deploy Applications to AKS
+title: How Do You Deploy Applications to AKS
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Deploy in Kubernetes
+  - Azure Kubernetes Service
+  - AKS
+
+summary: How Do You Deploy Applications to AKS
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Deploy Applications to AKS?
 ## Detailed Interview Preparation Guide with Flow Charts
 

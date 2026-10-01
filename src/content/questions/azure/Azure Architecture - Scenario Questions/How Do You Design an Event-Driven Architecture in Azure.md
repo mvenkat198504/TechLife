@@ -1,3 +1,24 @@
+---
+id: azure-Scenario Questions-008
+slug: How Do You Design an Event-Driven Architecture in Azure
+title: How Do You Design an Event-Driven Architecture in Azure
+categoryId: azure
+subcategory: Azure Scenario Questions
+difficulty: Experienced
+tags:
+  - azure
+  - Microservices
+  - Event-Driven Architecture
+  - Azure Architecture 
+  - Scenario Questions
+ 
+summary: How Do You Secure Communication Between Microservices
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Design an Event-Driven Architecture in Azure?
 ## Detailed Interview Preparation Guide with Flow Charts
 

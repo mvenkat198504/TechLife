@@ -1,3 +1,23 @@
+---
+id: azure-Serviec-Bus-005
+slug: When Should You Use a Topic?
+title: When Should You Use a Topic?
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Service Bus
+  - Topic
+ 
+
+summary: When Should You Use a Queue
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # When Should You Use a Topic?  
 ## Detailed Interview Preparation Guide with Flow Charts
 
