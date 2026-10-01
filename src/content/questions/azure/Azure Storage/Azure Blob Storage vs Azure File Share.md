@@ -1,3 +1,22 @@
+---
+id: azure-Blob-Storage-002
+slug: Azure Blob Storage vs Azure File Share
+title: Azure Blob Storage vs Azure File Share
+categoryId: azure
+subcategory: Azure Blob Storage
+difficulty: Experienced
+tags:
+  - azure
+  - Azure File Share
+  - Azure Storage
+
+summary: Azure Blob Storage vs Azure File Share
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Blob Storage vs Azure File Share
 
 ## Detailed Interview Preparation Guide with Flow Charts
