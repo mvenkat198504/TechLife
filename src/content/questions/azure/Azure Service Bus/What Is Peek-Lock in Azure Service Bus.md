@@ -1,3 +1,25 @@
+---
+id: azure-Functions-010
+slug: What Is Peek-Lock in Azure Service Bus
+title: What Is Peek-Lock in Azure Service Bus
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Peek-Lock
+  - Azure Service Bus
+  - What Is Peek-Lock
+ 
+
+summary: What Is Peek-Lock in Azure Service Bus
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # What Is Peek-Lock in Azure Service Bus?
 ## Detailed Interview Preparation Guide with Flow Charts
 

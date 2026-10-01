@@ -36,6 +36,7 @@
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
+  line-height: normal;
 }
 
 .mermaid-diagram foreignObject {

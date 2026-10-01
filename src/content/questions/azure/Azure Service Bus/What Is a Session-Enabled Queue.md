@@ -1,3 +1,24 @@
+---
+id: azure-Serviec-Bus-011
+slug: What Is a Session-Enabled Queue
+title: What Is a Session-Enabled Queue
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Enabled Queue
+  - Azure Service Bus
+  - Session-Enabled Queue
+ 
+
+summary: What Is a Session-Enabled Queue
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Session-Enabled Queue?
 ## Detailed Interview Preparation Guide with Flow Charts
 

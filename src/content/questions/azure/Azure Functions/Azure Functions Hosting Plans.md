@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-011
+id: azure-Functions-012
 slug: Azure Functions Hosting Plans 
 title: Azure Functions Hosting Plans 
 categoryId: azure

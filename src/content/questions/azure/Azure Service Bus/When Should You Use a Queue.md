@@ -1,3 +1,23 @@
+---
+id: azure-Functions-004
+slug: When Should You Use a Queue
+title: When Should You Use a Queue
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Service Bus
+  - Queue
+ 
+
+summary: When Should You Use a Queue
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # When Should You Use a Queue?  
 ## Detailed Interview Preparation Guide with Flow Charts
 

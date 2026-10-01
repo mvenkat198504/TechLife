@@ -1,3 +1,24 @@
+---
+id: azure-Functions-006
+slug: What Is a Dead-Letter Queue?
+title: What Is a Dead-Letter Queue?
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Dead Letter Queue
+  - Azure Service Bus
+  - Dead-Letter Queue
+ 
+
+summary: What Is a Dead-Letter Queue
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Dead-Letter Queue?
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -1,3 +1,24 @@
+---
+id: azure-Functions-001
+slug:   Azure Service Bus
+title:  Azure Service Bus
+categoryId: azure
+subcategory: Azure Service Bus
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Service Bus
+  - What Azure Service Bus
+ 
+
+summary: What is Azure Service Bus
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # Azure Service Bus  
 ## Detailed Interview Preparation Guide with Flow Charts
 
