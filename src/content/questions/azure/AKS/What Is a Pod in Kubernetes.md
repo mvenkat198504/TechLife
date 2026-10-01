@@ -1,3 +1,24 @@
+---
+id: azure-AKS-003
+slug: What Is a Pod in Kubernetes
+title: What Is a Pod in Kubernetes
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Pod in Kubernetes
+  - Azure App Service
+  - Azure Kubernetes Service
+  - AKS
+
+summary: What Is a Pod in Kubernetes
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Pod in Kubernetes?
 ## Detailed Interview Preparation Guide with Flow Charts
 

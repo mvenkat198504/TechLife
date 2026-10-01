@@ -1,3 +1,24 @@
+---
+id: azure-AKS-002
+slug: AKS vs Azure App Service
+title: AKS vs Azure App Service
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Azure App Service
+  - Azure Kubernetes Service
+  - AKS
+ 
+
+summary: AKS vs Azure App Service
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # AKS vs Azure App Service
 
 ## Detailed Interview Preparation Guide with Flow Charts

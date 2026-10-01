@@ -1,3 +1,23 @@
+---
+id: azure-AKS-006
+slug: What Is Ingress in Kubernetes
+title: What Is Ingress in Kubernetes
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Ingress in Kubernetes
+  - Azure Kubernetes Service
+  - AKS
+
+summary: What Is Ingress in Kubernetes
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Ingress in Kubernetes?
 ## Detailed Interview Preparation Guide with Flow Charts
 

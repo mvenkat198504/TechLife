@@ -1,3 +1,25 @@
+---
+id: azure-AKS-012
+slug: What Is ACR and Why Is It Used
+title: What Is ACR and Why Is It Used
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - ACR in Kubernetes
+  - Azure Kubernetes Service
+  - ACR
+  - AKS
+
+summary: What Is ACR and Why Is It Used
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # What Is ACR and Why Is It Used?
 ## Azure Container Registry Interview Preparation Guide
 

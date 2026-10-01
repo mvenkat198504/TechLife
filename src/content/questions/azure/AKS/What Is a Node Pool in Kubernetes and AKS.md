@@ -1,3 +1,23 @@
+---
+id: azure-AKS-005
+slug: What Is a Node Pool in Kubernetes and AKS
+title: What Is a Node Pool in Kubernetes and AKS
+categoryId: azure
+subcategory: Azure AKS
+difficulty: Experienced
+tags:
+  - azure
+  - Node Pool in Kubernetes
+  - Azure Kubernetes Service
+  - AKS
+
+summary: What Is a Node Pool in Kubernetes and AKS
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Node Pool in Kubernetes and AKS?
 
 ## Detailed Interview Preparation Guide with Flow Charts
