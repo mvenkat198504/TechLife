@@ -1,3 +1,25 @@
+---
+id: azure-Scenario Questions-006
+slug: How Would You Handle a Sudden Traffic Spike
+title: How Would You Handle a Sudden Traffic Spike
+categoryId: azure
+subcategory: Azure Scenario Questions
+difficulty: Experienced
+tags:
+  - azure
+  - App Service
+  - App Service AKS vs Azure Functions
+  - Azure Architecture 
+  - Scenario Questions
+ 
+
+summary: App Service vs AKS vs Azure Functions
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # App Service vs AKS vs Azure Functions
 ## When Would You Choose Each?
 ### Detailed Interview Preparation Guide with Flow Charts

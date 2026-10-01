@@ -1,3 +1,24 @@
+---
+id: azure-Scenario Questions-003
+slug: How Would You Achieve Zero Downtime Deployment
+title: How Would You Achieve Zero Downtime Deployment
+categoryId: azure
+subcategory: Azure Scenario Questions
+difficulty: Experienced
+tags:
+  - azure
+  - Downtime Deployment
+  - Azure Architecture 
+  - Scenario Questions
+ 
+
+summary: How Would You Achieve Zero Downtime Deployment
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Would You Achieve Zero Downtime Deployment?
 ## Detailed Interview Preparation Guide with Flow Charts
 

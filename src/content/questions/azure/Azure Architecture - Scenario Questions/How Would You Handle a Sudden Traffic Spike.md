@@ -1,3 +1,24 @@
+---
+id: azure-Scenario Questions-005
+slug: How Would You Handle a Sudden Traffic Spike
+title: How Would You Handle a Sudden Traffic Spike
+categoryId: azure
+subcategory: Azure Scenario Questions
+difficulty: Experienced
+tags:
+  - azure
+  - Sudden Traffic
+  - Azure Architecture 
+  - Scenario Questions
+ 
+
+summary: How Would You Handle a Sudden Traffic Spike
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Would You Handle a Sudden Traffic Spike?
 ## Detailed Interview Preparation Guide with Flow Charts
 
