@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-009
+id: azure-Serviec-Bus-009
 slug: How Do You Implement Message Deduplication
 title: How Do You Implement Message Deduplication
 categoryId: azure

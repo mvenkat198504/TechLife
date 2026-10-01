@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-003
+id: azure-Serviec-Bus-003
 slug: Azure Service Bus vs Azure Event Hubs
 title: Azure Service Bus vs Azure Event Hubs
 categoryId: azure

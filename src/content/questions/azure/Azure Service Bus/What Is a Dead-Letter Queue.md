@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-006
+id: azure-Serviec-Bus-006
 slug: What Is a Dead-Letter Queue?
 title: What Is a Dead-Letter Queue?
 categoryId: azure

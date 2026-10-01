@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-004
+id: azure-Serviec-Bus-004
 slug: When Should You Use a Queue
 title: When Should You Use a Queue
 categoryId: azure

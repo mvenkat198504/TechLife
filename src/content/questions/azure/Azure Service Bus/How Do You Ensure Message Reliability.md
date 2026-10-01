@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-007
+id: azure-Serviec-Bus-007
 slug: How Do You Ensure Message Reliability
 title: How Do You Ensure Message Reliability
 categoryId: azure

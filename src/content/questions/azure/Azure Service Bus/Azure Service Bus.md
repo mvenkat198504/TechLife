@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-001
+id: azure-Serviec-Bus-001
 slug:   Azure Service Bus
 title:  Azure Service Bus
 categoryId: azure

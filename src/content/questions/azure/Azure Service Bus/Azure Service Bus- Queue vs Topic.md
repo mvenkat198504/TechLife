@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-002
+id: azure-Serviec-Bus-002
 slug: Azure Service Bus: Queue vs Topic
 title: Azure Service Bus: Queue vs Topic
 categoryId: azure

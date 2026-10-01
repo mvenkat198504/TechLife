@@ -1,5 +1,5 @@
 ---
-id: azure-Functions-010
+id: azure-Serviec-Bus-010
 slug: What Is Peek-Lock in Azure Service Bus
 title: What Is Peek-Lock in Azure Service Bus
 categoryId: azure
