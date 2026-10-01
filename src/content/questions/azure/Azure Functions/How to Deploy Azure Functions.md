@@ -1,3 +1,24 @@
+---
+id: azure-Functions-011
+slug: How to Deploy Azure Functions
+title: How to Deploy Azure Functions
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Deploy 
+  - Azure Functions  
+ 
+
+summary: How to Deploy Azure Functions
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
+
 # How to Deploy Azure Functions  
 ## Detailed Interview Preparation Guide with Flow Charts
 

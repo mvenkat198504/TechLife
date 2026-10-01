@@ -1,3 +1,23 @@
+---
+id: azure-Functions-002
+slug:   Azure Functions
+title:  Azure Functions vs Azure App Service
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Functions vs Azure App Service 
+  - Azure App Service
+ 
+
+summary: Azure Functions vs Azure App Service  
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Functions vs Azure App Service  
 ## Detailed Interview Preparation Guide with Flow Charts
 

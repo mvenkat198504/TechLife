@@ -50,6 +50,16 @@
   white-space: normal;
 }
 
+html[data-theme='dark'] .mermaid-diagram svg text {
+  fill: #1f2937 !important;
+}
+
+html[data-theme='dark'] .mermaid-diagram foreignObject div,
+html[data-theme='dark'] .mermaid-diagram foreignObject span,
+html[data-theme='dark'] .mermaid-diagram foreignObject p {
+  color: #1f2937 !important;
+}
+
 .mermaid-diagram-error {
   margin: 1.25rem 0;
   padding: 1rem;

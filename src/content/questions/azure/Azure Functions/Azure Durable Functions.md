@@ -1,3 +1,23 @@
+---
+id: azure-Functions-005
+slug:  Durable Functions
+title: Durable Functions 
+categoryId: azure
+subcategory: Azure Functions
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Durable Functions
+  - Durable Functions
+ 
+
+summary: Durable Functions 
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Durable Functions  
 ## Detailed Interview Preparation Guide with Flow Charts
 
