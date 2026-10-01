@@ -11,7 +11,7 @@ tags:
   - Secure Functions
  
 
-summary:Secure Azure Functions  
+summary:  Secure Azure Functions  
 updatedAt: 2026-08-27
 status: published
 thumbnail: ""
