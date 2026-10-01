@@ -1,3 +1,23 @@
+---
+id: azure-Blob-Storage-007
+slug: What Are Azure Storage Account Types
+title: What Are Azure Storage Account Types
+categoryId: azure
+subcategory: Azure Blob Storage
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Storage Account Types
+  - Storage Account Types
+  - Secure Azure Blob Storage
+
+summary: What Are Azure Storage Account Types
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Are Azure Storage Account Types?
 ## Detailed Interview Preparation Guide with Flow Charts
 

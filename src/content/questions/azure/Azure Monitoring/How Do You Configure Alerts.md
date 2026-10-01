@@ -1,3 +1,23 @@
+---
+id: azure-Monitoring-007
+slug: How Do You Configure Alerts
+title: How Do You Configure Alerts
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Alerts
+  - Configure Alerts
+  - Azure Monitoring
+
+summary: How Do You Configure Alerts?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Configure Alerts?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 

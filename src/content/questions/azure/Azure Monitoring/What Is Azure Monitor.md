@@ -1,3 +1,23 @@
+---
+id: azure-Monitoring-002
+slug: What Is Azure Monitor
+title: What Is Azure Monitor
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Application Insights
+  - Azure Monitor
+  - Azure Monitoring
+
+summary: What Is Azure Monitor
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Azure Monitor?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 

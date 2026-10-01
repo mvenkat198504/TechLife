@@ -1,3 +1,23 @@
+---
+id: azure-Monitoring-008
+slug: How Do You Monitor Azure Functions
+title: How Do You Monitor Azure Functions
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Monitor
+  - Monitor Azure Functions
+  - Azure Monitoring
+
+summary: How Do You Monitor Azure Functions?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Monitor Azure Functions?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 

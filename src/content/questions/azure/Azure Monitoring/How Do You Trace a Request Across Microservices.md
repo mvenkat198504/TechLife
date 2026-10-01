@@ -1,3 +1,23 @@
+---
+id: azure-Monitoring-006
+slug: How Do You Trace a Request Across Microservices
+title: How Do You Trace a Request Across Microservices
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Trace a Request
+  - Trace
+  - Azure Monitoring
+
+summary: How Do You Trace a Request Across Microservices?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Trace a Request Across Microservices?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 

@@ -1,3 +1,22 @@
+---
+id: azure-Monitoring-004
+slug: How Do You Centralize Logs from Multiple Applications
+title: How Do You Centralize Logs from Multiple Applications
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Centralize Logs
+  - Azure Monitoring
+
+summary: How Do You Centralize Logs from Multiple Applications
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Centralize Logs from Multiple Applications?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 

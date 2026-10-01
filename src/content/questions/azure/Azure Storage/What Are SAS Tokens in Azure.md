@@ -1,3 +1,24 @@
+---
+id: azure-Blob-Storage-005
+slug: What Are SAS Tokens in Azure
+title: What Are SAS Tokens in Azure
+categoryId: azure
+subcategory: Azure Blob Storage
+difficulty: Experienced
+tags:
+  - azure
+  - SAS
+  - SAS Tokens in Azure
+  - Azure Storage
+  - Secure Azure Blob Storage
+
+summary: What Are SAS Tokens in Azure
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Are SAS Tokens in Azure?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 

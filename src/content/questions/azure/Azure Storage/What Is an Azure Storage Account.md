@@ -1,3 +1,23 @@
+---
+id: azure-Blob-Storage-006
+slug: What Is an Azure Storage Account
+title: What Is an Azure Storage Account
+categoryId: azure
+subcategory: Azure Blob Storage
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Storage Account
+  - Azure Storage
+  - Secure Azure Blob Storage
+
+summary: What Is an Azure Storage Account?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is an Azure Storage Account?
 ## Detailed Interview Preparation Guide with Flow Charts
 

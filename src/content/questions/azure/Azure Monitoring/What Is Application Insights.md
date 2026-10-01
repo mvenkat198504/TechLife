@@ -1,3 +1,22 @@
+---
+id: azure-Monitoring-001
+slug: What Is Application Insights
+title: What Is Application Insights
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Application Insights
+  - Azure Monitoring
+
+summary: What Is Application Insights
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Application Insights?
 ## Detailed Azure Interview Preparation Guide with Flow Charts
 

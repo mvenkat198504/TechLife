@@ -1,3 +1,22 @@
+---
+id: azure-Monitoring-005
+slug: What Telemetry Do You Collect
+title: What Telemetry Do You Collect
+categoryId: azure
+subcategory: Azure Monitoring
+difficulty: Experienced
+tags:
+  - azure
+  - Telemetry
+  - Azure Monitoring
+
+summary: What Telemetry Do You Collect?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Telemetry Do You Collect?
 ## Detailed Interview Preparation Guide with Flow Charts (Static Site Ready)
 
