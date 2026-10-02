@@ -35,45 +35,30 @@ For an experienced interview, do not simply list services. Explain **business bo
 
 ### Example: Order Management Platform
 
-```text
-                         Internet / Clients
-                                |
-                                v
-                      +--------------------+
-                      | Azure API Management|
-                      +----------+---------+
-                                 |
-              +------------------+------------------+
-              |                  |                  |
-              v                  v                  v
-      +---------------+  +---------------+  +---------------+
-      | Order Service |  | Catalog       |  | Customer      |
-      | ASP.NET Core  |  | Service       |  | Service       |
-      +-------+-------+  +-------+-------+  +-------+-------+
-              |                  |                  |
-              v                  v                  v
-          Order DB           Catalog DB         Customer DB
-              |
-              | OrderCreated
-              v
-       +-------------------+
-       | Azure Service Bus |
-       +----+----------+---+
-            |          |
-            v          v
-     +-------------+ +-------------+
-     | Inventory   | | Payment     |
-     | Service     | | Service     |
-     +------+------+ +------+------+
-            |               |
-            v               v
-      Inventory DB      Payment DB
-            |
-            +---- events ----+
-                     |
-                     v
-              Notification Service
+```mermaid
+flowchart TD
+    C["Internet / Clients"] --> APIM["Azure API Management"]
+
+    APIM --> O["Order Service (ASP.NET Core)"]
+    APIM --> CAT["Catalog Service"]
+    APIM --> CUS["Customer Service"]
+
+    O --> ODB[("Order DB")]
+    CAT --> CATDB[("Catalog DB")]
+    CUS --> CUSDB[("Customer DB")]
+
+    O -->|"OrderCreated"| BUS["Azure Service Bus"]
+
+    BUS --> I["Inventory Service"]
+    BUS --> P["Payment Service"]
+
+    I --> IDB[("Inventory DB")]
+    P --> PDB[("Payment DB")]
+
+    I -->|"Events"| N["Notification Service"]
+    P -->|"Events"| N
 ```
+
 
 ### Key design decisions
 
@@ -218,21 +203,18 @@ The Strangler Fig Pattern replaces a monolith **incrementally** rather than thro
 
 ### Initial architecture
 
-```text
-Client
-  |
-  v
-Monolith
-  |
-Shared Database
+```mermaid
+flowchart TD
+  A[Client] --> B[Monolith] --> C[(Shared Database)]
 ```
 
 ### Introduce a routing layer
 
-```text
-             +--> New Catalog Service
-Client -> Gateway
-             +--> Existing Monolith
+```mermaid
+flowchart LR
+    C(["Client"]) --> G{"Gateway"}
+    G -->|"Catalog requests"| CAT["New Catalog Service"]
+    G -->|"Other requests"| M["Existing Monolith"]
 ```
 
 ### Migration steps
@@ -286,10 +268,13 @@ The same domain/data model serves reads and writes.
 
 ### CQRS
 
-```text
-             +--> Command Handler --> Write Model
-Client ------|
-             +--> Query Handler ----> Read Model
+```mermaid
+flowchart LR
+    C(["Client"]) -->|"Command"| CH["Command Handler"]
+    C -->|"Query"| QH["Query Handler"]
+
+    CH -->|"Update"| WM[("Write Model")]
+    QH -->|"Read"| RM[("Read Model")]
 ```
 
 A command represents an intention:
@@ -398,11 +383,10 @@ Current state can be rebuilt by replaying the events.
 
 ### Why use them together?
 
-```text
-Commands -> Aggregate -> Events -> Event Store
-                            |
-                            v
-                      Read Projections
+```mermaid
+flowchart LR
+  A[Commands] --> B[Aggregate] --> C[Events] --> D[(Event Store)]
+  C --> E[Read Projections]
 ```
 
 Event Sourcing can generate projections that CQRS query models use.
@@ -433,34 +417,108 @@ A production Saga is more than publishing several events. It must manage **state
 
 ### Example order Saga
 
-```text
-Create Order
-    |
-    v
-Reserve Inventory
-    |
-    v
-Process Payment
-    |
-    v
-Create Shipment
-    |
-    v
-Complete Order
+```mermaid
+flowchart TD
+    START(["Start Saga"]) --> O["Create Order"]
+    O --> I["Reserve Inventory"]
+    I --> P["Process Payment"]
+    P --> S["Create Shipment"]
+    S --> C["Complete Order"]
+    C --> END(["Saga Completed"])
+
+    I -.->|"Failure"| CO["Cancel Order"]
+    P -.->|"Failure"| RI["Release Inventory"]
+    S -.->|"Failure"| RP["Refund Payment"]
+
+    RP --> RI
+    RI --> CO
+    CO --> FAILED(["Saga Compensated"])
 ```
 
 ### Orchestrated Saga
 
-```text
-                  +-------------------+
-                  | Order Saga        |
-                  | Orchestrator      |
-                  +---------+---------+
-                            |
-          +-----------------+------------------+
-          |                 |                  |
-          v                 v                  v
-      Inventory          Payment            Shipping
+```mermaid
+         flowchart TD
+    O["Order Saga Orchestrator"]
+
+    O -->|"Reserve Inventory"| I["Inventory Service"]
+    O -->|"Process Payment"| P["Payment Service"]
+    O -->|"Create Shipment"| S["Shipping Service"]
+
+    I -.->|"Result"| O
+    P -.->|"Result"| O
+    S -.->|"Result"| O
+```
+### choreography Saga
+```mermaid
+flowchart TD
+    O["Order Service"] -->|"Publish OrderCreated"| B[["Message Broker"]]
+    B -->|"OrderCreated"| I["Inventory Service"]
+
+    I -->|"Publish InventoryReserved"| B
+    B -->|"InventoryReserved"| P["Payment Service"]
+
+    P -->|"Publish PaymentProcessed"| B
+    B -->|"PaymentProcessed"| S["Shipping Service"]
+
+    S -->|"Publish ShipmentCreated"| B
+    B -->|"ShipmentCreated: Complete Order"| O
+```
+
+In choreography, services communicate through events in the message broker without a central orchestrator.
+
+### choreography Saga Pattern (Complete)
+
+```mermaid
+sequenceDiagram
+    participant O as Order Service
+    participant B as Message Broker
+    participant I as Inventory Service
+    participant P as Payment Service
+    participant S as Shipping Service
+
+    O->>B: Publish OrderCreated
+    B-->>I: Deliver OrderCreated
+    I->>I: Reserve inventory
+
+    alt Inventory reservation fails
+        I->>B: Publish InventoryReservationFailed
+        B-->>O: Deliver InventoryReservationFailed
+        O->>O: Cancel order
+    else Inventory reserved
+        I->>B: Publish InventoryReserved
+        B-->>P: Deliver InventoryReserved
+        P->>P: Process payment
+
+        alt Payment fails
+            P->>B: Publish PaymentFailed
+            B-->>I: Deliver PaymentFailed
+            I->>I: Release inventory
+            I->>B: Publish InventoryReleased
+            B-->>O: Deliver InventoryReleased
+            O->>O: Cancel order
+        else Payment processed
+            P->>B: Publish PaymentProcessed
+            B-->>S: Deliver PaymentProcessed
+            S->>S: Create shipment
+
+            alt Shipment creation fails
+                S->>B: Publish ShipmentFailed
+                B-->>P: Deliver ShipmentFailed
+                P->>P: Refund payment
+                P->>B: Publish PaymentRefunded
+                B-->>I: Deliver PaymentRefunded
+                I->>I: Release inventory
+                I->>B: Publish InventoryReleased
+                B-->>O: Deliver InventoryReleased
+                O->>O: Cancel order
+            else Shipment created
+                S->>B: Publish ShipmentCreated
+                B-->>O: Deliver ShipmentCreated
+                O->>O: Complete order
+            end
+        end
+    end
 ```
 
 The orchestrator maintains state such as:
@@ -595,15 +653,12 @@ In event-driven architecture, services publish facts about completed business ch
 
 Example:
 
-```text
-Order Service
-    |
-    | OrderCreated
-    v
-Event Broker
-  /     |       \
- v      v        v
-Inventory Payment Notification
+```mermaid
+flowchart TD
+    O["Order Service"] -->|"OrderCreated"| B[["Event Broker"]]
+    B -->|"OrderCreated"| I["Inventory Service"]
+    B -->|"OrderCreated"| P["Payment Service"]
+    B -->|"OrderCreated"| N["Notification Service"]
 ```
 
 ### Event design
@@ -777,14 +832,10 @@ COMMIT
 
 Then a background publisher processes the outbox:
 
-```text
-Outbox Table
-     |
-     v
-Publisher
-     |
-     v
-Message Broker
+```mermaid
+flowchart TD
+    O[("Outbox Table")] --> P["Publisher"]
+    P --> B[["Message Broker"]]
 ```
 
 Example table:
@@ -816,19 +867,13 @@ In distributed systems, avoid promising impossible guarantees casually. Usually 
 
 ### Reliable publishing flow
 
-```text
-Application
-   |
-Local Transaction
-   |
-   +--> Business Data
-   +--> Outbox Record
-            |
-            v
-       Outbox Worker
-            |
-            v
-        Message Broker
+```mermaid
+flowchart TD
+    A["Application"] --> T["Local Transaction"]
+    T --> D[("Business Data")]
+    T --> O[("Outbox Record")]
+    O --> W["Outbox Worker"]
+    W --> B[["Message Broker"]]
 ```
 
 ### Steps
@@ -857,14 +902,11 @@ Duplicates are normal in many reliable messaging systems because a message may b
 
 Example:
 
-```text
-Consumer processes PaymentCompleted
-        |
-DB update succeeds
-        |
-Consumer crashes before ACK
-        |
-Broker redelivers message
+```mermaid
+flowchart TD
+  A[Consumer processes PaymentCompleted] --> B[(DB update succeeds)]
+  B --> C[Consumer crashes before ACK]
+  C --> D[Broker redelivers message]
 ```
 
 ### Solution: identify every message
@@ -888,18 +930,13 @@ ConsumerName
 
 Processing logic:
 
-```text
-Receive message
-     |
-Is MessageId already processed?
-   /       \
- Yes       No
-  |         |
- ACK     Execute business operation
-            |
-         Save MessageId
-            |
-           ACK
+```mermaid
+flowchart TD
+    R(["Receive Message"]) --> D{"MessageId already processed?"}
+    D -->|"Yes"| A(["ACK"])
+    D -->|"No"| E["Execute Business Operation"]
+    E --> S[("Save MessageId")]
+    S --> A
 ```
 
 Ideally the business change and processed-message record are committed in the same local transaction.
@@ -997,15 +1034,12 @@ A **poison message** repeatedly fails processing because of invalid data, an uns
 
 ### Do not retry forever
 
-```text
-Message
-  |
-Attempt 1 -> fail
-Attempt 2 -> fail
-Attempt 3 -> fail
-  |
-  v
-Dead-Letter Queue
+```mermaid
+flowchart TD
+    M(["Message"]) --> A1["Attempt 1"]
+    A1 -->|"Fail"| A2["Attempt 2"]
+    A2 -->|"Fail"| A3["Attempt 3"]
+    A3 -->|"Fail"| D[["Dead-Letter Queue"]]
 ```
 
 ### DLQ processing
@@ -1014,16 +1048,12 @@ A production system should monitor DLQs.
 
 Workflow:
 
-```text
-DLQ
- |
- +--> Alert / Dashboard
- |
- +--> Inspect failure reason
- |
- +--> Correct data/code/configuration
- |
- +--> Replay/resubmit safely
+```mermaid
+flowchart TD
+    D[["Dead Letter Queue (DLQ)"]] --> A["Alert / Dashboard"]
+    D --> I["Inspect Failure Reason"]
+    I --> C["Correct Data / Code / Configuration"]
+    C --> R["Replay / Resubmit Safely"]
 ```
 
 ### Include diagnostic metadata
@@ -1193,10 +1223,11 @@ Scalability and availability require both application and infrastructure design.
 
 Prefer stateless API instances:
 
-```text
-Load Balancer
-  /    |    \
-Pod1  Pod2  Pod3
+```mermaid
+flowchart TD
+  A[Load Balancer] --> B[Pod1]
+  A --> C[Pod2]
+  A --> D[Pod3]
 ```
 
 State belongs in external systems such as databases, caches or durable messaging platforms.
@@ -1264,16 +1295,11 @@ There are two common scenarios.
 
 For machine-to-machine communication:
 
-```text
-Service A
-   |
-   | client authentication
-   v
-Identity Provider
-   |
-   | access token
-   v
-Service A ----Bearer Token----> Service B
+```mermaid
+flowchart TD
+  A[Service A] -->|client authentication| B[Identity Provider]
+  B -->|access token| A
+  A -->|Bearer Token| C[Service B]
 ```
 
 The access token represents the calling application/workload rather than an interactive user.
@@ -1290,17 +1316,13 @@ Service B validates:
 
 Managed Identity removes the need to store Azure resource credentials in application configuration.
 
-```text
-Order Service in Azure
-       |
-       | Managed Identity
-       v
-Microsoft Entra ID
-       |
-       +--> Azure Key Vault
-       +--> Azure SQL
-       +--> Storage
-       +--> Service Bus
+```mermaid
+flowchart TD
+  A[Order Service in Azure] -->|Managed Identity| B[Microsoft Entra ID]
+  B --> C[Azure Key Vault]
+  B --> D[Azure SQL]
+  B --> E[Storage]
+  B --> F[Service Bus]
 ```
 
 In .NET, Azure SDK clients commonly use `DefaultAzureCredential`:
@@ -1340,26 +1362,55 @@ Each microservice is packaged as a container and represented by Kubernetes resou
 
 ### Deployment architecture
 
-```text
-                       Internet
-                          |
-                          v
-                 Ingress / API Gateway
-                          |
-             +------------+------------+
-             |                         |
-             v                         v
-      Order Service              Catalog Service
-       Deployment                  Deployment
-      /    |    \                 /       \
-    Pod   Pod   Pod             Pod       Pod
-       |                            |
-       v                            v
-   Order Database              Catalog Database
 
-             +-------------------------+
-             | Azure Service Bus       |
-             +-------------------------+
+```mermaid
+                     flowchart TD
+    NET(["Internet"]) --> GW["Ingress / API Gateway"]
+
+    subgraph AKS["Azure Kubernetes Service (AKS)"]
+        GW
+
+        subgraph ORDER["Order Service Deployment"]
+            OD["Order Service"]
+            O1["Pod 1"]
+            O2["Pod 2"]
+            O3["Pod 3"]
+            OD --> O1 & O2 & O3
+        end
+
+        subgraph CATALOG["Catalog Service Deployment"]
+            CD["Catalog Service"]
+            C1["Pod 1"]
+            C2["Pod 2"]
+            CD --> C1 & C2
+        end
+
+        GW --> OD & CD
+    end
+
+    O1 & O2 & O3 --> ODB[("Order Database")]
+    C1 & C2 --> CDB[("Catalog Database")]
+
+    OD -.->|"Publish / Consume Events"| BUS[["Azure Service Bus"]]
+    CD -.->|"Publish / Consume Events"| BUS
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef order fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef catalog fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+
+    class NET client
+    class GW gateway
+    class OD,O1,O2,O3 order
+    class CD,C1,C2 catalog
+    class ODB,CDB database
+    class BUS broker
+
+    style AKS fill:#f8fafc,stroke:#0284c7,stroke-width:2px
+    style ORDER fill:#eff6ff,stroke:#93c5fd
+    style CATALOG fill:#f0fdf4,stroke:#86efac
 ```
 
 ### Deployment example
@@ -1500,26 +1551,46 @@ Cluster Autoscaler -> More Nodes Needed
 
 ### Typical CI/CD
 
-```text
-Git Push
-   |
-   v
-CI
- |- Restore
- |- Build
- |- Test
- |- Docker Build
- |- Image Scan
- |- Push to ACR
-   |
-   v
-CD / GitOps
-   |
-   v
-AKS
- |- Rolling deployment
- |- Readiness checks
- |- Monitoring
+```mermaid
+flowchart TD
+    G(["Git Push"]) --> CI
+
+    subgraph CI["Continuous Integration (CI)"]
+        direction TB
+        R["Restore Dependencies"] --> B["Build Application"]
+        B --> T["Run Tests"]
+        T --> D["Docker Build"]
+        D --> S["Image Scan"]
+        S --> P["Push Image to ACR"]
+    end
+
+    P --> ACR[["Azure Container Registry (ACR)"]]
+    ACR --> CD["CD / GitOps"]
+
+    subgraph AKS["Azure Kubernetes Service (AKS)"]
+        direction TB
+        RD["Rolling Deployment"] --> RC["Readiness Checks"]
+        RC --> M["Monitoring"]
+    end
+
+    CD --> RD
+
+    classDef trigger fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef build fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef security fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef registry fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef deploy fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef operations fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class G trigger
+    class R,B,T,D build
+    class S security
+    class ACR,P registry
+    class CD,RD deploy
+    class RC,M operations
+
+    style CI fill:#eff6ff,stroke:#93c5fd,stroke-width:2px
+    style AKS fill:#f0fdf4,stroke:#86efac,stroke-width:2px
 ```
 
 ### Interview-ready answer
@@ -1528,61 +1599,157 @@ AKS
 
 ---
 
-# Advanced End-to-End Architecture
+# Advanced End-to-End Architecture Diagram 1
 
-```text
-                            +----------------------+
-                            | Web / Mobile Client  |
-                            +----------+-----------+
-                                       |
-                                       v
-                            +----------------------+
-                            | API Management /     |
-                            | Gateway              |
-                            +----------+-----------+
-                                       |
-                +----------------------+----------------------+
-                |                      |                      |
-                v                      v                      v
-        +---------------+      +---------------+      +---------------+
-        | Order Service |      | Catalog       |      | Customer      |
-        | ASP.NET Core  |      | Service       |      | Service       |
-        +-------+-------+      +-------+-------+      +-------+-------+
-                |                      |                      |
-                v                      v                      v
-             Order DB              Catalog DB             Customer DB
-                |
-                | Local transaction
-                v
-          +-------------+
-          | Outbox      |
-          +------+------+ 
-                 |
-                 v
-        +-------------------+
-        | Azure Service Bus |
-        +---+-----------+---+
-            |           |
-            v           v
-      +-----------+  +-----------+
-      | Inventory |  | Payment   |
-      | Service   |  | Service   |
-      +-----+-----+  +-----+-----+
-            |              |
-            v              v
-       Inventory DB    Payment DB
+```mermaid
+flowchart TD
+  %% Clients and gateway
+  A[Web / Mobile Client] --> B[API Management / Gateway]
 
-Cross-cutting platform:
+  %% Core services
+  B --> C[Order Service<br/>ASP.NET Core]
+  B --> D[Catalog Service]
+  B --> E[Customer Service]
 
-Microsoft Entra ID / OAuth2 / Managed Identity
-Azure Key Vault
-Azure App Configuration
-OpenTelemetry
-Application Insights / Azure Monitor
-Azure Container Registry
-AKS
-HPA / KEDA / Cluster Autoscaler
+  %% Databases
+  C --> CDB[(Order DB)]
+  D --> DDB[(Catalog DB)]
+  E --> EDB[(Customer DB)]
+
+  %% Outbox / messaging
+  C --> F[Outbox]
+  F --> G[(Azure Service Bus)]
+
+  %% Downstream services
+  G --> H[Inventory Service]
+  G --> I[Payment Service]
+
+  H --> HDB[(Inventory DB)]
+  I --> IDB[(Payment DB)]
+
+  %% Platform capabilities
+  subgraph P[Cross-cutting platform]
+    P1[Microsoft Entra ID / OAuth2 / Managed Identity]
+    P2[Azure Key Vault]
+    P3[Azure App Configuration]
+    P4[OpenTelemetry]
+    P5[Application Insights / Azure Monitor]
+    P6[Azure Container Registry]
+    P7[AKS]
+    P8[HPA / KEDA / Cluster Autoscaler]
+  end
+
+  %% Platform relationships
+  A -. auth .-> P1
+  B -. secrets .-> P2
+  B -. config .-> P3
+  C -. telemetry .-> P4
+  D -. telemetry .-> P4
+  E -. telemetry .-> P4
+  H -. telemetry .-> P4
+  I -. telemetry .-> P4
+  P4 -. metrics/logs .-> P5
+  P6 -. images .-> P7
+  P7 -. runs on .-> P8
+
+  classDef client fill:#e0f2fe,stroke:#0284c7,color:#0f172a,stroke-width:1.5px;
+  classDef gateway fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef service fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef db fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef broker fill:#06b6d4,stroke:#0891b2,color:#ffffff,stroke-width:2px;
+  classDef platform fill:#f3f4f6,stroke:#9ca3af,color:#111827,stroke-width:1.5px;
+  classDef note fill:#fff7ed,stroke:#f59e0b,color:#111827,stroke-width:1px;
+
+  class A client;
+  class B gateway;
+  class C,D,E,H,I service;
+  class CDB,DDB,EDB,HDB,IDB db;
+  class G broker;
+  class P1,P2,P3,P4,P5,P6,P7,P8 platform;
 ```
+
+
+
+# Advanced End-to-End Architecture Diagram 2
+
+```mermaid
+                  flowchart TD
+    CLIENT(["Web / Mobile Client"]) --> APIM["API Management / Gateway"]
+
+    subgraph AKS["Azure Kubernetes Service (AKS)"]
+        direction TB
+
+        ORDER["Order Service (ASP.NET Core)"]
+        CATALOG["Catalog Service"]
+        CUSTOMER["Customer Service"]
+        WORKER["Outbox Publisher"]
+        INVENTORY["Inventory Service"]
+        PAYMENT["Payment Service"]
+    end
+
+    APIM --> ORDER & CATALOG & CUSTOMER
+
+    subgraph ORDERDATA["Order Database — Single Local Transaction"]
+        direction TB
+        ODB[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Commit order + event atomically"| ORDERDATA
+    CATALOG --> CDB[("Catalog DB")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    OUTBOX -->|"Read committed events"| WORKER
+    WORKER -->|"Publish OrderCreated"| BUS[["Azure Service Bus Topic"]]
+    WORKER -.->|"Mark published after broker acknowledgment"| OUTBOX
+
+    BUS -->|"Inventory subscription"| INVENTORY
+    BUS -->|"Payment subscription"| PAYMENT
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+
+    subgraph PLATFORM["Cross-Cutting Platform"]
+        direction TB
+        AUTH["Microsoft Entra ID / OAuth 2.0 / Managed Identity"]
+        KV["Azure Key Vault"]
+        CONFIG["Azure App Configuration"]
+        OTEL["OpenTelemetry"]
+        MONITOR["Application Insights / Azure Monitor"]
+        ACR[["Azure Container Registry"]]
+        SCALE["HPA / KEDA / Cluster Autoscaler"]
+
+        OTEL -->|"Traces, metrics and logs"| MONITOR
+    end
+
+    AUTH -.->|"Client authentication / API authorization"| APIM
+    AUTH -.->|"Workload identities"| AKS
+    KV -.->|"Secrets and certificates"| AKS
+    CONFIG -.->|"Settings and feature flags"| AKS
+    AKS -.->|"Telemetry"| OTEL
+    ACR -.->|"Container images"| AKS
+    SCALE -.->|"Scale pods and nodes"| AKS
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef platform fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class CLIENT client
+    class APIM gateway
+    class ORDER,CATALOG,CUSTOMER,WORKER,INVENTORY,PAYMENT service
+    class ODB,OUTBOX,CDB,CUDB,IDB,PDB database
+    class BUS,ACR broker
+    class AUTH,KV,CONFIG,OTEL,MONITOR,SCALE platform
+
+    style AKS fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style ORDERDATA fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+    style PLATFORM fill:#f0fdf4,stroke:#86efac,stroke-width:2px
+```
+
+The Order Service saves order data and the outbox event in one database transaction. The publisher sends committed events to separate Service Bus subscriptions for Inventory and Payment. Dotted arrows show platform support and operational connections.
 
 ---
 
@@ -1598,22 +1765,40 @@ The broker may redeliver `OrderCreated`, because from its perspective processing
 
 I assign a unique message/event ID and make Inventory's consumer idempotent:
 
-```text
-Receive OrderCreated (MessageId=123)
-       |
-       v
-Begin local transaction
-       |
-       +--> Check ProcessedMessages
-       |
-       +--> Reserve inventory if not already processed
-       |
-       +--> Insert ProcessedMessages(123)
-       |
-Commit
-       |
-ACK message
+```mermaid
+flowchart TD
+    R(["Receive OrderCreated (MessageId = 123)"]) --> B["Begin Local Transaction"]
+
+    subgraph TX["Local Database Transaction"]
+        B --> C{"MessageId 123 already in ProcessedMessages?"}
+        C -->|"No"| I["Reserve Inventory"]
+        I --> P[("Insert ProcessedMessages (123)")]
+        P --> COMMIT["Commit Transaction"]
+        C -->|"Yes — Skip Duplicate"| COMMIT
+    end
+
+    COMMIT --> ACK(["ACK Message"])
+
+    I -.->|"Failure"| RB["Roll Back Transaction"]
+    P -.->|"Failure"| RB
+    RB --> RETRY(["Retry / Redeliver Message"])
+
+    classDef endpoint fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef process fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef database fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef failure fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+
+    class R,ACK endpoint
+    class B,I,COMMIT process
+    class C decision
+    class P database
+    class RB,RETRY failure
+
+    style TX fill:#f8fafc,stroke:#94a3b8,stroke-width:2px
 ```
+Reserve inventory and record the MessageId in the same transaction. ACK only after a successful commit. Use a unique constraint on MessageId to prevent concurrent duplicate processing.
+
 
 If the same message arrives again, the consumer finds MessageId `123`, performs no duplicate reservation and acknowledges it.
 
@@ -1667,27 +1852,93 @@ This is a stronger production answer than saying, "the broker will never send du
 
 A mature microservices architecture combines:
 
-```text
-DDD / Bounded Contexts
-        |
-        v
-Independent Services + Data Ownership
-        |
-        +--> REST/gRPC for immediate interactions
-        |
-        +--> Events/Messaging for asynchronous workflows
-                        |
-                        +--> Saga
-                        +--> Outbox
-                        +--> Idempotency
-                        +--> DLQ
-                        +--> Ordering strategy
+```mermaid
+flowchart TD
+    DDD["DDD / Bounded Contexts"] --> SERVICES["Independent Services + Data Ownership"]
 
-Security -> OAuth2 / Managed Identity
-Reliability -> Timeout / Retry / Circuit Breaker / Bulkhead
-Observability -> Logs / Metrics / Distributed Traces
-Deployment -> Docker / AKS
-Scaling -> HPA / KEDA / Cluster Autoscaler
+    SERVICES --> SYNC["REST / gRPC: Immediate Interactions"]
+    SERVICES --> ASYNC[["Events / Messaging: Asynchronous Workflows"]]
+
+    subgraph PATTERNS["Messaging and Workflow Patterns"]
+        direction TB
+        SAGA["Saga"]
+        OUTBOX[("Outbox")]
+        IDEM["Idempotency"]
+        DLQ[["Dead-Letter Queue"]]
+        ORDER["Ordering Strategy"]
+    end
+
+    ASYNC --> SAGA & OUTBOX & IDEM & DLQ & ORDER
+
+    subgraph PLATFORM["Cross-Cutting Platform"]
+        direction TB
+        SECURITY["Security: OAuth 2.0 / Managed Identity"]
+        RELIABILITY["Reliability: Timeout / Retry / Circuit Breaker / Bulkhead"]
+        OBS["Observability: Logs / Metrics / Distributed Traces"]
+        DEPLOY["Deployment: Docker / AKS"]
+        SCALE["Scaling: HPA / KEDA / Cluster Autoscaler"]
+    end
+
+    SECURITY -.-> SERVICES
+    RELIABILITY -.-> SERVICES
+    SERVICES -.-> OBS
+    DEPLOY -.-> SERVICES
+    SCALE -.-> SERVICES
+
+    classDef domain fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef messaging fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef pattern fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef platform fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class DDD domain
+    class SERVICES,SYNC service
+    class ASYNC messaging
+    class SAGA,OUTBOX,IDEM,DLQ,ORDER pattern
+    class SECURITY,RELIABILITY,OBS,DEPLOY,SCALE platform
+
+    style PATTERNS fill:#fffbeb,stroke:#fbbf24,stroke-width:2px
+    style PLATFORM fill:#f0fdf4,stroke:#86efac,stroke-width:2px
+```
+
+```mermaid
+flowchart TD
+  A[DDD / Bounded Contexts] --> B[Independent Services + Data Ownership]
+
+  B --> C[REST / gRPC<br/>Immediate interactions]
+  B --> D[Events / Messaging<br/>Asynchronous workflows]
+
+  D --> E[Saga]
+  D --> F[Outbox]
+  D --> G[Idempotency]
+  D --> H[DLQ]
+  D --> I[Ordering strategy]
+
+  subgraph S[Cross-cutting concerns]
+    S1[Security<br/>OAuth2 / Managed Identity]
+    S2[Reliability<br/>Timeout / Retry / Circuit Breaker / Bulkhead]
+    S3[Observability<br/>Logs / Metrics / Distributed Traces]
+    S4[Deployment<br/>Docker / AKS]
+    S5[Scaling<br/>HPA / KEDA / Cluster Autoscaler]
+  end
+
+  A -.-> S1
+  B -.-> S2
+  D -.-> S3
+  C -.-> S4
+  D -.-> S5
+
+  classDef root fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef service fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef sync fill:#60a5fa,stroke:#2563eb,color:#ffffff,stroke-width:1.5px;
+  classDef async fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:1.5px;
+  classDef concern fill:#f3f4f6,stroke:#9ca3af,color:#111827,stroke-width:1.2px;
+
+  class A root;
+  class B service;
+  class C sync;
+  class D,E,F,G,H,I async;
+  class S1,S2,S3,S4,S5 concern;
 ```
 
 For senior interviews, always explain **why** you chose a pattern, what failure it solves, and what new complexity it introduces.

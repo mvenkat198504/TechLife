@@ -49,73 +49,199 @@ capabilities:
 -   Shipping
 -   Notification
 
-``` text
-                       Internet / Mobile / SPA
-                                |
-                                v
-                     +-----------------------+
-                     | Azure Front Door/WAF  |
-                     +-----------+-----------+
-                                 |
-                                 v
-                     +-----------------------+
-                     | Azure API Management  |
-                     | Gateway               |
-                     +-----------+-----------+
-                                 |
-             +-------------------+--------------------+
-             |                   |                    |
-             v                   v                    v
-      +-------------+     +-------------+      +-------------+
-      | Order API   |     | Catalog API |      | Customer API|
-      +------+------+     +------+------+      +------+------+
-             |                   |                    |
-             v                   v                    v
-         Order DB            Catalog DB           Customer DB
-             |
-             | local transaction
-             v
-       +-------------+
-       | Outbox      |
-       +------+------+
-              |
-              v
-     +----------------------+
-     | Azure Service Bus    |
-     | Topics / Queues      |
-     +---+---------+--------+
-         |         | 
-         v         v
- +---------------+ +---------------+
- | Inventory Svc | | Payment Svc   |
- +-------+-------+ +-------+-------+
-         |                 |
-    Inventory DB       Payment DB
-         |                 |
-         +--------+--------+
-                  |
-                  v
-          +---------------+
-          | Shipping Svc  |
-          +-------+-------+
-                  |
-             Shipping DB
+``` mermaid
+ flowchart TD
+    CLIENT(["Internet / Mobile / SPA"]) --> FD["Azure Front Door / WAF"]
+    FD --> APIM["Azure API Management Gateway"]
 
-Cross-cutting platform:
+    subgraph AKS["Azure Kubernetes Service (AKS)"]
+        direction TB
+        ORDER["Order API"]
+        CATALOG["Catalog API"]
+        CUSTOMER["Customer API"]
+        PUBLISHER["Outbox Publisher"]
+        INVENTORY["Inventory Service"]
+        PAYMENT["Payment Service"]
+        SHIPPING["Shipping Service"]
+    end
 
-Azure Entra ID / Identity Provider
-Managed Identity
-Azure Key Vault
-Azure App Configuration
-Redis
-OpenTelemetry
-Application Insights / Azure Monitor
-Container Registry
-AKS
-CI/CD
-Autoscaling
-Centralized logs
-Metrics + Alerts
+    APIM --> ORDER & CATALOG & CUSTOMER
+
+    subgraph ORDERDB["Order Database — Single Local Transaction"]
+        direction TB
+        DATA[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Save order + event atomically"| ORDERDB
+    CATALOG --> CDB[("Catalog DB")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    OUTBOX -->|"Read committed events"| PUBLISHER
+    PUBLISHER -->|"Publish OrderCreated"| BUS[["Azure Service Bus — Topics / Queues"]]
+    PUBLISHER -.->|"Mark published after acknowledgment"| OUTBOX
+
+    BUS -->|"OrderCreated: Inventory subscription"| INVENTORY
+    BUS -->|"OrderCreated: Payment subscription"| PAYMENT
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+
+    INVENTORY -->|"Publish InventoryReserved"| BUS
+    PAYMENT -->|"Publish PaymentSucceeded"| BUS
+    BUS -->|"Deliver inventory and payment events"| SHIPPING
+
+    SHIPPING --> CHECK{"Inventory reserved AND payment successful?"}
+    CHECK -->|"Yes — Create shipment"| SDB[("Shipping DB")]
+    CHECK -->|"No — Persist state and await remaining event"| SDB
+
+    subgraph PLATFORM["Cross-Cutting Platform"]
+        direction TB
+
+        subgraph SECURITY["Identity and Configuration"]
+            ENTRA["Microsoft Entra ID / Identity Provider"]
+            MI["Managed Identity"]
+            KV["Azure Key Vault"]
+            CONFIG["Azure App Configuration"]
+        end
+
+        subgraph OPERATIONS["Caching and Observability"]
+            REDIS[("Redis Cache")]
+            OTEL["OpenTelemetry"]
+            MONITOR["Application Insights / Azure Monitor"]
+            LOGS[("Centralized Logs")]
+            ALERTS["Metrics + Alerts"]
+
+            OTEL --> MONITOR
+            MONITOR --> LOGS & ALERTS
+        end
+
+        subgraph DELIVERY["Delivery and Scaling"]
+            CICD["CI/CD"]
+            ACR[["Azure Container Registry"]]
+            SCALE["Autoscaling — HPA / KEDA / Cluster Autoscaler"]
+
+            CICD -->|"Build, scan and push images"| ACR
+        end
+    end
+
+    ENTRA -.->|"Authentication / Authorization"| APIM
+    MI -.->|"Workload identity"| AKS
+    KV -.->|"Secrets / Certificates"| AKS
+    CONFIG -.->|"Settings / Feature flags"| AKS
+    AKS -.->|"Cache access"| REDIS
+    AKS -.->|"Logs / Metrics / Traces"| OTEL
+    ACR -.->|"Pull container images"| AKS
+    CICD -.->|"Deploy applications"| AKS
+    SCALE -.->|"Scale pods and nodes"| AKS
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef platform fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef decision fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+
+    class CLIENT client
+    class FD,APIM gateway
+    class ORDER,CATALOG,CUSTOMER,PUBLISHER,INVENTORY,PAYMENT,SHIPPING service
+    class DATA,OUTBOX,CDB,CUDB,IDB,PDB,SDB,REDIS,LOGS database
+    class BUS,ACR broker
+    class ENTRA,MI,KV,CONFIG,OTEL,MONITOR,ALERTS,CICD,SCALE platform
+    class CHECK decision
+
+    style AKS fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style ORDERDB fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+    style PLATFORM fill:#f8fafc,stroke:#94a3b8,stroke-width:2px
+    style SECURITY fill:#f0fdf4,stroke:#86efac
+    style OPERATIONS fill:#f0fdf4,stroke:#86efac
+    style DELIVERY fill:#f0fdf4,stroke:#86efac
+```
+
+```mermaid
+flowchart TD
+  %% Entry layer
+  A[Internet / Mobile / SPA] --> B[Azure Front Door / WAF]
+  B --> C[Azure API Management Gateway]
+
+  %% APIs
+  C --> O[Order API]
+  C --> CA[Catalog API]
+  C --> CU[Customer API]
+
+  %% Databases
+  O --> ODB[(Order DB)]
+  CA --> CAB[(Catalog DB)]
+  CU --> CDB[(Customer DB)]
+
+  %% Outbox + messaging
+  O --> OB[Outbox]
+  OB --> SB[(Azure Service Bus<br/>Topics / Queues)]
+
+  %% Downstream services
+  SB --> I[Inventory Svc]
+  SB --> P[Payment Svc]
+
+  I --> IDB[(Inventory DB)]
+  P --> PDB[(Payment DB)]
+
+  I --> S[Shipping Svc]
+  P --> S
+  S --> SDB[(Shipping DB)]
+
+  %% Cross-cutting platform
+  subgraph X[Cross-cutting platform]
+    X1[Azure Entra ID / Identity Provider]
+    X2[Managed Identity]
+    X3[Azure Key Vault]
+    X4[Azure App Configuration]
+    X5[Redis]
+    X6[OpenTelemetry]
+    X7[Application Insights / Azure Monitor]
+    X8[Container Registry]
+    X9[AKS]
+    X10[CI / CD]
+    X11[Autoscaling]
+    X12[Centralized logs]
+    X13[Metrics + Alerts]
+  end
+
+  %% Dotted relationships
+  C -. auth .-> X1
+  O -. managed identity .-> X2
+  CA -. secrets .-> X3
+  CU -. config .-> X4
+  O -. cache .-> X5
+  CA -. telemetry .-> X6
+  CU -. telemetry .-> X6
+  I -. telemetry .-> X6
+  P -. telemetry .-> X6
+  S -. telemetry .-> X6
+  X6 -. observability .-> X7
+  X8 -. images .-> X9
+  X10 -. deploys .-> X9
+  X9 -. scales .-> X11
+  X7 -. logs .-> X12
+  X7 -. alerts .-> X13
+
+  classDef edge fill:#e0f2fe,stroke:#0284c7,color:#0f172a,stroke-width:1.5px;
+  classDef gateway fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef api fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef db fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef broker fill:#06b6d4,stroke:#0891b2,color:#ffffff,stroke-width:2px;
+  classDef svc fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:2px;
+  classDef platform fill:#f3f4f6,stroke:#9ca3af,color:#111827,stroke-width:1.2px;
+
+  class A edge;
+  class B gateway;
+  class C api;
+  class O,CA,CU svc;
+  class ODB,CAB,CDB,IDB,PDB,SDB db;
+  class OB broker;
+  class SB broker;
+  class I,P,S svc;
+  class X1,X2,X3,X4,X5,X6,X7,X8,X9,X10,X11,X12,X13 platform;
 ```
 
 The exact technologies can change. The important interview point is
@@ -131,8 +257,121 @@ boundaries, communication, data ownership, security, reliability,
 observability, and deployment.
 
 ## Architecture
+```mermaid
+flowchart TD
+    CLIENT(["Web / Mobile Clients"]) -->|"HTTPS"| FD["Azure Front Door + WAF"]
+    FD --> APIM["API Gateway / Azure API Management"]
 
-``` text
+    APIM --> ORDER["Order Service"]
+    APIM --> CATALOG["Catalog Service"]
+    APIM --> CUSTOMER["Customer Service"]
+
+    ORDER --> ODB[("Order DB")]
+    CATALOG --> CDB[("Catalog DB")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    subgraph OUTBOXFLOW["Transactional Outbox"]
+        direction TB
+        OUTBOX[("Outbox Table in Order DB")]
+        PUB["Outbox Publisher"]
+        OUTBOX -->|"Read committed events"| PUB
+    end
+
+    ORDER -->|"Same local transaction as order data"| OUTBOX
+    PUB -->|"Publish outbox events"| BUS[["Azure Service Bus"]]
+
+    BUS --- FEATURES["Topics / Queues / DLQ / Sessions where required"]
+
+    BUS -->|"Inventory subscription"| INVENTORY["Inventory Service"]
+    BUS -->|"Payment subscription"| PAYMENT["Payment Service"]
+    BUS -->|"Notification subscription"| NOTIFY["Notification Service"]
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+
+    INVENTORY -->|"Publish inventory result"| BUS
+    PAYMENT -->|"Publish payment result"| BUS
+
+    BUS -->|"Deliver correlated result events"| SAGA["Saga Workflow"]
+    SAGA --> CHECK{"Inventory reserved and payment successful?"}
+
+    CHECK -->|"Yes — Request shipment"| SHIPPING["Shipping Service"]
+    CHECK -->|"No — Await results or compensate on failure"| SAGA
+
+    SHIPPING --> SDB[("Shipping DB")]
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef workflow fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef decision fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+    classDef note fill:#f8fafc,stroke:#94a3b8,color:#334155
+
+    class CLIENT client
+    class FD,APIM gateway
+    class ORDER,CATALOG,CUSTOMER,INVENTORY,PAYMENT,NOTIFY,SHIPPING,PUB service
+    class ODB,CDB,CUDB,OUTBOX,IDB,PDB,SDB database
+    class BUS broker
+    class SAGA workflow
+    class CHECK decision
+    class FEATURES note
+
+    style OUTBOXFLOW fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+```
+
+```mermaid
+flowchart TD
+  %% Entry
+  A[Web / Mobile Clients] -->|HTTPS| B[Front Door + WAF]
+  B --> C[API Gateway / APIM]
+
+  %% Core services
+  C --> O[Order Service]
+  C --> CA[Catalog Service]
+  C --> CU[Customer Svc]
+
+  %% Databases
+  O --> ODB[(Order DB)]
+  CA --> CDB[(Catalog DB)]
+  CU --> CUDB[(Customer DB)]
+
+  %% Outbox / messaging
+  O --> OB[Outbox events]
+  OB --> SB[(Azure Service Bus<br/>Topics / Queues / DLQ / Sessions)]
+
+  %% Async consumers
+  SB --> I[Inventory Svc]
+  SB --> P[Payment Svc]
+  SB --> N[Notification]
+
+  I --> IDB[(Inventory DB)]
+  P --> PDB[(Payment DB)]
+
+  %% Saga workflow and shipping
+  I --> SAGA[Saga Workflow]
+  P --> SAGA
+  SAGA --> S[Shipping Svc]
+  S --> SDB[(Shipping DB)]
+
+  %% Styling
+  classDef edge fill:#e0f2fe,stroke:#0284c7,color:#0f172a,stroke-width:1.5px;
+  classDef gateway fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef service fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef db fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef broker fill:#06b6d4,stroke:#0891b2,color:#ffffff,stroke-width:2px;
+  classDef workflow fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:2px;
+
+  class A edge;
+  class B,C gateway;
+  class O,CA,CU,I,P,N,S service;
+  class ODB,CDB,CUDB,IDB,PDB,SDB db;
+  class OB,SB broker;
+  class SAGA workflow;
+```
+
+<!-- ``` text
                         +-----------------------+
                         | Web / Mobile Clients  |
                         +-----------+-----------+
@@ -184,7 +423,7 @@ observability, and deployment.
                Shipping Svc
                      |
                  Shipping DB
-```
+``` -->
 
 ## Communication
 
@@ -243,17 +482,24 @@ I would include:
 
 ## Security
 
-``` text
-External users
-      |
-OAuth2 / OIDC
-      |
-API Gateway
-      |
-Microservices
+``` mermaid
+flowchart TD
+  A[External users] --> B[OAuth2 / OIDC] --> C[API Gateway] --> D[Microservices]
 
-Service-to-service:
-Managed Identity / workload identity
+  D --> E[Service-to-service]
+  E --> F[Managed Identity / Workload Identity]
+
+  classDef user fill:#e0f2fe,stroke:#0284c7,color:#0f172a,stroke-width:1.5px;
+  classDef auth fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef gateway fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef service fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef note fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:2px;
+
+  class A user;
+  class B auth;
+  class C gateway;
+  class D service;
+  class E,F note;
 ```
 
 Secrets are stored in Key Vault rather than application configuration
@@ -277,16 +523,21 @@ Trace context is propagated across HTTP and message headers.
 
 Every service is packaged independently:
 
-``` text
-Source
-  |
-CI
-  |
-Docker image
-  |
-Azure Container Registry
-  |
-AKS
+``` mermaid
+flowchart TD
+  A[Source] --> B[CI] --> C[Docker Image] --> D[(Azure Container Registry)] --> E[AKS]
+
+  classDef source fill:#e0f2fe,stroke:#0284c7,color:#0f172a,stroke-width:1.5px;
+  classDef ci fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef image fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef registry fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef cluster fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:2px;
+
+  class A source;
+  class B ci;
+  class C image;
+  class D registry;
+  class E cluster;
 ```
 
 Kubernetes handles:
@@ -583,20 +834,9 @@ remain tightly coupled.
 
 Bad architecture:
 
-``` text
-Order
-  |
-  v
-Inventory
-  |
-  v
-Payment
-  |
-  v
-Customer
-  |
-  v
-Shipping
+``` mermaid
+flowchart TD
+  A[Order] --> B[Inventory] --> C[Payment] --> D[Customer] --> E[Shipping]
 ```
 
 Every request depends synchronously on everything else.
@@ -662,24 +902,13 @@ This is a classic Saga problem.
 
 ## State flow
 
-``` text
-Order Created
-     |
-     v
-Reserve Inventory
-     |
-     v
-Authorize/Capture Payment
-     |
-     v
-Create Shipment
-     |
-     v
-Order Confirmed
+``` mermaid
+flowchart TD
+  A[Order Created] --> B[Reserve Inventory] --> C[Authorize / Capture Payment] --> D[Create Shipment] --> E[Order Confirmed]
 ```
 
 For a business-critical workflow, I often prefer orchestration.
-
+<!-- 
 ``` text
                      +------------------+
                      | Order Saga       |
@@ -690,24 +919,25 @@ For a business-critical workflow, I often prefer orchestration.
              |                |                |
              v                v                v
         Inventory          Payment          Shipping
+``` -->
+```mermaid
+flowchart TD
+  A[Order Saga<br/>Orchestrator] --> B[Inventory]
+  A --> C[Payment]
+  A --> D[Shipping]
+
+  classDef orchestrator fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef service fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+
+  class A orchestrator;
+  class B,C,D service;
 ```
 
 ## Example state machine
 
-``` text
-OrderCreated
-    |
-InventoryPending
-    |
-InventoryReserved
-    |
-PaymentPending
-    |
-PaymentCompleted
-    |
-ShippingPending
-    |
-Completed
+``` mermaid
+flowchart TD
+  A[OrderCreated] --> B[InventoryPending] --> C[InventoryReserved] --> D[PaymentPending] --> E[PaymentCompleted] --> F[ShippingPending] --> G[Completed]
 ```
 
 Possible failure states:
@@ -817,20 +1047,28 @@ Instead, design **business consistency**.
 
 ## Building blocks
 
-``` text
-Local ACID transaction
-+
-Transactional Outbox
-+
-Reliable messaging
-+
-Idempotent consumers
-+
-Saga
-+
-Compensation
-+
-Reconciliation
+``` mermaid
+flowchart TD
+    ACID["Local ACID Transaction"] --> OUTBOX[("Transactional Outbox")]
+    OUTBOX --> MSG[["Reliable Messaging"]]
+    MSG --> CONSUMER["Idempotent Consumers"]
+    CONSUMER --> SAGA["Saga"]
+    SAGA --> COMP["Compensation"]
+    COMP --> RECON["Reconciliation"]
+
+    classDef transaction fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef storage fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef messaging fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef consumer fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef workflow fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef recovery fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+
+    class ACID transaction
+    class OUTBOX storage
+    class MSG messaging
+    class CONSUMER consumer
+    class SAGA workflow
+    class COMP,RECON recovery
 ```
 
 ## Example
@@ -898,34 +1136,37 @@ Version
 
 ## Flow
 
-``` text
-OrderCreated
-      |
-      v
-Saga: ReserveInventory
-      |
-      +-- success --> ChargePayment
-      |
-      +-- failure --> CancelOrder
+```mermaid
+flowchart TD
+    START(["OrderCreated"]) --> RI["Saga: Reserve Inventory"]
 
-ChargePayment
-      |
-      +-- success --> CreateShipment
-      |
-      +-- failure --> ReleaseInventory
+    RI -->|"Success"| CP["Charge Payment"]
+    RI -->|"Failure"| CO["Cancel Order"]
 
-CreateShipment
-      |
-      +-- success --> CompleteOrder
-      |
-      +-- failure --> RefundPayment
-                       |
-                       v
-                 ReleaseInventory
-                       |
-                       v
-                  CancelOrder
+    CP -->|"Success"| CS["Create Shipment"]
+    CP -->|"Failure"| RELEASE["Release Inventory"]
+
+    CS -->|"Success"| COMPLETE(["Complete Order"])
+    CS -->|"Failure"| REFUND["Refund Payment"]
+
+    REFUND --> RELEASE
+    RELEASE --> CO
+    CO --> CANCELLED(["Order Cancelled"])
+
+    classDef event fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef action fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef success fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef compensation fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef cancelled fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+
+    class START event
+    class RI,CP,CS action
+    class COMPLETE success
+    class REFUND,RELEASE compensation
+    class CO,CANCELLED cancelled
 ```
+
+
 
 ## Production requirements
 
@@ -1219,15 +1460,12 @@ Suppose the service timed out while calling a provider.
 
 Do **not** immediately assume payment failed.
 
-``` text
-Payment request timeout
-        |
-        v
-Query provider using merchant transaction ID
-        |
-    +---+---+
-    |       |
- Paid     Not Paid
+``` mermaid
+flowchart TD
+    T(["Payment Request Timeout"]) --> Q["Query Provider Using Merchant Transaction ID"]
+    Q --> S{"Payment Status?"}
+    S -->|"Paid"| P(["Paid"])
+    S -->|"Not Paid"| N(["Not Paid"])
 ```
 
 This prevents duplicate charges.
@@ -1434,20 +1672,36 @@ Use OpenTelemetry.
 
 ## Trace structure
 
-``` text
-Trace ID: 7f123
+``` mermaid
+flowchart TD
+    subgraph TRACE["Distributed Trace — Trace ID: 7f123"]
+        direction TB
+        G["Gateway Span"]
+        O["Span: POST /orders"]
+        SQL[("Span: SQL INSERT")]
+        PUB["Span: Publish OrderCreated"]
+        I["Span: Inventory Consumer"]
+        P["Span: Payment Consumer"]
 
-Gateway
- |
- +-- Span: POST /orders
-       |
-       +-- Span: SQL INSERT
-       |
-       +-- Span: Publish OrderCreated
-                    |
-                    +-- Inventory consumer span
-                    |
-                    +-- Payment consumer span
+        G --> O
+        O --> SQL
+        O --> PUB
+        PUB --> I & P
+    end
+
+    classDef gateway fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef request fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef publish fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef consumer fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class G gateway
+    class O request
+    class SQL database
+    class PUB publish
+    class I,P consumer
+
+    style TRACE fill:#f8fafc,stroke:#64748b,stroke-width:2px
 ```
 
 ## HTTP
@@ -1739,28 +1993,32 @@ Useful for risk reduction.
 
 Use layered security.
 
-``` text
-User
- |
- v
-Identity Provider / Entra ID
- |
- | OAuth2/OIDC token
- v
-Front Door/WAF
- |
- v
-API Management
- |
- v
-Microservice
- |
- | Managed Identity
- +---------> Key Vault
- |
- +---------> Azure SQL
- |
- +---------> Service Bus
+``` mermaid
+flowchart TD
+    U(["User"]) -->|"Sign in"| IDP["Identity Provider / Microsoft Entra ID"]
+    IDP -->|"OAuth 2.0 / OIDC tokens"| CLIENT["Client Application"]
+    CLIENT -->|"HTTPS + Access Token"| FD["Azure Front Door / WAF"]
+    FD --> APIM["Azure API Management"]
+    APIM -->|"Validate Access Token / Forward Request"| MS["Microservice"]
+
+    MS -->|"Authenticate Using Managed Identity"| MI["Managed Identity"]
+    MI -->|"Authorized Access"| KV[("Azure Key Vault")]
+    MI -->|"Authorized Access"| SQL[("Azure SQL")]
+    MI -->|"Authorized Access"| SB[["Azure Service Bus"]]
+
+    classDef user fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef identity fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef gateway fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef service fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef resource fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+
+    class U,CLIENT user
+    class IDP,MI identity
+    class FD,APIM gateway
+    class MS service
+    class KV,SQL resource
+    class SB broker
 ```
 
 ## User authentication
@@ -2056,18 +2314,9 @@ Do not cache simply because Redis is available.
 
 ## Step 9 --- Security
 
-``` text
-Entra ID
-   |
-OAuth2/OIDC
-   |
-APIM
-   |
-Services
-   |
-Managed Identity
-   |
-Azure resources
+``` mermaid
+flowchart TD
+  A[Entra ID] --> B[OAuth2 / OIDC] --> C[APIM] --> D[Services] --> E[Managed Identity] --> F[Azure resources]
 ```
 
 Use Key Vault for unavoidable secrets.
@@ -2090,23 +2339,37 @@ Build once and promote the same immutable artifact across environments.
 
 ## Step 11 --- AKS
 
-``` text
-AKS Cluster
+``` mermaid
+flowchart TD
+  subgraph AKS["AKS Cluster"]
+    subgraph NS["Namespace: production"]
+      subgraph O["Order Deployment"]
+        O1[Pod]
+        O2[Pod]
+        O3[Pod]
+      end
 
-Namespace: production
+      subgraph P["Payment Deployment"]
+        P1[Pod]
+        P2[Pod]
+      end
 
-Order Deployment
-  - Pod
-  - Pod
-  - Pod
+      subgraph I["Inventory Deployment"]
+        I1[Pod]
+        I2[Pod]
+      end
+    end
+  end
 
-Payment Deployment
-  - Pod
-  - Pod
+  classDef cluster fill:#eff6ff,stroke:#2563eb,color:#0f172a,stroke-width:2px;
+  classDef ns fill:#ecfdf5,stroke:#10b981,color:#0f172a,stroke-width:1.5px;
+  classDef deploy fill:#f3e8ff,stroke:#8b5cf6,color:#0f172a,stroke-width:1.5px;
+  classDef pod fill:#fff7ed,stroke:#f59e0b,color:#0f172a,stroke-width:1px;
 
-Inventory Deployment
-  - Pod
-  - Pod
+  class AKS cluster;
+  class NS ns;
+  class O,P,I deploy;
+  class O1,O2,O3,P1,P2,I1,I2 pod;
 ```
 
 Use:
@@ -2127,27 +2390,18 @@ Use:
 
 Scale APIs based on signals such as CPU or custom metrics.
 
-``` text
-3 pods
-  |
-Traffic increases
-  |
-HPA
-  |
-10 pods
+``` mermaid
+flowchart TD
+  A[3 Pods] --> B[Traffic Increases] --> C[HPA] --> D[10 Pods]
 ```
 
 ### KEDA
 
 Useful for event-driven workers.
 
-``` text
-Service Bus queue length increases
-       |
-       v
-KEDA
-       |
-Scale consumers
+``` mermaid
+flowchart TD
+  A[Service Bus queue length increases] --> B[KEDA] --> C[Scale consumers]
 ```
 
 ### Cluster autoscaling
@@ -2188,65 +2442,107 @@ Avoid retries for unsafe operations unless idempotency is guaranteed.
 
 Use OpenTelemetry.
 
-``` text
-.NET Services
-    |
-OpenTelemetry
-    |
-Application Insights / Azure Monitor
-```
+``` mermaid
+flowchart TD
+    NET[".NET Services"] --> OTEL["OpenTelemetry"]
 
-Collect:
+    subgraph TELEMETRY["Collect Telemetry"]
+        direction LR
+        LOGS["Logs"]
+        METRICS["Metrics"]
+        TRACES["Distributed Traces"]
+    end
 
-``` text
-Logs
-Metrics
-Traces
-```
+    OTEL --> LOGS & METRICS & TRACES
+    LOGS & METRICS & TRACES --> MONITOR["Application Insights / Azure Monitor"]
+    MONITOR --> DASH["Dashboards + Alerts"]
 
-Dashboards:
+    subgraph APP["Application Performance"]
+        RPS["Requests per Second (RPS)"]
+        LATENCY["P95 / P99 Latency"]
+        ERRORS["Error Rate"]
+    end
 
-``` text
-RPS
-P95/P99
-Error rate
-CPU
-Memory
-DB latency
-Queue depth
-Consumer lag
-DLQ
-Saga failures
+    subgraph INFRA["Infrastructure and Database"]
+        CPU["CPU Usage"]
+        MEMORY["Memory Usage"]
+        DB["Database Latency"]
+    end
+
+    subgraph ASYNC["Messaging and Workflows"]
+        QUEUE["Queue Depth"]
+        LAG["Consumer Lag"]
+        DLQ["DLQ Message Count"]
+        SAGA["Saga Failures"]
+    end
+
+    DASH --> APP & INFRA & ASYNC
+
+    classDef service fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef telemetry fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef monitor fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef metric fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class NET service
+    class OTEL,LOGS,METRICS,TRACES telemetry
+    class MONITOR,DASH monitor
+    class RPS,LATENCY,ERRORS,CPU,MEMORY,DB,QUEUE,LAG,DLQ,SAGA metric
+
+    style TELEMETRY fill:#eff6ff,stroke:#93c5fd,stroke-width:2px
+    style APP fill:#f0fdf4,stroke:#86efac,stroke-width:2px
+    style INFRA fill:#f0fdf4,stroke:#86efac,stroke-width:2px
+    style ASYNC fill:#f0fdf4,stroke:#86efac,stroke-width:2px
 ```
 
 ------------------------------------------------------------------------
 
 ## Step 15 --- CI/CD
 
-``` text
-Git
- |
-Pull Request
- |
-Build
- |
-Unit Tests
- |
-Integration Tests
- |
-Contract Tests
- |
-Security Scan
- |
-Docker Build
- |
-Push ACR
- |
-Deploy Dev
- |
-Deploy QA
- |
-Canary/Production
+``` mermaid
+flowchart TD
+    G(["Git"]) --> PR["Pull Request"]
+
+    subgraph CI["Continuous Integration"]
+        direction TB
+        BUILD["Build"] --> UNIT["Unit Tests"]
+        UNIT --> INT["Integration Tests"]
+        INT --> CONTRACT["Contract Tests"]
+        CONTRACT --> SCAN["Security Scan"]
+        SCAN --> DOCKER["Docker Build"]
+        DOCKER --> ACR[["Push to Azure Container Registry"]]
+    end
+
+    PR --> BUILD
+
+    subgraph CD["Continuous Delivery"]
+        direction TB
+        DEV["Deploy Dev"] --> QA["Deploy QA"]
+        QA --> CANARY["Production Canary"]
+        CANARY --> CHECK{"Health Checks Passed?"}
+        CHECK -->|"Yes"| PROD(["Full Production Rollout"])
+        CHECK -->|"No"| ROLLBACK["Roll Back"]
+    end
+
+    ACR --> DEV
+
+    classDef source fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef build fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef test fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef security fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef registry fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef deploy fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef failure fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+
+    class G,PR source
+    class BUILD,DOCKER build
+    class UNIT,INT,CONTRACT,PROD test
+    class SCAN,CHECK security
+    class ACR registry
+    class DEV,QA,CANARY deploy
+    class ROLLBACK failure
+
+    style CI fill:#eff6ff,stroke:#93c5fd,stroke-width:2px
+    style CD fill:#faf5ff,stroke:#c4b5fd,stroke-width:2px
 ```
 
 Use Infrastructure as Code where possible.
@@ -2379,6 +2675,212 @@ CI/CD
 Infrastructure as Code
 Backup / DR
 ```
+```mermaid
+flowchart TD
+  %% Edge / entry
+  A[Web / Mobile] --> B[Azure Front Door + WAF]
+  B --> C[Azure API Management]
+
+  %% API layer
+  C --> O[Order API<br/>.NET / AKS]
+  C --> CA[Catalog API<br/>.NET / AKS]
+  C --> CU[Customer API<br/>.NET / AKS]
+
+  %% Core data stores
+  O --> ODB[(Order DB)]
+  CA --> CAB[(Catalog DB)]
+  CU --> CDB[(Customer DB)]
+
+  %% Outbox and messaging
+  O --> OT[Outbox Table]
+  OT --> SB[(Azure Service Bus<br/>Topics / Queues / DLQ / Sessions)]
+
+  %% Async services
+  SB --> I[Inventory Svc<br/>.NET / AKS]
+  SB --> P[Payment Svc<br/>.NET / AKS]
+
+  I --> IDB[(Inventory DB)]
+  P --> PDB[(Payment DB)]
+
+  %% Saga and fulfillment
+  I --> SAGA[Saga Orchestrator]
+  P --> SAGA
+  SAGA --> S[Shipping Svc]
+  S --> SDB[(Shipping DB)]
+
+  %% Cross-cutting platform
+  subgraph X[Platform / Cross Cutting]
+    X1[Azure Entra ID]
+    X2[Managed Identity / Workload Identity]
+    X3[Azure Key Vault]
+    X4[Azure App Configuration]
+    X5[Azure Cache for Redis]
+    X6[Azure Container Registry]
+    X7[AKS]
+    X8[OpenTelemetry]
+    X9[Application Insights]
+    X10[Azure Monitor]
+    X11[CI / CD]
+    X12[Infrastructure as Code]
+    X13[Backup / DR]
+  end
+
+  %% Dotted dependencies
+  C -. auth .-> X1
+  O -. identity .-> X2
+  CA -. secrets .-> X3
+  CU -. config .-> X4
+  O -. cache .-> X5
+  X6 -. images .-> X7
+  X7 -. runs .-> X11
+  X7 -. deploys .-> X12
+  O -. telemetry .-> X8
+  CA -. telemetry .-> X8
+  CU -. telemetry .-> X8
+  I -. telemetry .-> X8
+  P -. telemetry .-> X8
+  S -. telemetry .-> X8
+  X8 -. traces .-> X9
+  X8 -. metrics .-> X10
+  X13 -. recovery .-> ODB
+  X13 -. recovery .-> CAB
+  X13 -. recovery .-> CDB
+  X13 -. recovery .-> IDB
+  X13 -. recovery .-> PDB
+  X13 -. recovery .-> SDB
+
+  %% Styles
+  classDef edge fill:#dbeafe,stroke:#2563eb,color:#0f172a,stroke-width:1.5px;
+  classDef gateway fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef api fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef db fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef broker fill:#06b6d4,stroke:#0891b2,color:#ffffff,stroke-width:2px;
+  classDef workflow fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:2px;
+  classDef platform fill:#f3f4f6,stroke:#9ca3af,color:#111827,stroke-width:1.2px;
+
+  class A edge;
+  class B,C gateway;
+  class O,CA,CU,I,P,S api;
+  class ODB,CAB,CDB,IDB,PDB,SDB db;
+  class OT,SB broker;
+  class SAGA workflow;
+  class X1,X2,X3,X4,X5,X6,X7,X8,X9,X10,X11,X12,X13 platform;
+```
+
+```mermaid
+flowchart TD
+    CLIENT(["Web / Mobile Clients"]) --> FD["Azure Front Door + WAF"]
+    FD --> APIM["Azure API Management"]
+
+    subgraph AKS["Azure Kubernetes Service (AKS) — .NET Workloads"]
+        direction TB
+        ORDER["Order API"]
+        CATALOG["Catalog API"]
+        CUSTOMER["Customer API"]
+        PUB["Outbox Publisher"]
+        INVENTORY["Inventory Service"]
+        PAYMENT["Payment Service"]
+        SAGA["Saga Orchestrator"]
+        SHIPPING["Shipping Service"]
+    end
+
+    APIM --> ORDER & CATALOG & CUSTOMER
+
+    subgraph ORDERDB["Order DB — Atomic Local Transaction"]
+        DATA[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Save order + event atomically"| ORDERDB
+    CATALOG --> CDB[("Catalog DB")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    OUTBOX -->|"Read committed events"| PUB
+    PUB -->|"Publish OrderCreated"| BUS[["Azure Service Bus"]]
+    BUS --- FEATURES["Topics / Queues / DLQ / Sessions"]
+
+    BUS -->|"OrderCreated / Step results"| SAGA
+    SAGA -->|"Publish step commands"| BUS
+
+    BUS -->|"Reserve inventory command"| INVENTORY
+    BUS -->|"Process payment command"| PAYMENT
+    BUS -->|"Create shipment command"| SHIPPING
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+    SHIPPING --> SDB[("Shipping DB")]
+    SAGA --> SAGADB[("Saga State Store")]
+
+    INVENTORY -->|"Inventory result"| BUS
+    PAYMENT -->|"Payment result"| BUS
+    SHIPPING -->|"Shipment result"| BUS
+
+    subgraph PLATFORM["Platform / Cross-Cutting Capabilities"]
+        direction TB
+
+        subgraph SECURITY["Identity and Configuration"]
+            ENTRA["Microsoft Entra ID"]
+            IDENTITY["Managed Identity / Workload Identity"]
+            KV["Azure Key Vault"]
+            CONFIG["Azure App Configuration"]
+        end
+
+        subgraph OPERATIONS["Caching and Observability"]
+            REDIS[("Azure Cache for Redis")]
+            OTEL["OpenTelemetry"]
+            AI["Application Insights"]
+            MONITOR["Azure Monitor"]
+            OTEL --> AI --> MONITOR
+        end
+
+        subgraph DELIVERY["Delivery and Recovery"]
+            CICD["CI/CD"]
+            ACR[["Azure Container Registry"]]
+            IAC["Infrastructure as Code"]
+            DR["Backup / Disaster Recovery"]
+            CICD -->|"Build, scan and push"| ACR
+        end
+    end
+
+    ENTRA -.->|"Authentication / Authorization"| APIM
+    IDENTITY -.->|"Workload authentication"| AKS
+    KV -.->|"Secrets / Certificates"| AKS
+    CONFIG -.->|"Settings / Feature flags"| AKS
+    AKS -.->|"Cache access"| REDIS
+    AKS -.->|"Logs / Metrics / Traces"| OTEL
+    ACR -.->|"Container images"| AKS
+    CICD -.->|"Deploy workloads"| AKS
+    IAC -.->|"Provision infrastructure"| AKS
+    DR -.->|"Backup / Restore"| ORDERDB
+    DR -.->|"Backup / Restore"| CDB & CUDB & IDB & PDB & SDB & SAGADB
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef workflow fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+    classDef platform fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef note fill:#f8fafc,stroke:#94a3b8,color:#334155
+
+    class CLIENT client
+    class FD,APIM gateway
+    class ORDER,CATALOG,CUSTOMER,PUB,INVENTORY,PAYMENT,SHIPPING service
+    class DATA,OUTBOX,CDB,CUDB,IDB,PDB,SDB,SAGADB,REDIS database
+    class BUS,ACR broker
+    class SAGA workflow
+    class ENTRA,IDENTITY,KV,CONFIG,OTEL,AI,MONITOR,CICD,IAC,DR platform
+    class FEATURES note
+
+    style AKS fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style ORDERDB fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+    style PLATFORM fill:#f8fafc,stroke:#94a3b8,stroke-width:2px
+    style SECURITY fill:#f0fdf4,stroke:#86efac
+    style OPERATIONS fill:#f0fdf4,stroke:#86efac
+    style DELIVERY fill:#f0fdf4,stroke:#86efac
+```
+
+The Saga Orchestrator sends commands in sequence and advances after successful results. On failure, it issues compensation commands through Service Bus.
 
 ------------------------------------------------------------------------
 
@@ -2606,38 +3108,30 @@ gateway and services.
 
 The strongest architecture answer connects:
 
-``` text
-DOMAIN
-   |
-   v
-SERVICE BOUNDARIES
-   |
-   v
-DATA OWNERSHIP
-   |
-   v
-COMMUNICATION
-   |
-   v
-CONSISTENCY
-   |
-   v
-RESILIENCE
-   |
-   v
-SECURITY
-   |
-   v
-OBSERVABILITY
-   |
-   v
-DEPLOYMENT
-   |
-   v
-SCALABILITY
-   |
-   v
-OPERATIONS
+``` mermaid
+flowchart TD
+    DOMAIN(["Domain"]) --> BOUNDARIES["Service Boundaries"]
+    BOUNDARIES --> DATA[("Data Ownership")]
+    DATA --> COMM["Communication"]
+    COMM --> CONS["Consistency"]
+    CONS --> RES["Resilience"]
+    RES --> SEC["Security"]
+    SEC --> OBS["Observability"]
+    OBS --> DEPLOY["Deployment"]
+    DEPLOY --> SCALE["Scalability"]
+    SCALE --> OPS(["Operations"])
+
+    classDef domain fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef design fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef reliability fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef security fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+    classDef delivery fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class DOMAIN domain
+    class BOUNDARIES,DATA,COMM design
+    class CONS,RES reliability
+    class SEC security
+    class OBS,DEPLOY,SCALE,OPS delivery
 ```
 
 That demonstrates that you understand microservices as a **production

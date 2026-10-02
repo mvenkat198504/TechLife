@@ -114,13 +114,11 @@ Common technologies:
 
 Example:
 
-``` text
-Client
-   |
-   v
-Order Service ----HTTP/gRPC----> Inventory Service
-   |
- waits for response
+```mermaid
+flowchart TD
+    C["Client"] --> O["Order Service"]
+    O -->|"HTTP/gRPC request"| I["Inventory Service"]
+    I -->|"Response — Order Service waits"| O
 ```
 
 Example:
@@ -145,8 +143,9 @@ var response = await httpClient.GetAsync(
 
 For example:
 
-``` text
-Order -> Inventory -> Payment -> Shipping -> Notification
+```mermaid
+flowchart LR
+  Order --> Inventory --> Payment --> Shipping --> Notification
 ```
 
 If every dependency must respond before the original request completes,
@@ -166,16 +165,11 @@ Typical technologies:
 
 Example:
 
-``` text
-Order Service
-     |
-     | OrderCreated
-     v
-Message Broker
-   /      \
-  v        v
-Inventory Payment
-Service   Service
+```mermaid
+flowchart TD
+    O["Order Service"] -->|"OrderCreated"| B["Message Broker"]
+    B --> I["Inventory Service"]
+    B --> P["Payment Service"]
 ```
 
 ### Advantages
@@ -301,14 +295,12 @@ Choose messaging when:
 An API Gateway is the **entry point** between external clients and
 backend services.
 
-``` text
-Web / Mobile Client
-        |
-        v
-    API Gateway
-     /   |    \
-    v    v     v
- Order Product Customer
+```mermaid
+flowchart TD
+  A[Web / Mobile Client] --> B[API Gateway]
+  B --> C[Order]
+  B --> D[Product]
+  B --> E[Customer]
 ```
 
 Possible technologies include:
@@ -709,20 +701,14 @@ A production Saga should consider:
 
 Services react to events without a central coordinator.
 
-``` text
-Order Service
-   |
-OrderCreated
-   v
-Inventory Service
-   |
-InventoryReserved
-   v
-Payment Service
-   |
-PaymentCompleted
-   v
-Shipping Service
+``` mermaid
+flowchart TD
+  A[Order Service] --> B[OrderCreated]
+  B --> C[Inventory Service]
+  C --> D[InventoryReserved]
+  D --> E[Payment Service]
+  E --> F[PaymentCompleted]
+  F --> G[Shipping Service]
 ```
 
 #### Advantages
@@ -741,11 +727,11 @@ Shipping Service
 
 A central orchestrator controls the workflow.
 
-``` text
-          Saga Orchestrator
-          /      |       \
-         v       v        v
-    Inventory  Payment  Shipping
+```mermaid
+   flowchart TD
+  A[Saga Orchestrator] --> B[Inventory]
+  A --> C[Payment]
+  A --> D[Shipping]
 ```
 
 The orchestrator sends commands and processes responses/events.
@@ -1098,21 +1084,13 @@ layer for authentication.
 
 A typical architecture:
 
-``` text
-User
- |
- v
-Identity Provider
- |
- | Access Token
- v
-Client
- |
- v
-API Gateway
- |
- v
-Microservices
+``` mermaid
+flowchart TD
+  A[User] --> B[Identity Provider]
+  B --> C[Access Token]
+  C --> D[Client]
+  D --> E[API Gateway]
+  E --> F[Microservices]
 ```
 
 ### JWT contains claims
@@ -1211,28 +1189,26 @@ ENTRYPOINT ["dotnet", "OrderService.dll"]
 
 ### Typical CI/CD flow
 
-``` text
-Developer pushes code
-        |
-        v
-CI pipeline
-        |
-        +--> Restore
-        +--> Build
-        +--> Unit tests
-        +--> Security/image checks
-        +--> Docker build
-        +--> Push image
-        |
-        v
-Container Registry
-        |
-        v
-Deployment platform
-        |
-        +--> Kubernetes / AKS
-        +--> Azure Container Apps
-        +--> ECS, etc.
+``` mermaid
+flowchart TD
+    D["Developer pushes code"] --> CI["CI pipeline"]
+
+    subgraph CIStages["CI stages"]
+        R["Restore"] --> B["Build"]
+        B --> T["Unit tests"]
+        T --> S["Security checks"]
+        S --> DB["Docker build"]
+        DB --> IC["Image checks"]
+        IC --> P["Push image"]
+    end
+
+    CI --> R
+    P --> CR["Container Registry"]
+    CR --> DP["Deployment platform"]
+
+    DP --> AKS["Kubernetes / AKS"]
+    DP --> ACA["Azure Container Apps"]
+    DP --> ECS["Amazon ECS / Other platforms"]
 ```
 
 ### Why containers?
@@ -1317,13 +1293,11 @@ Store secrets in dedicated secret-management systems such as:
 
 A strong Azure architecture can use:
 
-``` text
-Microservice
-    |
-Managed Identity
-    |
-    +--> Azure Key Vault
-    +--> Azure App Configuration
+``` mermaid
+flowchart TD
+  A[Microservice] --> B[Managed Identity]
+  B --> C[Azure Key Vault]
+  B --> D[Azure App Configuration]
 ```
 
 This reduces the need to distribute credentials.
@@ -1354,14 +1328,9 @@ In microservices, one request may cross many services.
 
 Example:
 
-``` text
-Gateway
-  |
-Order Service
-  |
-Payment Service
-  |
-Inventory Service
+``` mermaid
+flowchart TD
+  A[Gateway] --> B[Order Service] --> C[Payment Service] --> D[Inventory Service]
 ```
 
 Independent log files are not enough.
@@ -1660,14 +1629,11 @@ Do not automatically begin with the hardest, most coupled module.
 
 ### Step 4: Put a routing layer in front
 
-``` text
-Client
-  |
-Gateway / Proxy
-  |
-  +------> New Microservice
-  |
-  +------> Existing Monolith
+```mermaid
+flowchart TD
+  A[Client] --> B[Gateway / Proxy]
+  B --> C[New Microservice]
+  B --> D[Existing Monolith]
 ```
 
 ### Step 5: Extract business capability and data ownership
@@ -1716,28 +1682,18 @@ Before scaling the number of services, establish:
 
 Example:
 
-``` text
-OrderCreated
-     |
-     +--> Inventory
-     +--> Notification
-     +--> Analytics
+```mermaid
+flowchart TD
+  A[OrderCreated] --> B[Inventory]
+  A --> C[Notification]
+  A --> D[Analytics]
 ```
 
 ### Step 9: Repeat incrementally
 
-``` text
-Monolith
-   |
-Extract Catalog
-   |
-Extract Notification
-   |
-Extract Orders
-   |
-Extract Payments
-   |
-...
+``` mermaid
+flowchart TD
+  A[Monolith] --> B[Extract Catalog] --> C[Extract Notification] --> D[Extract Orders] --> E[Extract Payments] --> F[...]
 ```
 
 The monolith gradually becomes smaller.
@@ -1773,33 +1729,14 @@ Watch for:
 
 A useful interview architecture is:
 
-``` text
-                    +------------------+
-Client ------------>|   API Gateway    |
-                    +--------+---------+
-                             |
-                             v
-                    +------------------+
-                    |  Order Service   |
-                    +--------+---------+
-                             |
-                       OrderCreated
-                             |
-                    +--------v---------+
-                    | Message Broker   |
-                    +---+----------+---+
-                        |          |
-             +----------v--+   +---v-------------+
-             | Inventory   |   | Payment Service |
-             | Service     |   +-----------------+
-             +-------------+
-                        |
-                 workflow/events
-                        |
-                 +------v-------+
-                 | Shipping     |
-                 | Service      |
-                 +--------------+
+``` mermaid
+flowchart TD
+    C["Client"] --> G["API Gateway"]
+    G --> O["Order Service"]
+    O -->|"OrderCreated"| B["Message Broker"]
+    B --> I["Inventory Service"]
+    B --> P["Payment Service"]
+    I -->|"Workflow / Events"| S["Shipping Service"]
 ```
 
 Each service owns its data:
