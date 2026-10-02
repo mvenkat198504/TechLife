@@ -1,3 +1,23 @@
+---
+id: azure-Security-001
+slug: What Is Azure Key Vault
+title: What Is Azure Key Vault
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Key Vault
+  - Azure Key Vault
+  - Azure Security
+
+summary:  What Is Azure Key Vault?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Azure Key Vault?
 ## Detailed Interview Preparation Guide with Flow Charts
 

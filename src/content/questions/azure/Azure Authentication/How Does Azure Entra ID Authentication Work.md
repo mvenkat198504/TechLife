@@ -1,3 +1,23 @@
+---
+id: azure-Authentication-004
+slug: How Does Azure Entra ID Authentication Work
+title: How Does Azure Entra ID Authentication Work
+categoryId: azure
+subcategory: Azure Authentication
+difficulty: Experienced
+tags:
+  - azure
+  - Entra ID
+  - Entra ID Authentication
+  - Azure Authentication
+
+summary: How Does Azure Entra ID Authentication Work
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Does Azure Entra ID Authentication Work?
 ## Detailed Interview Preparation Guide with Flow Charts
 

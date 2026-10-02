@@ -1,3 +1,23 @@
+---
+id: azure-Security-010
+slug: What is Azure Entra ID
+title: What is Azure Entra ID
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Entra ID
+  - Azure Entra ID
+  - Azure Security
+
+summary: What is Azure Entra ID?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What is Azure Entra ID?  
 _Interview Preparation Guide (with flow chart)_
 

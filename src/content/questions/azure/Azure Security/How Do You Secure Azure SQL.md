@@ -1,3 +1,23 @@
+---
+id: azure-Security-009
+slug: How Do You Secure Azure SQL
+title: How Do You Secure Azure SQL
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Secure Azure SQL
+  - SQL
+  - Azure Security
+
+summary: How Do You Secure Azure SQL?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Secure Azure SQL?
 ## Detailed Interview Preparation Guide with Flow Charts
 

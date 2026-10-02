@@ -1,3 +1,24 @@
+---
+id: azure-Security-006
+slug: How a .NET API Accesses Azure Key Vault
+title: How a .NET API Accesses Azure Key Vault
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - .NET API
+  - Azure Key Vault
+  - Managed Identity
+  - Azure Security
+
+summary: How a .NET API Accesses Azure Key Vault?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How a .NET API Accesses Azure Key Vault  
 _Interview Preparation Guide (with flow chart)_
 

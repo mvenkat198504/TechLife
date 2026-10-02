@@ -1,3 +1,23 @@
+---
+id: azure-Authentication-003
+slug: OAuth 2.0 / OIDC Authorization Code Flow
+title: OAuth 2.0 / OIDC Authorization Code Flow
+categoryId: azure
+subcategory: Azure Authentication
+difficulty: Experienced
+tags:
+  - azure
+  - OAuth 2.0
+  - OIDC Authorization
+  - Azure Authentication
+
+summary: OAuth 2.0 / OIDC Authorization Code Flow
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # OAuth 2.0 / OIDC Authorization Code Flow
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -1,3 +1,23 @@
+---
+id: azure-Authentication-007
+slug: Access Tokens vs Refresh Tokens
+title: Access Tokens vs Refresh Tokens
+categoryId: azure
+subcategory: Azure Authentication
+difficulty: Experienced
+tags:
+  - azure
+  - Tokens
+  - Refresh Tokens
+  - Azure Authentication
+
+summary: Access Tokens vs Refresh Tokens
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Access Tokens vs Refresh Tokens
 ## Detailed OAuth 2.0 / OpenID Connect Interview Preparation Guide
 

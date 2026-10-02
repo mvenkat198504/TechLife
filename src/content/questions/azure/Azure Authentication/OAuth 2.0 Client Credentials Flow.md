@@ -1,3 +1,23 @@
+---
+id: azure-Authentication-002
+slug: OAuth 2.0 vs OpenID Connect
+title: OAuth 2.0 vs OpenID Connect
+categoryId: azure
+subcategory: Azure Authentication
+difficulty: Experienced
+tags:
+  - azure
+  - OAuth 2.0
+  - OpenID Connect
+  - Azure Authentication
+
+summary: OAuth 2.0 vs OpenID Connect
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # OAuth 2.0 Client Credentials Flow  
 _Interview Preparation Guide (with flow chart)_
 

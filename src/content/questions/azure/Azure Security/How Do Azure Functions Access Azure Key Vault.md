@@ -1,3 +1,24 @@
+---
+id: azure-Security-005
+slug: How Do Azure Functions Access Azure Key Vault
+title: How Do Azure Functions Access Azure Key Vault
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Functions
+  - Azure Key Vault
+  - Managed Identity
+  - Azure Security
+
+summary: How Do Azure Functions Access Azure Key Vault?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do Azure Functions Access Azure Key Vault?
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -1,3 +1,23 @@
+---
+id: azure-Security-002
+slug:  Why Use Azure Key Vault
+title:  Why Use Azure Key Vault
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Key Vault
+  - Azure Key Vault
+  - Azure Security
+
+summary:  Why Use Azure Key Vault?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Why Use Azure Key Vault?
 ## Detailed Interview Preparation Guide with Flow Charts
 

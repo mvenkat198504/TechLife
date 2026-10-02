@@ -1,3 +1,22 @@
+---
+id: azure-Security-007
+slug: How Do You Secure Secrets in Azure
+title: How Do You Secure Secrets in Azure
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Secure Secrets
+  - Azure Security
+
+summary: How Do You Secure Secrets in Azure?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Secure Secrets in Azure?
 ## Detailed Interview Preparation Guide with Flow Charts
 

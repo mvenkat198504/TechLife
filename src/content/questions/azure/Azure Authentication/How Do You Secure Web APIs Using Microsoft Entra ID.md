@@ -1,3 +1,23 @@
+---
+id: azure-Authentication-005
+slug: How Do You Secure Web APIs Using Microsoft Entra ID
+title: How Do You Secure Web APIs Using Microsoft Entra ID
+categoryId: azure
+subcategory: Azure Authentication
+difficulty: Experienced
+tags:
+  - azure
+  - Entra ID
+  - Secure Web APIs
+  - Azure Authentication
+
+summary: How Do You Secure Web APIs Using Microsoft Entra ID
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Secure Web APIs Using Microsoft Entra ID?
 ## Detailed Interview Preparation Guide with Flow Charts
 

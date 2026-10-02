@@ -1,3 +1,23 @@
+---
+id: azure-Authentication-001
+slug: OAuth 2.0 vs OpenID Connect
+title: OAuth 2.0 vs OpenID Connect
+categoryId: azure
+subcategory: Azure Authentication
+difficulty: Experienced
+tags:
+  - azure
+  - OAuth 2.0 
+  - OpenID Connect
+  - Azure Authentication
+
+summary: OAuth 2.0 vs OpenID Connect
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # OAuth 2.0 vs OpenID Connect (OIDC)
 ## Detailed Interview Preparation Guide with Flow Charts
 

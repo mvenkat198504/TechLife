@@ -1,3 +1,23 @@
+---
+id: azure-Security-003
+slug: What Is Managed Identity in Azure
+title: What Is Managed Identity in Azure
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - Key Vault
+  - Managed Identity
+  - Azure Security
+
+summary:  What Is Managed Identity in Azure?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Managed Identity in Azure?
 ## Detailed Interview Preparation Guide with Flow Charts
 

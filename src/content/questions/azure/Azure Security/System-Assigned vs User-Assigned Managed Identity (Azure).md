@@ -1,3 +1,24 @@
+---
+id: azure-Security-004
+slug: What Is Managed Identity in Azure
+title: What Is Managed Identity in Azure
+categoryId: azure
+subcategory: Azure Security
+difficulty: Experienced
+tags:
+  - azure
+  - System-Assigned Managed Identity
+  - User-Assigned Managed Identity
+  - Managed Identity
+  - Azure Security
+
+summary:  What Is Managed Identity in Azure?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # System-Assigned vs User-Assigned Managed Identity (Azure)
 ## Detailed Interview Preparation Guide with Flow Charts
 
