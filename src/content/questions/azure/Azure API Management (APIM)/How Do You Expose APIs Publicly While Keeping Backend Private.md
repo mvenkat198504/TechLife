@@ -1,3 +1,24 @@
+---
+id: azure-API Management-008
+slug: How Do You Expose APIs Publicly While Keeping Backend Private
+title: How Do You Expose APIs Publicly While Keeping Backend Private
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - Expose APIs Publicly
+  - Backend Private
+  - APIM
+  - Azure API Management
+
+summary: How Do You Expose APIs Publicly While Keeping Backend Private?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Expose APIs Publicly While Keeping Backend Private?
 ## Detailed Interview Preparation Guide with Flow Charts (Azure APIM Pattern)
 

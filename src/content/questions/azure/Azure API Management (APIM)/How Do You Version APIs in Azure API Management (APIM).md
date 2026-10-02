@@ -1,3 +1,23 @@
+---
+id: azure-API Management-010
+slug: How Do You Version APIs in Azure API Management (APIM)
+title: How Do You Version APIs in Azure API Management (APIM)
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - Version APIs
+  - Version
+  - Azure API Management
+
+summary: How Do You Version APIs in Azure API Management (APIM)?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Version APIs in Azure API Management (APIM)?
 ## Detailed Interview Preparation Guide with Flow Charts
 

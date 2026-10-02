@@ -1,3 +1,23 @@
+---
+id: azure-API Management-001
+slug: What Is Azure API Management (APIM)
+title: What Is Azure API Management (APIM)
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - Azure API Management
+  - APIM
+  - Azure API Management
+
+summary: What Is Azure API Management (APIM)?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Azure API Management (APIM)?
 ## Detailed Interview Preparation Guide with Flow Charts
 

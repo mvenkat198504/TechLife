@@ -1,3 +1,23 @@
+---
+id: azure-API Management-005
+slug: How Do You Implement Rate Limiting in Azure API Management (APIM)
+title: How Do You Implement Rate Limiting in Azure API Management (APIM)
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - Rate Limiting
+  - APIM
+  - Azure API Management
+
+summary: How Do You Implement Rate Limiting in Azure API Management (APIM)?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Implement Rate Limiting in Azure API Management (APIM)?
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -80,10 +80,21 @@ export const questions = Object.values(questionFiles)
 export const getQuestionsByCategory = (categoryId) =>
   questions.filter((question) => question.categoryId === categoryId);
 
+const compareQuestionIds = (firstQuestion, secondQuestion) => {
+  const firstNumber = Number(firstQuestion.id?.match(/(\d{3})$/)?.[1]);
+  const secondNumber = Number(secondQuestion.id?.match(/(\d{3})$/)?.[1]);
+
+  if (Number.isNaN(firstNumber) || Number.isNaN(secondNumber)) {
+    return String(firstQuestion.id || '').localeCompare(String(secondQuestion.id || ''));
+  }
+
+  return firstNumber - secondNumber;
+};
+
 export const getQuestionsByCategoryAndSubcategory = (categoryId, subcategorySlug) =>
   getQuestionsByCategory(categoryId).filter(
     (question) => slugify(question.subcategory) === subcategorySlug
-  );
+  ).sort(compareQuestionIds);
 
 export const getSubcategoriesByCategory = (categoryId) => {
   const counts = new Map();

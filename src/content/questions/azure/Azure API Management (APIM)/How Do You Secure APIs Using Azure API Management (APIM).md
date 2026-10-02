@@ -1,3 +1,23 @@
+---
+id: azure-API Management-003
+slug: How Do You Secure APIs Using Azure API Management (APIM)
+title: How Do You Secure APIs Using Azure API Management (APIM)
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - Secure APIs
+  - APIM
+  - Azure API Management
+
+summary: How Do You Secure APIs Using Azure API Management (APIM)?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do You Secure APIs Using Azure API Management (APIM)?
 ## Detailed Interview Preparation Guide with Flow Charts
 

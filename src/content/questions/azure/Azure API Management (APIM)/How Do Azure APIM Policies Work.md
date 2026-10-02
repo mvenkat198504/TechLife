@@ -1,3 +1,23 @@
+---
+id: azure-API Management-007
+slug: How Do Azure APIM Policies Work
+title: How Do Azure APIM Policies Work
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - APIM Policies
+  - APIM
+  - Azure API Management
+
+summary: How Do Azure APIM Policies Work?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Do Azure APIM Policies Work?
 ## Detailed Interview Preparation Guide with Flow Charts
 

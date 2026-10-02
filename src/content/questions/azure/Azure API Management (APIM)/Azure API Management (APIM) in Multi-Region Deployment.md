@@ -1,3 +1,24 @@
+---
+id: azure-API Management-009
+slug: Azure API Management (APIM) in Multi-Region Deployment
+title: Azure API Management (APIM) in Multi-Region Deployment
+categoryId: azure
+subcategory: Azure API Management
+difficulty: Experienced
+tags:
+  - azure
+  - Multi-Region Deployment
+  - Deployment
+  - APIM
+  - Azure API Management
+
+summary: Azure API Management (APIM) in Multi-Region Deployment?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure API Management (APIM) in Multi-Region Deployment
 ## Detailed Interview Preparation Guide with Flow Charts
 
