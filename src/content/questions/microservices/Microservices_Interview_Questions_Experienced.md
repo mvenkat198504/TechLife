@@ -26,7 +26,7 @@ resources: []
 > **Focus:** Architecture, communication, data consistency, resiliency,
 > security, deployment, observability, API evolution, and migration
 
-------------------------------------------------------------------------
+ 
 
 ## 1. What are Microservices? How are they different from a Monolithic architecture?
 
@@ -97,7 +97,7 @@ product/team does not yet need independent deployment and scaling.
 > microservices when the business and operational benefits justify that
 > distributed-system complexity.
 
-------------------------------------------------------------------------
+ 
 
 ## 2. How do Microservices communicate --- synchronous vs asynchronous?
 
@@ -206,7 +206,7 @@ A real architecture commonly uses both.
 > unnecessary synchronous dependency chains because they increase
 > latency and can create cascading failures.
 
-------------------------------------------------------------------------
+ 
 
 ## 3. REST vs gRPC vs Messaging --- when would you choose each?
 
@@ -288,7 +288,7 @@ Choose messaging when:
 > based on interaction semantics rather than using one protocol
 > everywhere.
 
-------------------------------------------------------------------------
+ 
 
 ## 4. What is an API Gateway and what responsibilities should it have?
 
@@ -359,7 +359,7 @@ authentication, quotas, transformations, and policies.
 > business logic inside domain services so the gateway does not become a
 > centralized business layer.
 
-------------------------------------------------------------------------
+ 
 
 ## 5. How do you identify service boundaries when breaking a Monolith?
 
@@ -452,7 +452,7 @@ have the disadvantages of both architectures.
 > relatively coarse-grained boundaries and splitting further only when
 > there is a clear reason.
 
-------------------------------------------------------------------------
+ 
 
 ## 6. Why should each Microservice own its database?
 
@@ -523,7 +523,7 @@ Use:
 > to evolve independently, although it means cross-service consistency
 > and reporting require deliberate distributed-system patterns.
 
-------------------------------------------------------------------------
+ 
 
 ## 7. How do you handle distributed transactions between Microservices?
 
@@ -622,7 +622,7 @@ publication.
 > for failures, idempotent consumers, and usually the Transactional
 > Outbox pattern for reliable event publication.
 
-------------------------------------------------------------------------
+ 
 
 ## 8. What is the Saga Pattern?
 
@@ -693,7 +693,7 @@ A production Saga should consider:
 > actions undo or offset the business effect of earlier successful
 > steps.
 
-------------------------------------------------------------------------
+ 
 
 ## 9. Saga Choreography vs Orchestration --- which approach would you use?
 
@@ -764,7 +764,7 @@ operationally.
 > compensation and timeout rules, I generally prefer orchestration
 > because the workflow state and recovery path are explicit.
 
-------------------------------------------------------------------------
+ 
 
 ## 10. What is Eventual Consistency?
 
@@ -829,7 +829,7 @@ Failed
 > messaging, idempotent handlers, retries, and reconciliation so
 > temporary inconsistency is controlled and observable.
 
-------------------------------------------------------------------------
+ 
 
 ## 11. How do you implement Retry, Timeout, Circuit Breaker and Fallback?
 
@@ -926,7 +926,7 @@ traffic, and SLO requirements.
 > semantically acceptable. I also add jitter and make operations
 > idempotent to avoid retry storms and duplicate side effects.
 
-------------------------------------------------------------------------
+ 
 
 ## 12. How do you prevent cascading failures between services?
 
@@ -997,7 +997,7 @@ chain.
 > shedding, and avoiding deep synchronous chains. I also make sure
 > retries are coordinated so one failure does not create a retry storm.
 
-------------------------------------------------------------------------
+ 
 
 ## 13. How do you secure communication between Microservices?
 
@@ -1075,7 +1075,7 @@ Verify identity and authorization.
 > not automatically be trusted simply because it is inside the cluster
 > or VNet.
 
-------------------------------------------------------------------------
+ 
 
 ## 14. How do you implement JWT/OAuth2 authentication in Microservices?
 
@@ -1161,7 +1161,7 @@ through the gateway.
 > client-credentials-style access rather than sharing passwords or
 > long-lived secrets.
 
-------------------------------------------------------------------------
+ 
 
 ## 15. How do you deploy Microservices using Docker?
 
@@ -1243,7 +1243,7 @@ Containers provide:
 > platform. Configuration and secrets are injected at runtime rather
 > than stored in the image.
 
-------------------------------------------------------------------------
+ 
 
 ## 16. How do you manage configuration and secrets across services?
 
@@ -1320,7 +1320,7 @@ in source control.
 > configuration for non-secret settings. I avoid long-lived credentials
 > in source code, Docker images, and CI files.
 
-------------------------------------------------------------------------
+ 
 
 ## 17. How do you perform centralized logging and distributed tracing?
 
@@ -1413,7 +1413,7 @@ Propagate trace context/correlation identifiers across:
 > carry trace context so we can reconstruct a transaction across the
 > gateway, services, databases, and messaging infrastructure.
 
-------------------------------------------------------------------------
+ 
 
 ## 18. How do you version Microservice APIs without breaking consumers?
 
@@ -1504,7 +1504,7 @@ Retire v1
 > use contract testing, communicate deprecation, and monitor old-version
 > usage before removal.
 
-------------------------------------------------------------------------
+ 
 
 ## 19. How do you implement health checks?
 
@@ -1581,7 +1581,7 @@ premature liveness failures.
 > downstream issue does not unnecessarily remove every instance from
 > service.
 
-------------------------------------------------------------------------
+ 
 
 ## 20. How would you migrate an existing Monolith to Microservices?
 
@@ -1723,7 +1723,7 @@ Watch for:
 > early, then repeat capability by capability rather than performing a
 > big-bang rewrite.
 
-------------------------------------------------------------------------
+ 
 
 ## End-to-End Example: Order Processing Microservices
 
@@ -1763,7 +1763,7 @@ Container Registry
 Container Orchestrator
 ```
 
-------------------------------------------------------------------------
+ 
 
 ## Experienced Interview Scenario
 
@@ -1802,7 +1802,7 @@ At the design level I would ensure:
 This answer demonstrates that resiliency is not just a library
 configuration; it is an architectural property.
 
-------------------------------------------------------------------------
+ 
 
 ## Rapid Revision Sheet
 
@@ -1861,7 +1861,7 @@ distributed-system consequences:
     deployable services exist.
 -   Failure isolation is as important as functional decomposition.
 
-------------------------------------------------------------------------
+ 
 
 # Final Interview Summary
 
