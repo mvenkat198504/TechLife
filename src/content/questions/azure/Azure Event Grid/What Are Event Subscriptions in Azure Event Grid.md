@@ -1,3 +1,22 @@
+---
+id: azure-Event Grid-005
+slug: What Are Event Subscriptions in Azure Event Grid
+title: What Are Event Subscriptions in Azure Event Grid
+categoryId: azure
+subcategory: Azure Event Grid
+difficulty: Experienced
+tags:
+  - azure
+  - Event Subscriptions
+  - Azure Event Grid
+
+summary: What Are Event Subscriptions in Azure Event Grid?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Are Event Subscriptions in Azure Event Grid?
 ## Detailed Interview Preparation Guide with Flow Charts
 

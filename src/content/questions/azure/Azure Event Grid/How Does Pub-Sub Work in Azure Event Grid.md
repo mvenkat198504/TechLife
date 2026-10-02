@@ -1,3 +1,22 @@
+---
+id: azure-Event Grid-004
+slug: How Does Pub/Sub Work in Azure Event Grid
+title: How Does Pub/Sub Work in Azure Event Grid
+categoryId: azure
+subcategory: Azure Event Grid
+difficulty: Experienced
+tags:
+  - azure
+  - Event Grid
+  - Azure Event Grid
+
+summary: How Does Pub/Sub Work in Azure Event Grid?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # How Does Pub/Sub Work in Azure Event Grid?
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -1,3 +1,22 @@
+---
+id: azure-Event Grid-002
+slug: Azure Event Grid vs Azure Service Bus
+title: Azure Event Grid vs Azure Service Bus
+categoryId: azure
+subcategory: Azure Event Grid
+difficulty: Experienced
+tags:
+  - azure
+  - Event Grid
+  - Azure Event Grid
+
+summary: Azure Event Grid vs Azure Service Bus?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Event Grid vs Azure Service Bus
 ## Detailed Interview Preparation Guide with Flow Charts
 

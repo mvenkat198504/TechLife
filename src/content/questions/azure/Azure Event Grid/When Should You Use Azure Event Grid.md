@@ -1,3 +1,22 @@
+---
+id: azure-Event Grid-003
+slug: When Should You Use Azure Event Grid
+title: When Should You Use Azure Event Grid
+categoryId: azure
+subcategory: Azure Event Grid
+difficulty: Experienced
+tags:
+  - azure
+  - Event Grid
+  - Azure Event Grid
+
+summary: When Should You Use Azure Event Grid?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # When Should You Use Azure Event Grid?
 ## Detailed Interview Preparation Guide with Flow Charts
 
