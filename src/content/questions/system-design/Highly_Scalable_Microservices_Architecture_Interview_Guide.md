@@ -104,7 +104,7 @@ These numbers are examples for design discussion, not universal targets.
 
 ## 3. High-Level Architecture
 
-``` text
+<!-- ``` text
                           Internet / Mobile / SPA
                                    |
                                    v
@@ -153,27 +153,286 @@ These numbers are examples for design discussion, not universal targets.
                               +------+------+
                                      |
                                 Shipping DB
+``` -->
+
+
+``` mermaid
+flowchart TD
+    CLIENT(["Internet / Mobile / SPA"]) --> FD["Azure Front Door + WAF"]
+    FD --> APIM["Azure API Management / API Gateway"]
+
+    subgraph AKS["Azure Kubernetes Service (AKS) — .NET Services"]
+        CATALOG["Catalog API"]
+        ORDER["Order API"]
+        CUSTOMER["Customer API"]
+        PUB["Outbox Publisher"]
+        INVENTORY["Inventory Service"]
+        PAYMENT["Payment Service"]
+        SHIPPING["Shipping Service"]
+    end
+
+    APIM --> CATALOG & ORDER & CUSTOMER
+
+    CATALOG --> REDIS[("Redis Cache")]
+    CATALOG --> CDB[("Catalog DB")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    subgraph ORDERDB["Order Database — Local ACID Transaction"]
+        DATA[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Save order + event atomically"| ORDERDB
+    OUTBOX -->|"Read committed events"| PUB
+    PUB -->|"Publish OrderCreated"| BUS[["Azure Service Bus"]]
+    BUS --- FEATURES["Topics / Queues / DLQ"]
+
+    BUS -->|"OrderCreated — Inventory subscription"| INVENTORY
+    BUS -->|"OrderCreated — Payment subscription"| PAYMENT
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+
+    INVENTORY -->|"Publish InventoryReserved"| BUS
+    PAYMENT -->|"Publish PaymentSucceeded"| BUS
+    BUS -->|"Deliver correlated result events"| SHIPPING
+
+    SHIPPING --> CHECK{"Inventory reserved AND payment successful?"}
+    CHECK -->|"Yes — Create shipment"| SDB[("Shipping DB")]
+    CHECK -->|"No — Persist pending state"| STATE[("Shipping Workflow State")]
+    STATE -.->|"Resume when next event arrives"| SHIPPING
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef cache fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef decision fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef note fill:#f8fafc,stroke:#94a3b8,color:#334155
+
+    class CLIENT client
+    class FD,APIM gateway
+    class CATALOG,ORDER,CUSTOMER,PUB,INVENTORY,PAYMENT,SHIPPING service
+    class CDB,CUDB,DATA,OUTBOX,IDB,PDB,SDB,STATE database
+    class REDIS cache
+    class BUS broker
+    class CHECK decision
+    class FEATURES note
+
+    style AKS fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style ORDERDB fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+
 ```
 
+```mermaid
+flowchart TD
+  %% Entry
+  A[Internet / Mobile / SPA] --> B[Azure Front Door + WAF]
+  B --> C[Azure API Management<br/>API Gateway]
+
+  %% APIs
+  C --> CA[Catalog API<br/>.NET / AKS]
+  C --> OA[Order API<br/>.NET / AKS]
+  C --> UA[Customer API<br/>.NET / AKS]
+
+  %% Data stores
+  CA --> CR[(Catalog DB)]
+  CA --> R[(Redis)]
+  UA --> CDB[(Customer DB)]
+  OA --> ODB[(Order DB)]
+  OA --> OUT[Outbox]
+
+  %% Messaging
+  OUT --> SB[(Azure Service Bus<br/>Topics / Queues / DLQ)]
+
+  %% Async services
+  SB --> IS[Inventory Service]
+  SB --> PS[Payment Service]
+
+  IS --> IDB[(Inventory DB)]
+  PS --> PDB[(Payment DB)]
+
+  %% Fulfillment
+  IS --> SS[Shipping Service]
+  PS --> SS
+  SS --> SDB[(Shipping DB)]
+
+  %% Styles
+  classDef edge fill:#dbeafe,stroke:#2563eb,color:#0f172a,stroke-width:1.5px;
+  classDef gateway fill:#1d4ed8,stroke:#1e40af,color:#ffffff,stroke-width:2px;
+  classDef api fill:#10b981,stroke:#059669,color:#ffffff,stroke-width:2px;
+  classDef db fill:#8b5cf6,stroke:#6d28d9,color:#ffffff,stroke-width:2px;
+  classDef cache fill:#f59e0b,stroke:#d97706,color:#111827,stroke-width:2px;
+  classDef broker fill:#06b6d4,stroke:#0891b2,color:#ffffff,stroke-width:2px;
+  classDef svc fill:#ef4444,stroke:#b91c1c,color:#ffffff,stroke-width:2px;
+  classDef store fill:#f3f4f6,stroke:#9ca3af,color:#111827,stroke-width:1.2px;
+
+  class A edge;
+  class B,C gateway;
+  class CA,OA,UA api;
+  class CR,CDB,ODB,IDB,PDB,SDB db;
+  class R cache;
+  class SB broker;
+  class IS,PS,SS svc;
+  class OUT store;
+```
 Cross-cutting platform:
 
-``` text
-Azure Entra ID
-Managed Identity / Workload Identity
-Azure Key Vault
-Azure App Configuration
-OpenTelemetry
-Application Insights / Azure Monitor
-Azure Container Registry
-AKS
-HPA / KEDA
-CI/CD
-Infrastructure as Code
-Centralized logs
-Metrics and alerts
+``` mermaid
+flowchart TD
+    subgraph SECURITY["Identity and Configuration"]
+        ENTRA["Microsoft Entra ID"]
+        IDENTITY["Managed Identity / Workload Identity"]
+        KV["Azure Key Vault"]
+        CONFIG["Azure App Configuration"]
+    end
+
+    subgraph RUNTIME["Application Platform"]
+        AKS["AKS — Application Workloads"]
+        SCALE["HPA / KEDA"]
+        SCALE -->|"Scale workloads"| AKS
+    end
+
+    subgraph DELIVERY["Delivery and Infrastructure"]
+        CICD["CI/CD"]
+        ACR[["Azure Container Registry"]]
+        IAC["Infrastructure as Code"]
+
+        CICD -->|"Build, scan and push images"| ACR
+        ACR -->|"Pull images"| AKS
+        CICD -->|"Deploy workloads"| AKS
+        IAC -->|"Provision infrastructure"| AKS
+    end
+
+    subgraph OBSERVABILITY["Observability"]
+        OTEL["OpenTelemetry"]
+        MONITOR["Application Insights / Azure Monitor"]
+        LOGS[("Centralized Logs")]
+        ALERTS["Metrics and Alerts"]
+
+        OTEL -->|"Export telemetry"| MONITOR
+        MONITOR --> LOGS
+        MONITOR --> ALERTS
+    end
+
+    ENTRA -.->|"User authentication"| AKS
+    IDENTITY -.->|"Workload authentication"| AKS
+    AKS -.->|"Access secrets using workload identity"| KV
+    AKS -.->|"Read settings / Feature flags"| CONFIG
+    AKS -->|"Logs / Metrics / Traces"| OTEL
+
+    classDef security fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef runtime fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef delivery fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef observability fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class ENTRA,IDENTITY,KV,CONFIG security
+    class AKS,SCALE runtime
+    class CICD,ACR,IAC delivery
+    class OTEL,MONITOR,LOGS,ALERTS observability
+
+    style SECURITY fill:#faf5ff,stroke:#c4b5fd,stroke-width:2px
+    style RUNTIME fill:#eff6ff,stroke:#93c5fd,stroke-width:2px
+    style DELIVERY fill:#fff7ed,stroke:#fdba74,stroke-width:2px
+    style OBSERVABILITY fill:#f0fdf4,stroke:#86efac,stroke-width:2px
 ```
 
-------------------------------------------------------------------------
+```mermaid
+flowchart TD
+    CLIENT(["Internet / Mobile / SPA"]) -->|"HTTPS"| FD["Azure Front Door + WAF"]
+    FD --> APIM["Azure API Management / API Gateway"]
+
+    subgraph AKS["AKS — .NET Application Services"]
+        CATALOG["Catalog API"]
+        ORDER["Order API"]
+        CUSTOMER["Customer API"]
+        PUB["Outbox Publisher"]
+        INVENTORY["Inventory Service"]
+        PAYMENT["Payment Service"]
+        SHIPPING["Shipping Service"]
+    end
+
+    APIM --> CATALOG
+    APIM --> ORDER
+    APIM --> CUSTOMER
+
+    CATALOG --> REDIS[("Redis Cache")]
+    CATALOG --> CDB[("Catalog DB")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    subgraph ORDERDB["Order Database — Local ACID Transaction"]
+        DATA[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Save order and event atomically"| ORDERDB
+    OUTBOX -->|"Read committed events"| PUB
+    PUB -->|"Publish OrderCreated"| BUS[["Azure Service Bus"]]
+    PUB -.->|"Mark published after acknowledgment"| OUTBOX
+
+    BUS --- FEATURES["Topics / Queues / DLQ"]
+    BUS -->|"Inventory subscription"| INVENTORY
+    BUS -->|"Payment subscription"| PAYMENT
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+
+    INVENTORY -->|"Publish InventoryReserved"| BUS
+    PAYMENT -->|"Publish PaymentSucceeded"| BUS
+    BUS -->|"Shipping subscription: correlated results"| SHIPPING
+
+    SHIPPING --> STATE[("Shipping DB — Workflow State")]
+    STATE --> CHECK{"Inventory reserved AND payment successful?"}
+    CHECK -->|"Yes"| CREATE["Create Shipment Idempotently"]
+    CREATE --> STATE
+    CHECK -->|"Not yet"| WAIT["Await Remaining Event"]
+    WAIT -.->|"Resume on next event"| SHIPPING
+
+    subgraph PLATFORM["Cross-Cutting Platform"]
+        direction TB
+        ENTRA["Microsoft Entra ID"]
+        IDENTITY["Managed Identity / Workload Identity"]
+        KV["Azure Key Vault"]
+        CONFIG["Azure App Configuration"]
+        OTEL["OpenTelemetry"]
+        MONITOR["Application Insights / Azure Monitor"]
+        ACR[["Azure Container Registry"]]
+
+        OTEL -->|"Export logs, metrics and traces"| MONITOR
+    end
+
+    ENTRA -.->|"Validate user access tokens"| APIM
+    IDENTITY -.->|"Authenticate workloads"| AKS
+    AKS -.->|"Read secrets securely"| KV
+    AKS -.->|"Read configuration / Feature flags"| CONFIG
+    AKS -.->|"Emit telemetry"| OTEL
+    ACR -.->|"Supply container images"| AKS
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef platform fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef workflow fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:2px
+    classDef note fill:#f8fafc,stroke:#94a3b8,color:#334155
+
+    class CLIENT client
+    class FD,APIM gateway
+    class CATALOG,ORDER,CUSTOMER,PUB,INVENTORY,PAYMENT,SHIPPING service
+    class REDIS,CDB,CUDB,DATA,OUTBOX,IDB,PDB,STATE database
+    class BUS,ACR broker
+    class ENTRA,IDENTITY,KV,CONFIG,OTEL,MONITOR platform
+    class CHECK,CREATE,WAIT workflow
+    class FEATURES note
+
+    style AKS fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style ORDERDB fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+    style PLATFORM fill:#f0fdf4,stroke:#86efac,stroke-width:2px
+```
+
+
 
 ## 4. Service Boundaries
 
@@ -258,21 +517,19 @@ A good principle is:
 > independent ownership, scaling, deployment or domain complexity
 > justifies it.
 
-------------------------------------------------------------------------
+
 
 ## 5. API Gateway
 
 External clients should normally not know every internal service
 location.
 
-``` text
-Client
-  |
-  v
-API Gateway
- /   |    \
-v    v     v
-Catalog Order Customer
+``` mermaid
+flowchart TD
+  A[Client] --> B[API Gateway]
+  B --> C[Catalog]
+  B --> D[Order]
+  B --> E[Customer]
 ```
 
 Possible Azure choice:
@@ -298,14 +555,9 @@ The Gateway can handle:
 
 #### Example
 
-``` text
-GET /api/catalog/products/100
-        |
-        v
-Gateway
-        |
-        v
-Catalog Service
+``` mermaid
+flowchart TD
+  A[GET /api/catalog/products/100] --> B[Gateway] --> C[Catalog Service]
 ```
 
 #### What should not be in the Gateway?
@@ -342,7 +594,7 @@ Versions
 Transformations
 ```
 
-------------------------------------------------------------------------
+
 
 ## 6. North-South vs East-West traffic
 
@@ -362,7 +614,7 @@ Do not force every internal call through the public Gateway unless there
 is a deliberate reason. Internal service communication should have its
 own secure routing and identity model.
 
-------------------------------------------------------------------------
+
 
 ## 7. Synchronous Communication
 
@@ -398,18 +650,9 @@ Capacity planning
 
 Bad:
 
-``` text
-Gateway
-  |
-Order
-  |
-Inventory
-  |
-Payment
-  |
-Shipping
-  |
-Notification
+``` mermaid
+flowchart TD
+  A[Gateway] --> B[Order] --> C[Inventory] --> D[Payment] --> E[Shipping] --> F[Notification]
 ```
 
 If every dependency must respond before the client receives a response,
@@ -419,15 +662,12 @@ Prefer asynchronous workflows where immediate completion is unnecessary.
 
 Example:
 
-``` text
-Order Service
-      |
-      | OrderCreated
-      v
-Message Broker
-   /      |       \
-  v       v        v
-Inventory Payment Notification
+``` mermaid
+flowchart TD
+  A[Order Service] -->|OrderCreated| B[Message Broker]
+  B --> C[Inventory]
+  B --> D[Payment]
+  B --> E[Notification]
 ```
 
 ------------------------------------------------------------------------
@@ -451,14 +691,12 @@ Use queues/topics for:
 
 Example:
 
-``` text
-OrderCreated
-     |
-     v
-Service Bus Topic
-   /      |       \
-  v       v        v
-Inventory Payment Analytics
+``` mermaid
+flowchart TD
+  A[OrderCreated] --> B[Service Bus Topic]
+  B --> C[Inventory]
+  B --> D[Payment]
+  B --> E[Analytics]
 ```
 
 #### Benefits
@@ -516,11 +754,12 @@ Payment Service   -> Payment DB
 
 Avoid:
 
-``` text
-Catalog ----\
-Order -------+--> Shared DB
-Inventory ---+
-Payment -----/
+``` mermaid
+flowchart LR
+  C[Catalog] --> D[(Shared DB)]
+  O[Order] --> D
+  I[Inventory] --> D
+  P[Payment] --> D
 ```
 
 #### Why?
@@ -616,18 +855,13 @@ COMMIT
 
 Use:
 
-``` text
-Local ACID transactions
-+
-Saga
-+
-Outbox
-+
-Inbox
-+
-Idempotency
-+
-Compensation
+``` mermaid
+flowchart TD
+  A[Local ACID transactions] --> B[Saga]
+  B --> C[Outbox]
+  C --> D[Inbox]
+  D --> E[Idempotency]
+  E --> F[Compensation]
 ```
 
 This provides reliable **business consistency** rather than pretending
@@ -662,18 +896,9 @@ COMMIT
 
 Then a publisher sends pending Outbox messages.
 
-``` text
-Business DB
-+----------------+
-| Orders         |
-| OutboxMessages |
-+-------+--------+
-        |
-        v
-Publisher
-        |
-        v
-Message Broker
+``` mermaid
+flowchart TD
+  A[(Business DB<br/>Orders<br/>OutboxMessages)] --> B[Publisher] --> C[Message Broker]
 ```
 
 ------------------------------------------------------------------------
@@ -717,28 +942,20 @@ database load.
 
 Example:
 
-``` text
-Client
-  |
-Catalog API
-  |
-Redis
-  |
-Catalog DB
+``` mermaid
+flowchart TD
+  A[Client] --> B[Catalog API] --> C[Redis] --> D[Catalog DB]
 ```
 
 Flow:
 
-``` text
-Check Redis
-   |
-   +-- Hit --> return
-   |
-   +-- Miss --> DB
-                 |
-              Cache result
-                 |
-               return
+``` mermaid
+flowchart TD
+  A[Check Redis] --> B{Cache hit?}
+  B -->|Hit| C[Return]
+  B -->|Miss| D[DB]
+  D --> E[Cache result]
+  E --> C
 ```
 
 This is commonly called **cache-aside**.
@@ -1048,12 +1265,12 @@ appropriately.
 
 #### Horizontal application scaling
 
-``` text
-Load Balancer
-     |
- +---+---+---+
- |   |   |   |
-P1  P2  P3  P4
+``` mermaid
+flowchart TD
+  LB[Load Balancer] --> P1[P1]
+  LB --> P2[P2]
+  LB --> P3[P3]
+  LB --> P4[P4]
 ```
 
 Keep APIs stateless where practical.
@@ -1180,16 +1397,9 @@ Do not start with sharding if indexing/query design solves the problem.
 
 For read-heavy services:
 
-``` text
-Client
- |
-CDN / Cache
- |
-Read API
- |
-Redis
- |
-Read Replica / Read Store
+``` mermaid
+flowchart TD
+  A[Client] --> B[CDN / Cache] --> C[Read API] --> D[Redis] --> E[Read Replica / Read Store]
 ```
 
 Possible techniques:
@@ -1240,28 +1450,32 @@ an availability and recovery strategy.
 
 ## 38. Security architecture
 
-``` text
-User
- |
- v
-Azure Entra ID / Identity Provider
- |
- | OAuth2/OIDC Access Token
- v
-Front Door + WAF
- |
- v
-API Management
- |
- v
-Microservices
- |
- | Managed Identity / Workload Identity
- +----------> Service Bus
- |
- +----------> Key Vault
- |
- +----------> Azure SQL / other Azure resources
+``` mermaid
+flowchart TD
+    USER(["User"]) -->|"Sign in"| IDP["Microsoft Entra ID / Identity Provider"]
+    IDP -->|"Issue OAuth 2.0 Access Token"| CLIENT["Client Application"]
+    CLIENT -->|"HTTPS + Access Token"| FD["Azure Front Door + WAF"]
+    FD --> APIM["Azure API Management"]
+    APIM -->|"Validate Token / Forward Request"| MS["Microservices"]
+
+    MS -->|"Authenticate using"| IDENTITY["Managed Identity / Workload Identity"]
+    IDENTITY -->|"Authorized Access"| BUS[["Azure Service Bus"]]
+    IDENTITY -->|"Authorized Access"| KV[("Azure Key Vault")]
+    IDENTITY -->|"Authorized Access"| SQL[("Azure SQL / Other Azure Resources")]
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef identity fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef gateway fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef service fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef resource fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+
+    class USER,CLIENT client
+    class IDP,IDENTITY identity
+    class FD,APIM gateway
+    class MS service
+    class KV,SQL resource
+    class BUS broker
 ```
 
 ------------------------------------------------------------------------
@@ -1586,24 +1800,38 @@ P99
 
 Each service becomes an immutable container image.
 
-``` text
-Git
- |
-CI Pipeline
- |
- +-- Restore
- +-- Build
- +-- Unit Tests
- +-- Integration Tests
- +-- Contract Tests
- +-- Security Scan
- +-- Docker Build
- |
- v
-Azure Container Registry
- |
- v
-AKS
+``` mermaid
+flowchart TD
+    GIT(["Git Push"]) --> RESTORE
+
+    subgraph CI["CI Pipeline"]
+        direction TB
+        RESTORE["Restore Dependencies"] --> BUILD["Build"]
+        BUILD --> UNIT["Unit Tests"]
+        UNIT --> INTEGRATION["Integration Tests"]
+        INTEGRATION --> CONTRACT["Contract Tests"]
+        CONTRACT --> SECURITY["Security Scan"]
+        SECURITY --> DOCKER["Docker Build"]
+    end
+
+    DOCKER -->|"Push Image"| ACR[["Azure Container Registry"]]
+    ACR -->|"Deploy Image"| AKS["Azure Kubernetes Service (AKS)"]
+
+    classDef source fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef build fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef test fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef security fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef registry fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef deploy fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+
+    class GIT source
+    class RESTORE,BUILD,DOCKER build
+    class UNIT,INTEGRATION,CONTRACT test
+    class SECURITY security
+    class ACR registry
+    class AKS deploy
+
+    style CI fill:#eff6ff,stroke:#93c5fd,stroke-width:2px
 ```
 
 Use:
@@ -1804,18 +2032,9 @@ baked into Docker images.
 
 ## 59. Failure scenario: Database is slow
 
-``` text
-DB latency increases
-      |
-API requests wait
-      |
-Connections fill
-      |
-Threads/tasks accumulate
-      |
-P99 rises
-      |
-Service becomes unhealthy
+``` mermaid
+flowchart TD
+  A[DB latency increases] --> B[API requests wait] --> C[Connections fill] --> D[Threads/tasks accumulate] --> E[P99 rises] --> F[Service becomes unhealthy]
 ```
 
 Mitigation:
@@ -2022,7 +2241,7 @@ Cost
 
 ## 67. Complete architecture with scaling
 
-``` text
+<!-- ``` text
                               Global Users
                                    |
                                    v
@@ -2069,58 +2288,112 @@ Queue consumers     -> KEDA
 Cluster capacity    -> Cluster autoscaler
 Read traffic        -> CDN/Redis/read models
 Database            -> indexes/read replicas/partitioning as required
+``` -->
+
+```mermaid
+flowchart TD
+    USERS(["Global Users"]) --> FD["Azure Front Door + WAF / CDN"]
+    FD --> APIM["Azure API Management"]
+
+    subgraph AKS["AKS Cluster"]
+        direction TB
+        CATALOG["Catalog — Pods × N"]
+        ORDER["Order — Pods × N"]
+        CUSTOMER["Customer — Pods × N"]
+        PUB["Outbox Publisher"]
+        INVENTORY["Inventory — Workers × N"]
+        PAYMENT["Payment — Workers × N"]
+    end
+
+    APIM --> CATALOG
+    APIM --> ORDER
+    APIM --> CUSTOMER
+
+    CATALOG --> REDIS[("Redis Cache")]
+    CATALOG --> CDB[("Catalog DB / Read Models")]
+    CUSTOMER --> CUDB[("Customer DB")]
+
+    subgraph ORDERDB["Order DB — Local ACID Transaction"]
+        DATA[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Save order + event atomically"| ORDERDB
+    OUTBOX -->|"Read committed events"| PUB
+    PUB -->|"Publish events"| BUS[["Azure Service Bus"]]
+
+    BUS -->|"Inventory subscription"| INVENTORY
+    BUS -->|"Payment subscription"| PAYMENT
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+
+    subgraph SCALING["Scaling Strategies"]
+        HPA["HPA / Custom Metrics"]
+        KEDA["KEDA"]
+        CA["Cluster Autoscaler"]
+        READ["CDN / Redis / Read Models"]
+        DBOPT["Indexes / Read Replicas / Partitioning"]
+    end
+
+    HPA -.->|"Scale API pods"| CATALOG
+    HPA -.->|"Scale API pods"| ORDER
+    HPA -.->|"Scale API pods"| CUSTOMER
+
+    KEDA -.->|"Scale queue consumers"| INVENTORY
+    KEDA -.->|"Scale queue consumers"| PAYMENT
+    CA -.->|"Scale node capacity"| AKS
+
+    READ -.->|"Cache eligible public responses"| FD
+    READ -.->|"Reduce origin reads"| REDIS
+    READ -.->|"Serve read projections"| CDB
+
+    DBOPT -.->|"Optimize as required"| CDB
+    DBOPT -.->|"Optimize as required"| ORDERDB
+    DBOPT -.->|"Optimize as required"| CUDB
+    DBOPT -.->|"Optimize as required"| IDB
+    DBOPT -.->|"Optimize as required"| PDB
+
+    classDef edge fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef scaling fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class USERS,FD,APIM edge
+    class CATALOG,ORDER,CUSTOMER,PUB,INVENTORY,PAYMENT service
+    class REDIS,CDB,CUDB,DATA,OUTBOX,IDB,PDB database
+    class BUS broker
+    class HPA,KEDA,CA,READ,DBOPT scaling
+
+    style AKS fill:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    style ORDERDB fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
+    style SCALING fill:#f0fdf4,stroke:#86efac,stroke-width:2px
 ```
 
-------------------------------------------------------------------------
 
 ## 68. Architecture decision table
 
-  ----------------------------------------------------------------------------------------------
-  Area              Typical choice              Why                     Main trade-off
-  ----------------- --------------------------- ----------------------- ------------------------
-  Edge              Front Door + WAF            Global entry/security   Cost/configuration
+  | Area | Typical choice | Why | Main trade-off |
+|---|---|---|---|
+| Edge | Front Door + WAF | Global entry/security | Cost/configuration |
+| Gateway | API Management | Policies/routing/rate limits | Gateway dependency |
+| Services | ASP.NET Core | High-performance .NET APIs | Service operations |
+| Boundaries | DDD bounded contexts | Business autonomy | Requires domain analysis |
+| Data | Database per service | Independent ownership | Distributed consistency |
+| Sync | REST/gRPC | Immediate response | Temporal coupling |
+| Async | Service Bus | Durable decoupling | Eventual consistency |
+| Consistency | Saga + Outbox/Inbox | Reliable workflow | More application logic |
+| Cache | Redis/CDN | Reduce latency/load | Invalidation/staleness |
+| Resilience | Timeout/retry/CB/bulkhead | Failure isolation | Configuration complexity |
+| Identity | OAuth2/OIDC | Standard user/client auth | Identity infrastructure |
+| Azure access | Managed Identity | Avoid credentials | Platform dependency |
+| Secrets | Key Vault | Central secret protection | Availability/access design |
+| Observability | OpenTelemetry | Vendor-neutral instrumentation | Telemetry cost |
+| Runtime | Docker + AKS | Independent deployment/scaling | Operational complexity |
+| API scaling | HPA | Elastic replicas | Needs good metrics |
+| Worker scaling | KEDA | Backlog-based scaling | Downstream capacity matters |
 
-  Gateway           API Management              Policies/routing/rate   Gateway dependency
-                                                limits                  
 
-  Services          ASP.NET Core                High-performance .NET   Service operations
-                                                APIs                    
-
-  Boundaries        DDD bounded contexts        Business autonomy       Requires domain analysis
-
-  Data              Database per service        Independent ownership   Distributed consistency
-
-  Sync              REST/gRPC                   Immediate response      Temporal coupling
-
-  Async             Service Bus                 Durable decoupling      Eventual consistency
-
-  Consistency       Saga + Outbox/Inbox         Reliable workflow       More application logic
-
-  Cache             Redis/CDN                   Reduce latency/load     Invalidation/staleness
-
-  Resilience        Timeout/retry/CB/bulkhead   Failure isolation       Configuration complexity
-
-  Identity          OAuth2/OIDC                 Standard user/client    Identity infrastructure
-                                                auth                    
-
-  Azure access      Managed Identity            Avoid credentials       Platform dependency
-
-  Secrets           Key Vault                   Central secret          Availability/access
-                                                protection              design
-
-  Observability     OpenTelemetry               Vendor-neutral          Telemetry cost
-                                                instrumentation         
-
-  Runtime           Docker + AKS                Independent             Operational complexity
-                                                deployment/scaling      
-
-  API scaling       HPA                         Elastic replicas        Needs good metrics
-
-  Worker scaling    KEDA                        Backlog-based scaling   Downstream capacity
-                                                                        matters
-  ----------------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------
 
 ## 69. Common mistakes
 
@@ -2172,7 +2445,7 @@ Track user-visible latency/errors plus queues, DB and dependencies.
 
 Prefer workload identity and Key Vault.
 
-------------------------------------------------------------------------
+
 
 ## 70. Two-minute interview answer
 
@@ -2278,36 +2551,33 @@ technologies.
 
 ## 72. Rapid revision cheat sheet
 
-  Topic                  Interview point
-  ---------------------- -----------------------------------------
-  Service boundaries     Business capability / bounded context
-  API Gateway            Routing and edge cross-cutting concerns
-  Database-per-service   Independent data ownership
-  REST                   Immediate/general request-response
-  gRPC                   Efficient strongly typed internal calls
-  Messaging              Async decoupling/load leveling
-  Saga                   Distributed business workflow
-  Outbox                 Reliable DB-to-message transition
-  Inbox                  Consumer deduplication
-  Redis                  Read performance; manage staleness
-  Timeout                Bound dependency latency
-  Retry                  Transient + safe operations only
-  Circuit breaker        Fail fast on unhealthy dependency
-  Bulkhead               Isolate resource exhaustion
-  Rate limiting          Protect capacity
-  HPA                    Scale API replicas
-  KEDA                   Scale message consumers
-  OAuth2/OIDC            User/client identity and authorization
-  Managed Identity       Credential-free Azure workload access
-  Key Vault              Secrets that cannot be eliminated
-  OpenTelemetry          Logs/metrics/traces correlation
-  P95/P99                Tail latency
-  Consumer lag           Async processing health
-  Zero downtime          Backward compatibility
-  DR                     RPO + RTO
-
-------------------------------------------------------------------------
-
+  | Topic | Interview point |
+|---|---|
+| Service boundaries | Business capability / bounded context |
+| API Gateway | Routing and edge cross-cutting concerns |
+| Database-per-service | Independent data ownership |
+| REST | Immediate/general request-response |
+| gRPC | Efficient strongly typed internal calls |
+| Messaging | Async decoupling/load leveling |
+| Saga | Distributed business workflow |
+| Outbox | Reliable DB-to-message transition |
+| Inbox | Consumer deduplication |
+| Redis | Read performance; manage staleness |
+| Timeout | Bound dependency latency |
+| Retry | Transient + safe operations only |
+| Circuit breaker | Fail fast on unhealthy dependency |
+| Bulkhead | Isolate resource exhaustion |
+| Rate limiting | Protect capacity |
+| HPA | Scale API replicas |
+| KEDA | Scale message consumers |
+| OAuth2/OIDC | User/client identity and authorization |
+| Managed Identity | Credential-free Azure workload access |
+| Key Vault | Secrets that cannot be eliminated |
+| OpenTelemetry | Logs/metrics/traces correlation |
+| P95/P99 | Tail latency |
+| Consumer lag | Async processing health |
+| Zero downtime | Backward compatibility |
+| DR | RPO + RTO |
 ## 73. Final interview statement
 
 > A highly scalable microservices system is not created simply by

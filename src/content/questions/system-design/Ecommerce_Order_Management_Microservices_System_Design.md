@@ -51,7 +51,7 @@ paths**.
 
 ## 2. Business workflow
 
-``` text
+<!-- ``` text
 Customer places order
         |
         v
@@ -68,6 +68,10 @@ Create Shipment
         |
         v
 Confirm Order
+``` -->
+```mermaid
+flowchart TD
+  A[Customer places order] --> B[Create Order] --> C[Reserve Inventory] --> D[Process Payment] --> E[Create Shipment] --> F[Confirm Order]
 ```
 
 Each capability owns its own data:
@@ -87,7 +91,7 @@ is a **distributed business transaction**.
 
 ## 3. High-Level Architecture
 
-``` text
+<!-- ``` text
                          +----------------------+
                          | Web / Mobile Client  |
                          +----------+-----------+
@@ -131,6 +135,52 @@ is a **distributed business transaction**.
                       |                           |                           |
                       v                           v                           v
                 Inventory DB                 Payment DB                  Shipping DB
+``` -->
+
+```mermaid
+flowchart TD
+    CLIENT(["Web / Mobile Client"]) -->|"HTTPS"| APIM["API Gateway / Azure API Management"]
+    APIM --> ORDER["Order Service — ASP.NET Core"]
+
+    subgraph TX["Order Database — Local ACID Transaction"]
+        direction TB
+        DATA[("Order Data")]
+        OUTBOX[("Outbox Table")]
+    end
+
+    ORDER -->|"Save order + event atomically"| TX
+    OUTBOX -->|"Read committed events"| PUB["Outbox Publisher"]
+    PUB -->|"Publish OrderCreated"| BUS[["Azure Service Bus"]]
+    BUS -->|"Deliver OrderCreated"| SAGA["Saga Orchestrator"]
+    SAGA --> STATE[("Saga State Store")]
+
+    SAGA -->|"1. Reserve Inventory"| INVENTORY["Inventory Service"]
+    SAGA -->|"2. Process Payment"| PAYMENT["Payment Service"]
+    SAGA -->|"3. Create Shipment"| SHIPPING["Shipping Service"]
+
+    INVENTORY -.->|"Inventory Result"| SAGA
+    PAYMENT -.->|"Payment Result"| SAGA
+    SHIPPING -.->|"Shipment Result"| SAGA
+
+    INVENTORY --> IDB[("Inventory DB")]
+    PAYMENT --> PDB[("Payment DB")]
+    SHIPPING --> SDB[("Shipping DB")]
+
+    classDef client fill:#f1f5f9,stroke:#475569,color:#0f172a,stroke-width:2px
+    classDef gateway fill:#7c3aed,stroke:#5b21b6,color:#ffffff,stroke-width:2px
+    classDef service fill:#dbeafe,stroke:#2563eb,color:#1e3a8a,stroke-width:2px
+    classDef database fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:2px
+    classDef broker fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef saga fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+
+    class CLIENT client
+    class APIM gateway
+    class ORDER,PUB,INVENTORY,PAYMENT,SHIPPING service
+    class DATA,OUTBOX,STATE,IDB,PDB,SDB database
+    class BUS broker
+    class SAGA saga
+
+    style TX fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
 ```
 
 Cross-cutting platform:
@@ -183,22 +233,16 @@ The principle is:
 
 A naive design is:
 
-``` text
-Client -> Order -> Inventory -> Payment -> Shipping
+``` mermaid
+flowchart LR
+  A[Client] --> B[Order] --> C[Inventory] --> D[Payment] --> E[Shipping]
 ```
 
 If Shipping becomes slow:
 
-``` text
-Shipping slow
-    |
-Payment waits
-    |
-Order waits
-    |
-Gateway waits
-    |
-Client times out
+``` mermaid
+flowchart TD
+  A[Shipping slow] --> B[Payment waits] --> C[Order waits] --> D[Gateway waits] --> E[Client times out]
 ```
 
 This creates strong temporal coupling and difficult partial failures.
@@ -226,34 +270,31 @@ connection.
 
 A Saga models the transaction as local transactions:
 
-``` text
-Create Order
-     |
-Reserve Inventory
-     |
-Process Payment
-     |
-Create Shipment
-     |
-Confirm Order
+``` mermaid
+flowchart TD
+  A[Create Order] --> B[Reserve Inventory] --> C[Process Payment] --> D[Create Shipment] --> E[Confirm Order]
 ```
 
 If a later step fails, perform compensating business operations.
 
-``` text
-Create Order           SUCCESS
-Reserve Inventory      SUCCESS
-Process Payment        SUCCESS
-Create Shipment        FAILED
-                            |
-                            v
-                       Compensation
-                            |
-                       Refund/Void
-                            |
-                       Release Stock
-                            |
-                       Cancel Order
+``` mermaid
+flowchart TD
+    O["Create Order — SUCCESS"] --> I["Reserve Inventory — SUCCESS"]
+    I --> P["Process Payment — SUCCESS"]
+    P --> S["Create Shipment — FAILED"]
+
+    S --> C["Start Compensation"]
+    C --> R["Refund Payment / Void Authorization"]
+    R --> STOCK["Release Stock"]
+    STOCK --> CANCEL(["Cancel Order"])
+
+    classDef success fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2px
+    classDef failure fill:#fee2e2,stroke:#dc2626,color:#7f1d1d,stroke-width:2px
+    classDef compensation fill:#ffedd5,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+
+    class O,I,P success
+    class S,CANCEL failure
+    class C,R,STOCK compensation
 ```
 
 ------------------------------------------------------------------------
@@ -262,18 +303,9 @@ Create Shipment        FAILED
 
 ### Choreography
 
-``` text
-OrderCreated
-     |
-Inventory Service
-     |
-InventoryReserved
-     |
-Payment Service
-     |
-PaymentCompleted
-     |
-Shipping Service
+``` mermaid
+flowchart TD
+  A[OrderCreated] --> B[Inventory Service] --> C[InventoryReserved] --> D[Payment Service] --> E[PaymentCompleted] --> F[Shipping Service] --> G[Confirm Order]
 ```
 
 This is suitable for relatively simple event reactions, but complex
@@ -284,15 +316,11 @@ workflows can become difficult to visualize, recover and compensate.
 For Order → Inventory → Payment → Shipping, I generally prefer a durable
 orchestrator:
 
-``` text
-                      +--------------------+
-                      | Saga Orchestrator  |
-                      +---------+----------+
-                                |
-              +-----------------+------------------+
-              |                 |                  |
-              v                 v                  v
-         Inventory          Payment            Shipping
+``` mermaid
+flowchart TD
+  A[Saga Orchestrator] --> B[Inventory]
+  A --> C[Payment]
+  A --> D[Shipping]
 ```
 
 It sends commands, processes results, stores workflow state and controls

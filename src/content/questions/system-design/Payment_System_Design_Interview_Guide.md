@@ -1478,51 +1478,23 @@ This sequence is excellent to explain in interviews.
 
 ## 47. Complete failure matrix
 
-  -----------------------------------------------------------------------
-  Failure                             Correct response
-  ----------------------------------- -----------------------------------
-  User double-clicks Pay              Same idempotency key returns same
-                                      logical result
-
-  Two duplicate requests arrive       Unique DB constraint prevents two
-  concurrently                        logical operations
-
-  PSP returns card declined           Mark failed; do not retry blindly
-
-  PSP returns transient 503           Bounded idempotent retry
-
-  PSP request times out               Mark unknown/pending verification;
-                                      query/reconcile
-
-  PSP charged but response lost       Reconciliation/webhook confirms
-                                      success
-
-  Payment DB updated but event not    Outbox publishes later
-  published                           
-
-  Outbox event published twice        Consumer Inbox/idempotency handles
-                                      duplicate
-
-  Duplicate PSP webhook               ProviderEventId deduplication
-
-  Out-of-order webhook                State/version validation or
-                                      provider lookup
-
-  Shipping fails after payment        Saga requests void/refund
-  capture                             compensation
-
-  Refund command delivered twice      Refund idempotency key prevents
-                                      double refund
-
-  Refund fails temporarily            RefundPending +
-                                      retry/reconciliation
-
-  Refund repeatedly fails             Alert + exception/DLQ + manual
-                                      recovery
-
-  Payment Service pod crashes         Durable DB/message state allows
-                                      recovery
-  -----------------------------------------------------------------------
+| Failure | Correct response |
+|---|---|
+| User double-clicks Pay | Same idempotency key returns same logical result |
+| Two duplicate requests arrive concurrently | Unique DB constraint prevents two logical operations |
+| PSP returns card declined | Mark failed; do not retry blindly |
+| PSP returns transient 503 | Bounded idempotent retry |
+| PSP request times out | Mark unknown/pending verification; query/reconcile |
+| PSP charged but response lost | Reconciliation/webhook confirms success |
+| Payment DB updated but event not published | Outbox publishes later |
+| Outbox event published twice | Consumer Inbox/idempotency handles duplicate |
+| Duplicate PSP webhook | ProviderEventId deduplication |
+| Out-of-order webhook | State/version validation or provider lookup |
+| Shipping fails after payment capture | Saga requests void/refund compensation |
+| Refund command delivered twice | Refund idempotency key prevents double refund |
+| Refund fails temporarily | RefundPending + retry/reconciliation |
+| Refund repeatedly fails | Alert + exception/DLQ + manual recovery |
+| Payment Service pod crashes | Durable DB/message state allows recovery |
 
 ------------------------------------------------------------------------
 
@@ -2093,45 +2065,21 @@ Provider throttling
 
 ## 69. Architecture trade-offs
 
-  ----------------------------------------------------------------------------
-  Decision                Benefit                 Trade-off
-  ----------------------- ----------------------- ----------------------------
-  Dedicated Payment       Central payment         Service complexity
-  Service                 rules/audit             
-
-  Durable idempotency     Prevent duplicate       Storage/lifecycle management
-                          financial effects       
-
-  PSP idempotency         Extra duplicate         Provider-specific behavior
-                          protection              
-
-  Outbox                  Reliable event          Publisher/cleanup complexity
-                          publication             
-
-  Inbox                   Duplicate event         Additional storage
-                          protection              
-
-  Async messaging         Decoupling/recovery     Eventual consistency
-
-  Saga                    Distributed workflow    Compensation complexity
-                          consistency             
-
-  Reconciliation          Detects rare mismatches Operational cost
-
-  Append-style ledger     Strong auditability     More modeling/reporting
-                                                  complexity
-
-  Circuit breaker         Protects unhealthy      Must handle open-state
-                          dependency              business flow
-
-  AKS autoscaling         Elastic workers         Cannot exceed PSP/DB limits
-
-  Multiple PSPs           Potential               Major
-                          availability/routing    reconciliation/integration
-                          flexibility             complexity
-  ----------------------------------------------------------------------------
-
-------------------------------------------------------------------------
+  
+| Decision | Benefit | Trade-off |
+|---|---|---|
+| Dedicated Payment Service | Central payment rules/audit | Service complexity |
+| Durable idempotency | Prevent duplicate financial effects | Storage/lifecycle management |
+| PSP idempotency | Extra duplicate protection | Provider-specific behavior |
+| Outbox | Reliable event publication | Publisher/cleanup complexity |
+| Inbox | Duplicate event protection | Additional storage |
+| Async messaging | Decoupling/recovery | Eventual consistency |
+| Saga | Distributed workflow consistency | Compensation complexity |
+| Reconciliation | Detects rare mismatches | Operational cost |
+| Append-style ledger | Strong auditability | More modeling/reporting complexity |
+| Circuit breaker | Protects unhealthy dependency | Must handle open-state business flow |
+| AKS autoscaling | Elastic workers | Cannot exceed PSP/DB limits |
+| Multiple PSPs | Potential availability/routing flexibility | Major reconciliation/integration complexity |
 
 ## 70. Common interview mistakes
 
