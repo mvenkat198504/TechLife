@@ -1,3 +1,23 @@
+---
+id: azure-Event Hubs-002
+slug: Azure Event Hubs vs Azure Service Bus
+title: Azure Event Hubs vs Azure Service Bus
+categoryId: azure
+subcategory: Azure Event Hubs
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Event Hubs vs Azure Service Bus
+  - Azure Service Bus
+  - Azure Event Hubs
+
+summary: Azure Event Hubs vs Azure Service Bus?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Event Hubs vs Azure Service Bus
 ## Detailed Interview Preparation Guide with Flow Charts
 

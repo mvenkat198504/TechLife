@@ -1,3 +1,23 @@
+---
+id: azure-Event Hubs-003
+slug: Azure Event Hubs vs Apache Kafka
+title: Azure Event Hubs vs Apache Kafka
+categoryId: azure
+subcategory: Azure Event Hubs
+difficulty: Experienced
+tags:
+  - azure
+  - Azure Event Hubs vs  Apache Kafka
+  - Apache Kafka
+  - Azure Event Hubs
+
+summary: Azure Event Hubs vs Apache Kafka?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # Azure Event Hubs vs Apache Kafka
 ## Detailed Interview Preparation Guide with Flow Charts
 

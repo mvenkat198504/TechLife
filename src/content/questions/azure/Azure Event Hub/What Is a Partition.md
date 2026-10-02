@@ -1,3 +1,22 @@
+---
+id: azure-Event Hubs-004
+slug: What Is a Partition
+title: What Is a Partition
+categoryId: azure
+subcategory: Azure Event Hubs
+difficulty: Experienced
+tags:
+  - azure
+  - Partition
+  - Azure Event Hubs
+
+summary: What Is a Partition?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Partition?
 ## Detailed Interview Preparation Guide with Flow Charts
 

@@ -33,6 +33,110 @@
   text-align: center;
 }
 
+.mermaid-diagram-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: -0.35rem -0.35rem 0.35rem;
+}
+
+.mermaid-diagram-content {
+  cursor: zoom-in;
+}
+
+.mermaid-diagram-content:focus-visible {
+  outline: 2px solid #0d6efd;
+  outline-offset: 3px;
+}
+
+.mermaid-expand-button,
+.mermaid-zoom-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+}
+
+.mermaid-expand-button:hover,
+.mermaid-zoom-toolbar button:hover {
+  background: #f1f5f9;
+}
+
+.mermaid-zoom-backdrop {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.mermaid-zoom-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 1500px);
+  height: min(100%, 1000px);
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.mermaid-zoom-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  gap: 1rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.mermaid-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mermaid-zoom-controls span {
+  min-width: 3.5rem;
+  color: #334155;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.mermaid-zoom-stage {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.mermaid-zoom-svg {
+  flex: 0 0 auto;
+  transform-origin: center center;
+}
+
+.mermaid-zoom-svg svg {
+  display: block;
+  width: min(88vw, 1400px) !important;
+  height: min(72vh, 820px) !important;
+}
+
+.mermaid-zoom-loading {
+  color: #334155;
+}
+
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
@@ -73,6 +177,28 @@ html[data-theme='dark'] .mermaid-diagram foreignObject p {
 .mermaid-diagram-error pre {
   white-space: pre-wrap;
   margin-top: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .mermaid-zoom-backdrop {
+    padding: 0;
+  }
+
+  .mermaid-zoom-dialog {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .mermaid-zoom-stage {
+    padding: 0.5rem;
+  }
+
+  .mermaid-zoom-svg svg {
+    width: 96vw !important;
+    height: calc(100vh - 100px) !important;
+  }
 }
 
 .pdf-viewer-wrapper {

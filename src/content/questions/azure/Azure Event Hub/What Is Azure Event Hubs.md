@@ -1,3 +1,22 @@
+---
+id: azure-Event Hubs-001
+slug: What Is Azure Event Hubs
+title: What Is Azure Event Hubs
+categoryId: azure
+subcategory: Azure Event Hubs
+difficulty: Experienced
+tags:
+  - azure
+  - Event Hubs
+  - Azure Event Hubs
+
+summary: What Is Azure Event Hubs?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is Azure Event Hubs?
 ## Detailed Interview Preparation Guide with Flow Charts
 

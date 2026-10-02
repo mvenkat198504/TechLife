@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 let mermaidModulePromise = null;
 
@@ -22,8 +23,13 @@ const loadMermaid = () => {
 // Renders a ```mermaid code fence as an SVG diagram instead of raw text.
 export const MermaidDiagram = ({ chart }) => {
   const containerRef = useRef(null);
+  const expandedContainerRef = useRef(null);
+  const expandButtonRef = useRef(null);
   const renderId = useId().replace(/:/g, '-');
   const [error, setError] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpandedReady, setIsExpandedReady] = useState(false);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     let isCancelled = false;
@@ -47,6 +53,51 @@ export const MermaidDiagram = ({ chart }) => {
     };
   }, [chart, renderId]);
 
+  useEffect(() => {
+    if (!isExpanded) return undefined;
+
+    let isCancelled = false;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    loadMermaid()
+      .then((mermaid) => mermaid.render(`mermaid-expanded-${renderId}`, chart))
+      .then(({ svg }) => {
+        if (!isCancelled && expandedContainerRef.current) {
+          expandedContainerRef.current.innerHTML = svg;
+          setIsExpandedReady(true);
+        }
+      })
+      .catch((renderError) => {
+        if (!isCancelled) {
+          setError(renderError?.message || 'Unable to render diagram.');
+          setIsExpanded(false);
+        }
+      });
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsExpanded(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      isCancelled = true;
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [chart, isExpanded, renderId]);
+
+  const closeExpandedView = () => {
+    setIsExpanded(false);
+    requestAnimationFrame(() => expandButtonRef.current?.focus());
+  };
+
+  const openExpandedView = () => {
+    setZoom(1);
+    setIsExpandedReady(false);
+    setIsExpanded(true);
+  };
+
   if (error) {
     return (
       <div className="mermaid-diagram-error">
@@ -56,5 +107,97 @@ export const MermaidDiagram = ({ chart }) => {
     );
   }
 
-  return <div className="mermaid-diagram" ref={containerRef} />;
+  return (
+    <>
+      <div className="mermaid-diagram">
+        <div className="mermaid-diagram-toolbar">
+          <button
+            ref={expandButtonRef}
+            type="button"
+            className="mermaid-expand-button"
+            onClick={openExpandedView}
+            aria-label="Enlarge diagram"
+            title="Enlarge diagram"
+          >
+            <i className="bi bi-arrows-fullscreen" aria-hidden="true" />
+          </button>
+        </div>
+        <div
+          className="mermaid-diagram-content"
+          ref={containerRef}
+          role="button"
+          tabIndex={0}
+          aria-label="Open enlarged diagram"
+          onClick={openExpandedView}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openExpandedView();
+            }
+          }}
+        />
+      </div>
+      {isExpanded && createPortal(
+        <div
+          className="mermaid-zoom-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeExpandedView();
+          }}
+        >
+          <section
+            className="mermaid-zoom-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Diagram viewer"
+          >
+            <div className="mermaid-zoom-toolbar">
+              <div className="mermaid-zoom-controls">
+                <button
+                  type="button"
+                  onClick={() => setZoom((currentZoom) => Math.max(0.5, currentZoom - 0.2))}
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                >
+                  <i className="bi bi-dash-lg" aria-hidden="true" />
+                </button>
+                <span aria-live="polite">{Math.round(zoom * 100)}%</span>
+                <button
+                  type="button"
+                  onClick={() => setZoom((currentZoom) => Math.min(3, currentZoom + 0.2))}
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                >
+                  <i className="bi bi-plus-lg" aria-hidden="true" />
+                </button>
+                <button type="button" onClick={() => setZoom(1)} title="Reset zoom">
+                  Reset
+                </button>
+              </div>
+              <button
+                type="button"
+                className="mermaid-zoom-close"
+                onClick={closeExpandedView}
+                aria-label="Close diagram viewer"
+                title="Close"
+                autoFocus
+              >
+                <i className="bi bi-x-lg" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="mermaid-zoom-stage">
+              <div
+                ref={expandedContainerRef}
+                className="mermaid-zoom-svg"
+                style={{ transform: `scale(${zoom})` }}
+              />
+              {!isExpandedReady && (
+                <div className="mermaid-zoom-loading" role="status">Loading diagram...</div>
+              )}
+            </div>
+          </section>
+        </div>,
+        document.body
+      )}
+    </>
+  );
 };

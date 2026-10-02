@@ -1,3 +1,22 @@
+---
+id: azure-Event Hubs-005
+slug: What Is a Consumer Group
+title: What Is a Consumer Group
+categoryId: azure
+subcategory: Azure Event Hubs
+difficulty: Experienced
+tags:
+  - azure
+  - Consumer Group
+  - Azure Event Hubs
+
+summary: What Is a Consumer Group?
+updatedAt: 2026-08-27
+status: published
+thumbnail: ""
+videos: []
+resources: []
+---
 # What Is a Consumer Group?
 ## Detailed Interview Preparation Guide with Flow Charts
 
