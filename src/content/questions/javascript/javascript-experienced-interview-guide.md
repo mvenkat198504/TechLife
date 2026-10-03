@@ -1,15 +1,16 @@
 ---
-id: javascript-randomquestions-002
-slug:  JavaScript Interview Guide
+id: javascript-experinced-002
+slug:  javascript-experinced-002
 title: JavaScript Interview Guide for Experienced Full Stack Developers
 categoryId: javascript
-subcategory: JavaScript Interview Guide
+subcategory: JavaScript_Interview_Guide
 difficulty: Experienced
 tags:
   - JavaScript Interview Guide
   - Interview Guide
   - javascript
-summary: Forty detailed JavaScript interview answers with examples and production scenarios.
+
+summary: JavaScript interview answers with examples and production scenarios.
 updatedAt: 2026-08-27
 status: published
 thumbnail: ""

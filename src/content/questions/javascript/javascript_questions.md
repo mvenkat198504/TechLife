@@ -1,6 +1,6 @@
 ---
 id: javascript-questions-003
-slug:  JavaScript Interview Guide
+slug: javascript-questions-003
 title: JavaScript Interview Guide for Experienced Full Stack Developers
 categoryId: javascript
 subcategory: JavaScript Interview Guide ALL

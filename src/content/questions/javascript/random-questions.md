@@ -1,7 +1,7 @@
 ---
-id: javascript-randomquestions-001
-slug:  question1
-title: Difference between Default export and Named export. 
+id: javascript-random-questions-004
+slug:  javascript-randomquestions-004
+title: Difference questions Default export and Named export. 
 categoryId: javascript
 subcategory: random-questions
 difficulty: Experienced

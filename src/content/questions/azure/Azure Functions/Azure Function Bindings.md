@@ -1,6 +1,6 @@
 ---
 id: azure-Functions-004
-slug:  Azure Function Bindings 
+slug:  azure-Functions-004
 title: Azure Function Bindings 
 categoryId: azure
 subcategory: Azure Functions

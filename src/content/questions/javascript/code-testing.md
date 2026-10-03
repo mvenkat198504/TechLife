@@ -1,6 +1,6 @@
 ---
 id: javascript-codetesting-001
-slug:  withdrawCash
+slug: javascript-codetesting-001
 title: Write a JavaScript function to simulate an ATM cash withdrawal. 
 categoryId: javascript
 subcategory: coding-questions

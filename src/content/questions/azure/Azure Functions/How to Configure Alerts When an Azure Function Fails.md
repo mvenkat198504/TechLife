@@ -1,6 +1,6 @@
 ---
-id: azure-Functions-008
-slug: How to Configure Alerts When an Azure Function Fails  
+id: azure-Functions-015
+slug:  Azure Functions-015
 title: How to Configure Alerts When an Azure Function Fails
 categoryId: azure
 subcategory: Azure Functions
@@ -8,8 +8,7 @@ difficulty: Experienced
 tags:
   - azure
   - Configure Alerts  
-  - Azure Function Fails  
- 
+  - Azure Function Fails
 
 summary: How to Configure Alerts When an Azure Function Fails
 updatedAt: 2026-08-27

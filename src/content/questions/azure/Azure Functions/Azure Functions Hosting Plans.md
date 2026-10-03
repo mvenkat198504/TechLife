@@ -1,6 +1,6 @@
 ---
 id: azure-Functions-012
-slug: Azure Functions Hosting Plans 
+slug: azure-Functions-012
 title: Azure Functions Hosting Plans 
 categoryId: azure
 subcategory: Azure Functions
