@@ -9,10 +9,25 @@ const loadMermaid = () => {
     mermaidModulePromise = import('mermaid').then(({ default: mermaid }) => {
       mermaid.initialize({
         startOnLoad: false,
-        theme: 'default',
+        theme: 'base',
         securityLevel: 'strict',
         flowchart: { useMaxWidth: true, htmlLabels: true, wrap: true },
-        themeVariables: { fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif' },
+        themeVariables: {
+          fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
+          // fontSize: '16px',
+          // fontWeight: 'bold',
+          // primaryColor: '#e8f4ff',
+          // primaryTextColor: '#24569a',
+          mainBkg: '#e8f4ff',
+          nodeBorder: '#d5e1eb',
+          nodeTextColor: '#24569a',
+          textColor: '#24569a',
+          // primaryBorderColor: '#d5e1eb',
+          // lineColor: '#9aa3ad',
+          // secondaryColor: '#f5faff',
+          // tertiaryColor: '#f5faff',
+        //themeCSS: '.node rect { rx: 16px; ry: 16px; } .node polygon { fill: #f5faff; stroke-dasharray: 3 3; }',
+        },
       });
       return mermaid;
     });

@@ -103,7 +103,14 @@ export const categories = [
     icon: 'bezier2',
     displayOrder: 13,
   },
-  
+  {
+    id: 'ai',
+    slug: 'ai',
+    name: 'AI',
+    description: 'Artificial intelligence, machine learning, neural networks, and data processing',
+    icon: 'bezier2',
+    displayOrder: 14,
+  },
  
 ];
 

@@ -1,6 +1,6 @@
 ---
 id: azure-Functions-005
-slug:  Durable Functions
+slug: azure-Functions-005
 title: Durable Functions 
 categoryId: azure
 subcategory: Azure Functions
