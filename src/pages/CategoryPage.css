@@ -114,23 +114,23 @@
 }
 
 .mermaid-zoom-stage {
-  display: flex;
   flex: 1 1 auto;
-  align-items: center;
-  justify-content: center;
+  min-width: 0;
+  min-height: 0;
   overflow: auto;
   padding: 1rem;
 }
 
 .mermaid-zoom-svg {
-  flex: 0 0 auto;
-  transform-origin: center center;
+  width: max-content;
+  margin: 0 auto;
 }
 
 .mermaid-zoom-svg svg {
   display: block;
-  width: min(88vw, 1400px) !important;
-  height: min(72vh, 820px) !important;
+  width: calc(min(88vw, 1400px) * var(--mermaid-zoom, 1)) !important;
+  max-width: none !important;
+  height: auto !important;
 }
 
 .mermaid-zoom-loading {
@@ -200,8 +200,7 @@ html[data-theme='dark'] .mermaid-diagram foreignObject p {
   }
 
   .mermaid-zoom-svg svg {
-    width: 96vw !important;
-    height: calc(100vh - 100px) !important;
+    width: calc((100vw - 1rem) * var(--mermaid-zoom, 1)) !important;
   }
 }
 

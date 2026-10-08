@@ -203,7 +203,7 @@ export const MermaidDiagram = ({ chart }) => {
               <div
                 ref={expandedContainerRef}
                 className="mermaid-zoom-svg"
-                style={{ transform: `scale(${zoom})` }}
+                style={{ '--mermaid-zoom': zoom }}
               />
               {!isExpandedReady && (
                 <div className="mermaid-zoom-loading" role="status">Loading diagram...</div>
