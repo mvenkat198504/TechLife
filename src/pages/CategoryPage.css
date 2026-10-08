@@ -137,19 +137,30 @@
   color: #334155;
 }
 
-.mermaid-diagram svg {
+.mermaid-diagram,
+.mermaid-zoom-svg {
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+.mermaid-diagram svg,
+.mermaid-zoom-svg svg {
   max-width: 100%;
   height: auto;
   line-height: normal;
 }
 
-.mermaid-diagram foreignObject {
+.mermaid-diagram foreignObject,
+.mermaid-zoom-svg foreignObject {
   overflow: visible;
 }
 
 .mermaid-diagram foreignObject div,
 .mermaid-diagram foreignObject span,
-.mermaid-diagram foreignObject p {
+.mermaid-diagram foreignObject p,
+.mermaid-zoom-svg foreignObject div,
+.mermaid-zoom-svg foreignObject span,
+.mermaid-zoom-svg foreignObject p {
   font-family: inherit;
   line-height: 1.3;
   white-space: normal;
