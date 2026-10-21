@@ -75,7 +75,7 @@ Function Code
 
 ---
 
-# 3. High-Level Comparison Flow Chart
+## 3. High-Level Comparison Flow Chart
 
 ```mermaid
 flowchart TD
@@ -97,9 +97,9 @@ flowchart TD
 
 ---
 
-# 4. Azure App Service
+## 4. Azure App Service
 
-## 4.1 What Is Azure App Service?
+### 4.1 What Is Azure App Service?
 
 Azure App Service is a fully managed Azure platform for hosting:
 
@@ -111,7 +111,7 @@ Azure App Service is a fully managed Azure platform for hosting:
 
 It supports common application stacks, including .NET, Java, Node.js, Python, PHP, and custom containers. Azure manages the underlying infrastructure while the development team manages application code and configuration. ([learn.microsoft.com](https://learn.microsoft.com/en-us/azure/developer/intro/hosting-apps-on-azure?utm_source=openai))
 
-## 4.2 Typical App Service Architecture
+### 4.2 Typical App Service Architecture
 
 ```mermaid
 flowchart LR
@@ -125,7 +125,7 @@ flowchart LR
     API --> Monitor[Application Insights]
 ```
 
-## 4.3 App Service Is a Good Choice For
+### 4.3 App Service Is a Good Choice For
 
 - Full ASP.NET Core MVC applications
 - Blazor Server applications
@@ -138,9 +138,9 @@ flowchart LR
 
 ---
 
-# 5. Azure Functions
+## 5. Azure Functions
 
-## 5.1 What Is Azure Functions?
+### 5.1 What Is Azure Functions?
 
 Azure Functions is a serverless compute service for running event-driven code. A function runs when activated by a trigger such as:
 
@@ -155,7 +155,7 @@ Azure Functions is a serverless compute service for running event-driven code. A
 
 Azure Functions provides triggers and bindings that simplify integration with Azure services. ([learn.microsoft.com](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview?utm_source=openai))
 
-## 5.2 Typical Azure Functions Architecture
+### 5.2 Typical Azure Functions Architecture
 
 ```mermaid
 flowchart LR
@@ -170,7 +170,7 @@ flowchart LR
     Logic --> Monitor[Application Insights]
 ```
 
-## 5.3 Azure Functions Is a Good Choice For
+### 5.3 Azure Functions Is a Good Choice For
 
 - Background processing
 - Queue and message processing
@@ -185,9 +185,9 @@ flowchart LR
 
 ---
 
-# 6. Main Difference: Application vs Function Execution Model
+## 6. Main Difference: Application vs Function Execution Model
 
-## App Service Execution Model
+### App Service Execution Model
 
 App Service hosts an application process.
 
@@ -204,7 +204,7 @@ Receives Many HTTP Requests
 Application Handles Routing and Business Logic
 ```
 
-## Azure Functions Execution Model
+### Azure Functions Execution Model
 
 Functions execute individual functions based on triggers.
 
@@ -227,7 +227,7 @@ Function Returns or Produces Output
 
 ---
 
-# 7. Detailed Comparison Table
+## 7. Detailed Comparison Table
 
 | Area | Azure App Service | Azure Functions |
 |---|---|---|
@@ -254,9 +254,9 @@ The actual Azure Functions scaling and billing behavior depends on the hosting o
 
 ---
 
-# 8. Hosting and Scaling Comparison
+## 8. Hosting and Scaling Comparison
 
-## 8.1 App Service Scaling
+### 8.1 App Service Scaling
 
 App Service can scale through:
 
@@ -278,7 +278,7 @@ flowchart TD
     ScaleOut --> LoadBalance[Distribute Requests]
 ```
 
-## 8.2 Azure Functions Scaling
+### 8.2 Azure Functions Scaling
 
 Functions scaling depends on the selected hosting plan and trigger type.
 
@@ -306,9 +306,9 @@ flowchart TD
 
 ---
 
-# 9. Cold Start
+## 9. Cold Start
 
-## 9.1 What Is a Cold Start?
+### 9.1 What Is a Cold Start?
 
 A cold start occurs when Azure needs to initialize a new function host before executing the function.
 
@@ -321,25 +321,25 @@ Cold starts may occur when:
 
 Cold-start behavior depends on the Functions hosting plan. Premium hosting provides pre-warmed instances, and Flex Consumption supports optional always-ready instances. ([learn.microsoft.com](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan?utm_source=openai))
 
-## 9.2 App Service and Cold Starts
+### 9.2 App Service and Cold Starts
 
 A continuously running App Service instance generally avoids the same scale-to-zero behavior associated with serverless Functions. However, application startup time can still matter during deployments, restarts, scaling, or platform operations.
 
-## 9.3 Interview Answer
+### 9.3 Interview Answer
 
 > If the API requires highly predictable first-request latency, I would consider App Service or a pre-warmed Functions plan. If occasional startup latency is acceptable and cost efficiency is more important, a serverless Functions plan may be appropriate.
 
 ---
 
-# 10. Cost Comparison
+## 10. Cost Comparison
 
-## App Service Cost Model
+### App Service Cost Model
 
 App Service is normally billed based on the App Service Plan and its provisioned compute capacity.
 
 Multiple apps may share an App Service Plan, depending on design and resource constraints.
 
-## Azure Functions Cost Model
+### Azure Functions Cost Model
 
 Functions cost depends on the hosting plan:
 
@@ -348,7 +348,7 @@ Functions cost depends on the hosting plan:
 - Dedicated hosting uses an App Service Plan and is billed based on the plan.
 - Function apps hosted on a Dedicated App Service Plan run on dedicated virtual machines. ([learn.microsoft.com](https://learn.microsoft.com/en-us/azure/azure-functions/functions-infrastructure-as-code?pivots=premium-plan&utm_source=openai))
 
-## Cost Decision Flow
+### Cost Decision Flow
 
 ```mermaid
 flowchart TD
@@ -367,9 +367,9 @@ flowchart TD
 
 ---
 
-# 11. API Development Comparison
+## 11. API Development Comparison
 
-## Choose App Service for a Complete API When You Need
+### Choose App Service for a Complete API When You Need
 
 - Many controllers and routes
 - Shared middleware
@@ -395,7 +395,7 @@ App Service
   +-- Database
 ```
 
-## Choose Functions for an API When You Need
+### Choose Functions for an API When You Need
 
 - Small independent endpoints
 - Webhooks
@@ -423,9 +423,9 @@ HTTP-Triggered Function
 
 ---
 
-# 12. Background Processing Comparison
+## 12. Background Processing Comparison
 
-## App Service
+### App Service
 
 Background processing can be implemented using:
 
@@ -435,7 +435,7 @@ Background processing can be implemented using:
 - Containerized worker
 - External messaging service
 
-## Azure Functions
+### Azure Functions
 
 Background processing is a native use case:
 
@@ -462,9 +462,9 @@ flowchart LR
 
 ---
 
-# 13. Deployment Comparison
+## 13. Deployment Comparison
 
-## App Service Deployment Flow
+### App Service Deployment Flow
 
 ```mermaid
 flowchart TD
@@ -478,7 +478,7 @@ flowchart TD
     Swap --> Production[Production Traffic]
 ```
 
-## Functions Deployment Flow
+### Functions Deployment Flow
 
 ```mermaid
 flowchart TD
@@ -493,9 +493,9 @@ Both App Service and Functions support deployment through tools such as Azure CL
 
 ---
 
-# 14. Security Comparison
+## 14. Security Comparison
 
-## App Service Security
+### App Service Security
 
 Common App Service security capabilities include:
 
@@ -509,7 +509,7 @@ Common App Service security capabilities include:
 - TLS certificates
 - Key Vault integration
 
-## Azure Functions Security
+### Azure Functions Security
 
 Common Functions security capabilities include:
 
@@ -542,11 +542,11 @@ flowchart LR
 
 ---
 
-# 15. Observability Comparison
+## 15. Observability Comparison
 
 Both services integrate with Azure Monitor and Application Insights.
 
-## App Service Monitoring
+### App Service Monitoring
 
 Monitor:
 
@@ -559,7 +559,7 @@ Monitor:
 - CPU and memory
 - Deployment health
 
-## Functions Monitoring
+### Functions Monitoring
 
 Monitor:
 
@@ -586,9 +586,9 @@ flowchart LR
 
 ---
 
-# 16. Reliability and Failure Handling
+## 16. Reliability and Failure Handling
 
-## App Service Reliability Patterns
+### App Service Reliability Patterns
 
 - Multiple instances
 - Health checks
@@ -600,7 +600,7 @@ flowchart LR
 - Availability monitoring
 - Regional disaster recovery
 
-## Functions Reliability Patterns
+### Functions Reliability Patterns
 
 - Idempotent function logic
 - Retry policies
@@ -627,11 +627,11 @@ flowchart TD
 
 ---
 
-# 17. State Management
+## 17. State Management
 
 Both App Service applications and Azure Functions should avoid relying on local instance memory or local disk for durable business state.
 
-## Recommended External State Stores
+### Recommended External State Stores
 
 - Azure SQL
 - Azure Cosmos DB
@@ -640,7 +640,7 @@ Both App Service applications and Azure Functions should avoid relying on local 
 - Azure Service Bus
 - Durable Functions storage for orchestration state
 
-## Function-Specific Consideration
+### Function-Specific Consideration
 
 Functions may scale across multiple instances, so a function should generally be:
 
@@ -656,7 +656,7 @@ Functions may scale across multiple instances, so a function should generally be
 
 ---
 
-# 18. Durable Functions
+## 18. Durable Functions
 
 Durable Functions extend Azure Functions for stateful workflows and orchestration.
 
@@ -689,7 +689,7 @@ Do not use one very large ordinary Function as a substitute for a workflow engin
 
 ---
 
-# 19. App Service and Functions Can Be Used Together
+## 19. App Service and Functions Can Be Used Together
 
 The choice is not always either/or.
 
@@ -719,7 +719,7 @@ flowchart LR
 
 ---
 
-# 20. Decision Matrix
+## 20. Decision Matrix
 
 | Requirement | Recommended Choice |
 |---|---|
@@ -742,7 +742,7 @@ flowchart LR
 
 ---
 
-# 21. When to Choose App Service
+## 21. When to Choose App Service
 
 Choose **Azure App Service** when:
 
@@ -763,7 +763,7 @@ Choose **Azure App Service** when:
 
 ---
 
-# 22. When to Choose Azure Functions
+## 22. When to Choose Azure Functions
 
 Choose **Azure Functions** when:
 
@@ -784,41 +784,41 @@ Choose **Azure Functions** when:
 
 ---
 
-# 23. Common Mistakes
+## 23. Common Mistakes
 
-## Mistake 1: Choosing Functions for Every API
+### Mistake 1: Choosing Functions for Every API
 
 Not every REST API should be split into Functions. A large cohesive API may become harder to maintain if every endpoint is independently deployed.
 
-## Mistake 2: Choosing App Service for All Background Work
+### Mistake 2: Choosing App Service for All Background Work
 
 App Service can host background tasks, but queue-triggered and event-driven processing may be simpler and more scalable with Functions.
 
-## Mistake 3: Ignoring Cold Starts
+### Mistake 3: Ignoring Cold Starts
 
 If the workload requires predictable first-request latency, evaluate App Service, Premium Functions, or always-ready capacity.
 
-## Mistake 4: Ignoring Retry Behavior
+### Mistake 4: Ignoring Retry Behavior
 
 Functions triggered by messages may be retried. The logic must be idempotent and safe to execute more than once.
 
-## Mistake 5: Treating Function Keys as Enterprise Identity
+### Mistake 5: Treating Function Keys as Enterprise Identity
 
 Function keys provide access control but are not a replacement for complete identity, authorization, auditing, and role-based access control.
 
-## Mistake 6: Storing State Locally
+### Mistake 6: Storing State Locally
 
 Instances can be restarted or scaled out. Store durable state in an external data service.
 
-## Mistake 7: Ignoring Hosting Plan Details
+### Mistake 7: Ignoring Hosting Plan Details
 
 Azure Functions behavior depends heavily on the hosting plan. Check scaling, networking, execution duration, cold-start, operating system, and billing behavior before selecting a plan. ([learn.microsoft.com](https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale?utm_source=openai))
 
 ---
 
-# 24. Scenario-Based Interview Questions
+## 24. Scenario-Based Interview Questions
 
-## Scenario 1: Customer REST API
+### Scenario 1: Customer REST API
 
 ### Requirement
 
@@ -873,15 +873,15 @@ A high-volume customer API requires predictable latency, shared middleware, and 
 
 ---
 
-# 25. 60-Second Interview Pitch
+## 25. 60-Second Interview Pitch
 
 > Azure App Service and Azure Functions are both managed Azure services, but they solve different problems. App Service is application-centric and is best for complete web applications and continuously running REST APIs. Azure Functions is function- and event-centric and is best for queue processing, timers, webhooks, lightweight HTTP endpoints, and asynchronous integrations. App Service generally provides a more conventional application lifecycle with deployment slots and predictable hosting. Functions provide event-driven scaling and serverless execution, but I must design for retries, idempotency, cold starts, and plan-specific limits. In many production systems, I use App Service for the synchronous API and Functions for asynchronous background processing.
 
 ---
 
-# 26. Final Summary
+## 26. Final Summary
 
-## Azure App Service
+### Azure App Service
 
 ```text
 Application-centric
@@ -892,7 +892,7 @@ Deployment slots
 Conventional web application model
 ```
 
-## Azure Functions
+### Azure Functions
 
 ```text
 Function-centric
@@ -903,11 +903,11 @@ Possible scale-to-zero
 Requires idempotency and retry-aware design
 ```
 
-## Best One-Line Answer
+### Best One-Line Answer
 
 > Choose Azure App Service for a complete, continuously running web application or API; choose Azure Functions for small, event-driven, asynchronous, scheduled, or highly variable workloads.
 
-## Recommended Architecture for Many Enterprise Systems
+### Recommended Architecture for Many Enterprise Systems
 
 ```text
 Client

@@ -49,10 +49,10 @@ So you **cannot rely on local memory** or instance-local disk for durable busine
 
 ```mermaid
 flowchart TD
-    Trigger[HTTP/Queue/Event Trigger] --> Func[Azure Function (Stateless Compute)]
-    Func --> StateStore[(External State Store)]
+    Trigger["HTTP/Queue/Event Trigger"] --> Func["Azure Function (Stateless Compute)"]
+    Func --> StateStore[("External State Store")]
     StateStore --> Func
-    Func --> Response[Return Result / Emit Event]
+    Func --> Response["Return Result / Emit Event"]
 ```
 
 ---
@@ -90,17 +90,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Need state in Azure Functions] --> B{Workflow orchestration state?}
-    B -- Yes --> DF[Use Durable Functions]
-    B -- No --> C{Need relational queries/transactions?}
-    C -- Yes --> SQL[Use Azure SQL]
-    C -- No --> D{Need flexible JSON + scale?}
-    D -- Yes --> COSMOS[Use Cosmos DB]
-    D -- No --> E{Need very low-latency temporary state?}
-    E -- Yes --> REDIS[Use Redis (+ durable backing store)]
-    E -- No --> F{Simple key-value metadata?}
-    F -- Yes --> TABLE[Table Storage]
-    F -- No --> BLOB[Blob Storage / Hybrid]
+    A["Need state in Azure Functions"] --> B{"Workflow orchestration state?"}
+    B -- Yes --> DF["Use Durable Functions"]
+    B -- No --> C{"Need relational queries/transactions?"}
+    C -- Yes --> SQL["Use Azure SQL"]
+    C -- No --> D{"Need flexible JSON + scale?"}
+    D -- Yes --> COSMOS["Use Cosmos DB"]
+    D -- No --> E{"Need very low-latency temporary state?"}
+    E -- Yes --> REDIS["Use Redis (+ durable backing store)"]
+    E -- No --> F{"Simple key-value metadata?"}
+    F -- Yes --> TABLE["Table Storage"]
+    F -- No --> BLOB["Blob Storage / Hybrid"]
 ```
 
 ---

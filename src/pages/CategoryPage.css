@@ -130,6 +130,7 @@
   display: block;
   width: calc(min(88vw, 1400px) * var(--mermaid-zoom, 1)) !important;
   max-width: none !important;
+  max-height: calc((100vh - 8rem) * var(--mermaid-zoom, 1)) !important;
   height: auto !important;
 }
 
