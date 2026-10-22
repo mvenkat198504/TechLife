@@ -1220,138 +1220,79 @@ Database changes should use an expand-and-contract approach.
 
 ## 31. Complete failure matrix
 
-  -----------------------------------------------------------------------
-  Failure                             Response
-  ----------------------------------- -----------------------------------
-  Order creation fails                Fail request; Saga never starts
-
-  Inventory unavailable               Cancel/reject order
-
-  Inventory temporarily unavailable   Bounded retry
-
-  Payment rejected                    Release inventory and cancel
-
-  Payment call times out              Reconcile provider status before
-                                      charging again
-
-  Payment succeeds, Shipping          Keep ShippingPending and retry
-  temporarily fails                   
-
-  Payment succeeds, Shipping          Void/refund, release inventory,
-  permanently fails                   cancel
-
-  Refund temporarily fails            Persist CompensationPending and
-                                      retry
-
-  Refund repeatedly fails             Alert + exception/DLQ +
-                                      reconciliation/manual recovery
-
-  Duplicate message                   Inbox/idempotency prevents
-                                      duplicate effect
-
-  Saga pod crashes                    Resume from persisted Saga state
-
-  Broker redelivery                   Idempotent consumer processes
-                                      safely
-
-  Shipment outcome unknown            Reconcile carrier using external
-                                      idempotency reference
-
-  Consumer repeatedly fails           DLQ + investigation + controlled
-                                      replay
-  -----------------------------------------------------------------------
-
+  | Failure | Response |
+|---|---|
+| Order creation fails | Fail request; Saga never starts. |
+| Inventory unavailable | Cancel/reject order. |
+| Inventory temporarily unavailable | Retry with a bounded retry policy. |
+| Payment rejected | Release inventory and cancel order. |
+| Payment call times out | Reconcile provider status before charging again. |
+| Payment succeeds; shipping temporarily fails | Keep order in `ShippingPending` and retry. |
+| Payment succeeds; shipping permanently fails | Void/refund payment, release inventory, and cancel order. |
+| Refund temporarily fails | Persist `CompensationPending` and retry. |
+| Refund repeatedly fails | Alert, route to exception handling/DLQ, and reconcile or recover manually. |
+| Duplicate message | Inbox/idempotency prevents duplicate effects. |
+| Saga pod crashes | Resume from persisted Saga state. |
+| Broker redelivery | Idempotent consumer processes the message safely. |
+| Shipment outcome unknown | Reconcile with the carrier using the external idempotency reference. |
+| Consumer repeatedly fails | Route to DLQ, investigate, and perform controlled replay. |
 ------------------------------------------------------------------------
 
 ## 32. Happy-path sequence diagram
 
-``` text
-Customer
-   |
-   | POST /orders
-   v
-Order Service
-   |
-   | Save Order + Outbox
-   v
-Order DB
-   |
-   | OrderCreated
-   v
-Saga Orchestrator
-   |
-   | ReserveInventory
-   v
-Inventory Service
-   |
-   | InventoryReserved
-   v
-Saga
-   |
-   | ProcessPayment
-   v
-Payment Service
-   |
-   | PaymentCompleted
-   v
-Saga
-   |
-   | CreateShipment
-   v
-Shipping Service
-   |
-   | ShipmentCreated
-   v
-Saga
-   |
-   | ConfirmOrder
-   v
-Order Service
 
-Order = Confirmed
+```mermaid
+flowchart TD
+    C["Customer"] -->|"POST /orders"| OS["Order Service"]
+    OS -->|"Save Order + Outbox atomically"| DB[("Order DB")]
+    DB -->|"Outbox publisher sends OrderCreated"| S1["Saga Orchestrator"]
+
+    S1 -->|"ReserveInventory"| INV["Inventory Service"]
+    INV -->|"InventoryReserved"| S2["Saga Orchestrator"]
+
+    S2 -->|"ProcessPayment"| PAY["Payment Service"]
+    PAY -->|"PaymentCompleted"| S3["Saga Orchestrator"]
+
+    S3 -->|"CreateShipment"| SHIP["Shipping Service"]
+    SHIP -->|"ShipmentCreated"| S4["Saga Orchestrator"]
+
+    S4 -->|"ConfirmOrder"| OS2["Order Service"]
+    OS2 --> DONE["Order = Confirmed"]
 ```
 
 ------------------------------------------------------------------------
 
 ## 33. Shipping-failure sequence
 
-``` text
-Order Created
-     |
-Inventory Reserved
-     |
-Payment Completed
-     |
-Create Shipment
-     |
-     X
-Shipping Failed
-     |
-     +---- transient? ---- YES ----> Retry Shipping
-     |
-     NO
-     |
-     v
-Compensate Payment
-     |
-Refund / Void
-     |
-Release Inventory
-     |
-Cancel Order
+```mermaid
+flowchart TD
+    A["Order Created"] --> B["Inventory Reserved"]
+    B --> C["Payment Completed"]
+    C --> D["Create Shipment"]
+
+    D --> E{"Shipping successful?"}
+    E -- Yes --> F["Confirm Order"]
+    E -- No --> G["Shipping Failed"]
+
+    G --> H{"Transient failure?"}
+    H -- Yes --> I["Retry Shipping"]
+    I --> D
+
+    H -- No --> J["Compensate Payment"]
+    J --> K["Refund / Void"]
+    K --> L["Release Inventory"]
+    L --> M["Cancel Order"]
 ```
 
 If refund fails:
 
-``` text
-Refund Failed
-    |
-CompensationPending
-    |
-    +--> safe retries
-    +--> reconciliation
-    +--> alerts
-    +--> manual recovery
+```mermaid
+flowchart TD
+    A["Refund Failed"] --> B["CompensationPending"]
+    B --> C["Safe Retries"]
+    B --> D["Reconciliation"]
+    B --> E["Alerts"]
+    B --> F["Manual Recovery"]
 ```
 
 ------------------------------------------------------------------------
@@ -1401,14 +1342,11 @@ fulfillment policies.
 
 Yes. An advanced workflow might be:
 
-``` text
-Reserve Inventory
-      |
-Authorize Payment
-      |
-Create/prepare Shipment
-      |
-Capture Payment
+```mermaid
+flowchart TD
+    A["Reserve Inventory"] --> B["Authorize Payment"]
+    B --> C["Create / Prepare Shipment"]
+    C --> D["Capture Payment"]
 ```
 
 This may reduce refund requirements, but adds authorization expiration,
@@ -1429,16 +1367,12 @@ your database transaction anyway.
 
 For this architecture, the practical model is:
 
-``` text
-Local ACID
-+
-Saga
-+
-Outbox/Inbox
-+
-Idempotency
-+
-Compensation
+```mermaid
+flowchart TD
+    A["Local ACID"] --> B["Saga"]
+    B --> C["Outbox / Inbox"]
+    C --> D["Idempotency"]
+    D --> E["Compensation"]
 ```
 
 ------------------------------------------------------------------------
@@ -1476,14 +1410,11 @@ Do not casually promise end-to-end exactly-once processing.
 
 A practical production design is:
 
-``` text
-At-least-once delivery
-+
-Idempotent processing
-+
-Deduplication
-+
-Local transactions
+```mermaid
+flowchart TD
+    A["At-least-once Delivery"] --> B["Idempotent Processing"]
+    B --> C["Deduplication"]
+    C --> D["Local Transactions"]
 ```
 
 The business effect can therefore behave as if it happened once even if
@@ -1594,21 +1525,21 @@ External dependency saturation
 
 Draw:
 
-``` text
-Client
-  |
-Gateway
-  |
-Order Service ---> Order DB + Outbox
-  |
-Service Bus
-  |
-Saga
- / | \
-v  v  v
-Inventory Payment Shipping
- |        |       |
- DB       DB      DB
+```mermaid
+flowchart TD
+    C["Client"] --> G["Gateway"]
+    G --> OS["Order Service"]
+    OS -->|"Save atomically"| ODB[("Order DB + Outbox")]
+    ODB -->|"Outbox Publisher"| SB["Service Bus"]
+    SB --> S["Saga Orchestrator"]
+
+    S --> INV["Inventory Service"]
+    S --> PAY["Payment Service"]
+    S --> SHIP["Shipping Service"]
+
+    INV --> IDB[("Inventory DB")]
+    PAY --> PDB[("Payment DB")]
+    SHIP --> SDB[("Shipping DB")]
 ```
 
 Explain in this sequence:
@@ -1634,92 +1565,65 @@ Explain in this sequence:
 
 # Rapid Revision
 
-``` text
-ORDER
-  |
-RESERVE INVENTORY
-  |
-PROCESS PAYMENT
-  |
-CREATE SHIPMENT
-  |
-CONFIRM ORDER
+```mermaid
+flowchart TD
+    A["Order"] --> B["Reserve Inventory"]
+    B --> C["Process Payment"]
+    C --> D["Create Shipment"]
+    D --> E["Confirm Order"]
 ```
 
 Permanent Shipping failure:
 
-``` text
-SHIPPING FAILED
-      |
-REFUND / VOID PAYMENT
-      |
-RELEASE INVENTORY
-      |
-CANCEL ORDER
+```mermaid
+flowchart TD
+    A["Shipping Failed"] --> B["Refund / Void Payment"]
+    B --> C["Release Inventory"]
+    C --> D["Cancel Order"]
 ```
 
 Reliability:
 
-``` text
-Local ACID
-+
-Outbox
-+
-Service Bus
-+
-Inbox
-+
-Idempotency
-+
-Saga
-+
-Compensation
-+
-DLQ
-+
-Reconciliation
+```mermaid
+flowchart TD
+    A["Local ACID"] --> B["Outbox"]
+    B --> C["Service Bus"]
+    C --> D["Inbox"]
+    D --> E["Idempotency"]
+    E --> F["Saga"]
+    F --> G["Compensation"]
+    G --> H["DLQ"]
+    H --> I["Reconciliation"]
 ```
 
 Operations:
 
-``` text
-OpenTelemetry
-+
-Structured Logs
-+
-Metrics
-+
-Alerts
-+
-Saga Dashboard
+```mermaid
+flowchart TD
+    A["OpenTelemetry"] --> B["Structured Logs"]
+    B --> C["Metrics"]
+    C --> D["Alerts"]
+    D --> E["Saga Dashboard"]
 ```
 
 Security:
 
-``` text
-OAuth2/OIDC
-+
-Gateway
-+
-Managed Identity
-+
-Key Vault
-+
-Least Privilege
+```mermaid
+flowchart TD
+    A["OAuth2 / OIDC"] --> B["Gateway"]
+    B --> C["Managed Identity"]
+    C --> D["Key Vault"]
+    D --> E["Least Privilege"]
 ```
 
 Deployment:
 
-``` text
-Docker
-+
-AKS
-+
-HPA/KEDA
-+
-Health Probes
-+
-Rolling/Canary Deployment
+```mermaid
+flowchart TD
+    A["Docker"] --> B["AKS"]
+    B --> C["HPA / KEDA"]
+    C --> D["Health Probes"]
+    D --> E["Rolling / Canary Deployment"]
 ```
 
 ------------------------------------------------------------------------
